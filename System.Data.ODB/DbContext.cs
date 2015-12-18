@@ -116,10 +116,13 @@ namespace System.Data.ODB
             }   
         }
 
-        #endregion    
+        #endregion
 
         #region ORM 
 
+        /// <summary>
+        /// Create a Table if not exists
+        /// </summary>
         public virtual bool Create<T>() where T : IEntity
         {
             Type type = typeof(T);
@@ -175,6 +178,9 @@ namespace System.Data.ODB
             return true;
         }
 
+        /// <summary>
+        /// Drop Table 
+        /// </summary>
         public virtual bool Drop<T>() where T : IEntity
         {
             Type type = typeof(T);
@@ -186,6 +192,9 @@ namespace System.Data.ODB
             return true;
         }
 
+        /// <summary>
+        /// Select a Table
+        /// </summary>
         public virtual IQuery<T> Table<T>() where T : IEntity
         { 
             return this.Select<T>(new[] { "*" });
@@ -194,8 +203,11 @@ namespace System.Data.ODB
         public virtual IQuery<T> Select<T>(string[] cols) where T : IEntity
         { 
             return this.BuildQuery<T>().Select(cols).From();
-        } 
+        }
 
+        /// <summary>
+        /// Get table result
+        /// </summary>
         public virtual IList<T> Get<T>(IQuery<T> q) where T : IEntity
         {
             using (IDataReader rdr = this.ExecuteReader(q))
@@ -258,7 +270,10 @@ namespace System.Data.ODB
             
             return list;
         }
-                       
+
+        /// <summary>
+        /// Insert object
+        /// </summary>
         public virtual int Insert<T>(T t) where T : IEntity
         {
             if (t == null)
@@ -291,7 +306,10 @@ namespace System.Data.ODB
 
             return this.ExecuteNonQuery(sql.ToString(), sql.GetParameters()); 
         }
- 
+
+        /// <summary>
+        /// Update object
+        /// </summary>
         public virtual int Update<T>(T t) where T : IEntity
         {
             if (t == null || !t.IsPersisted)
@@ -349,6 +367,9 @@ namespace System.Data.ODB
                 return this.ExecuteNonQuery("");
         }
 
+        /// <summary>
+        /// Delete object
+        /// </summary>
         public virtual int Delete<T>(T t) where T : IEntity
         {
             if (t == null || !t.IsPersisted)
@@ -368,6 +389,9 @@ namespace System.Data.ODB
             return this.ExecuteNonQuery(query.ToString(), query.GetParameters());          
         }
 
+        /// <summary>
+        /// Delete table
+        /// </summary>
         public int Clear<T>() where T : IEntity
         {
             IQuery<T> q = this.BuildQuery<T>().Delete();
@@ -401,14 +425,11 @@ namespace System.Data.ODB
 
         public IDataReader ExecuteReader(string sql, params IDbDataParameter[] commandParameters)
         {
-            //create a command and prepare it for execution
+            //create a command 
             IDbCommand cmd = this.Connection.CreateCommand();
 
             SetCommand(cmd, sql, commandParameters);
-
-            // we use a try/catch here because if the method throws an exception we want to 
-            // close the connection throw code, because no datareader will exist, hence the 
-            // commandBehaviour.CloseConnection will not work
+         
             try
             {
                 IDataReader rdr = cmd.ExecuteReader();
@@ -427,15 +448,14 @@ namespace System.Data.ODB
 
         public T ExecuteScalar<T>(string sql, params IDbDataParameter[] commandParameters)
         {
-            //create a command and prepare it for execution
+            //create a command 
             IDbCommand cmd = this.Connection.CreateCommand();
 
             SetCommand(cmd, sql, commandParameters);
 
             //execute the command & return the results
             T retval = (T)cmd.ExecuteScalar();
-
-            // detach the SqlParameters from the command object, so they can be used again.
+                     
             cmd.Parameters.Clear();
 
             return retval;
@@ -448,9 +468,9 @@ namespace System.Data.ODB
 
         public int ExecuteNonQuery(string sql, params IDbDataParameter[] commandParameters)
         {
-            //create a command and prepare it for execution
+            //create a command
             IDbCommand cmd = this.Connection.CreateCommand();
-
+          
             SetCommand(cmd, sql, commandParameters);
 
             int n = cmd.ExecuteNonQuery();
@@ -461,11 +481,10 @@ namespace System.Data.ODB
 
         protected void SetCommand(IDbCommand cmd, string cmdText, IDbDataParameter[] commandParameters)
         {
-            //Open the connection if required
+            //Open the connection 
             if (this.Connection.State != ConnectionState.Open)
                 this.Connection.Open();
-
-            //Set up the command
+         
             if (this._inTrans && this._trans != null)
                 cmd.Transaction = this._trans;
 

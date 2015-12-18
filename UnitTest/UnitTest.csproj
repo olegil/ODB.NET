@@ -68,7 +68,7 @@
     <Compile Include="UnitClear.cs" />
     <Compile Include="UnitCount.cs" />
     <Compile Include="UnitSelect.cs" />
-    <Compile Include="Update.cs" />
+    <Compile Include="UnitUpdate.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Data.ODB.SQLite\System.Data.ODB.SQLite.csproj">

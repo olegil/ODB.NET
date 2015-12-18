@@ -6,29 +6,29 @@ using System.Data.ODB.SQLite;
 namespace UnitTest
 {
     [TestClass]
-    public class UnitDelete
+    public class UnitUpdate
     {
         [TestMethod]
-        public void TestDelete()
+        public void TestUpdate()
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            db.Create<User>();
- 
-            db.Insert(new User() { Name = "Peter" });
-
+            db.IsEntityTracking = true;
+            
             User user = db.Table<User>().First();
-                      
-            int a = 0;
+
+            int ret = 0;
 
             if (user != null)
             {
-                a = db.Delete(user);
+                user.Name = "Good";
+
+                ret = db.Update(user);
             }
 
             db.Close();
 
-            Assert.IsTrue(a > 0);            
+            Assert.IsTrue(ret != 0);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace UnitTest
 
             db.Insert(book);
 
-            int a = db.Clear<Book>();
+            int a = db.Clear<User>();
 
             db.Close();
 

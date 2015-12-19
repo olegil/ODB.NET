@@ -15,7 +15,7 @@ namespace System.Data.ODB.SQLite
             return new SQLiteConnection(this.ConnectionString);
         }
 
-        public override IQuery<T> BuildQuery<T>()
+        public override IQuery<T> Query<T>()
         {
             return new SQLiteQuery<T>(this);
         }

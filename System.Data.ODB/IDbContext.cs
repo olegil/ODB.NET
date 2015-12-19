@@ -7,7 +7,7 @@ namespace System.Data.ODB
     {
         bool Create<T>() where T : IEntity;
 
-        IQuery<T> BuildQuery<T>() where T : IEntity;
+        IQuery<T> Query<T>() where T : IEntity;
        
         IList<T> Get<T>(IQuery<T> query) where T : IEntity;
 

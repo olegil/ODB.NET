@@ -5,11 +5,15 @@ namespace System.Data.ODB
 {
     public interface IQuery<T> where T : IEntity
     {
+        IQuery<T> Create(string[] cols);
+        IQuery<T> Drop();
         IQuery<T> Select(string[] cols);
         IQuery<T> From();
-        IQuery<T> Insert(string table);
-        IQuery<T> Update(string table);
+        IQuery<T> Insert(string[] cols);
+        IQuery<T> Update();
         IQuery<T> Delete();
+        IQuery<T> Values(string[] cols);
+        IQuery<T> Set(string[] cols);
         IQuery<T> Where(string str);
         IQuery<T> And(string str);
         IQuery<T> Or(string str);
@@ -22,6 +26,8 @@ namespace System.Data.ODB
         IQuery<T> Lte(object val);
         IQuery<T> Like(string str);
         IQuery<T> Count();
+        IQuery<T> Skip(int start);
+        IQuery<T> Take(int count);
         IQuery<T> Join<T2>() where T2 : IEntity;
         IQuery<T> LeftJoin<T2>() where T2 : IEntity;
         IQuery<T> As(string str);
@@ -29,10 +35,9 @@ namespace System.Data.ODB
         IQuery<T> Equal(string str);
         IQuery<T> SortAsc();
         IQuery<T> SortDesc();
-        IQuery<T> Set(string str);
-        IQuery<T> Symbol(string str);
-        IQuery<T> Values(string str);
-
+        
+        IQuery<T> Append(string str);
+       
         void AddParameter(IDbDataParameter p);
 
         IDbDataParameter[] GetParameters();

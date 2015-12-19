@@ -125,13 +125,9 @@ namespace System.Data.ODB
         /// </summary>
         public virtual bool Create<T>() where T : IEntity
         {
-            Type type = typeof(T);
+            Type type = typeof(T); 
 
-            string table = MappingHelper.GetTableName(type);
-
-            List<string> fields = new List<string>();
-
-            StringBuilder sb = new StringBuilder(); 
+            List<string> fields = new List<string>(); 
 
             foreach (PropertyInfo pi in type.GetProperties())
             {
@@ -166,16 +162,16 @@ namespace System.Data.ODB
                 }
             }
 
+            int n = 0;
+
             if (fields.Count > 0)
             {
-                sb.AppendLine("CREATE TABLE IF NOT EXISTS \"" + table + "\"(");
-                sb.Append(string.Join(",\r\n", fields.ToArray()));
-                sb.AppendLine("\r\n);");
+                IQuery<T> query = this.Query<T>().Create(fields.ToArray());
+
+                n = this.ExecuteNonQuery(query);
             }
-
-            this.ExecuteNonQuery(sb.ToString(), null);
-
-            return true;
+ 
+            return n > 0;
         }
 
         /// <summary>
@@ -183,13 +179,9 @@ namespace System.Data.ODB
         /// </summary>
         public virtual bool Drop<T>() where T : IEntity
         {
-            Type type = typeof(T);
- 
-            string def = "DROP TABLE IF EXISTS " + MappingHelper.GetTableName(type) + ";";
+            int n = this.ExecuteNonQuery(this.Query<T>().Drop().ToString(), null);
 
-            this.ExecuteNonQuery(def, null);
-
-            return true;
+            return n > 0;
         }
 
         /// <summary>
@@ -202,7 +194,7 @@ namespace System.Data.ODB
 
         public virtual IQuery<T> Select<T>(string[] cols) where T : IEntity
         { 
-            return this.BuildQuery<T>().Select(cols).From();
+            return this.Query<T>().Select(cols).From();
         }
 
         /// <summary>
@@ -216,7 +208,7 @@ namespace System.Data.ODB
             }
         }
 
-        public IList<T> Get<T>(IDataReader rdr) where T : IEntity
+        public virtual IList<T> Get<T>(IDataReader rdr) where T : IEntity
         {
             IList<T> list = new List<T>();
 
@@ -284,9 +276,9 @@ namespace System.Data.ODB
             List<string> fields = new List<string>();
             List<string> ps = new List<string>();
 
-            TableMapping table = MappingHelper.Create<T>(t);
+            TableMapping table = MappingHelper.Create(t);
 
-            IQuery<T> sql = this.BuildQuery<T>().Insert(table.Name);
+            IQuery<T> query = this.Query<T>();
 
             foreach (ColumnMapping col in table.Columns)
             {
@@ -294,17 +286,16 @@ namespace System.Data.ODB
                 {
                     IDbDataParameter pr = this.CreateParameter(col);
 
-                    sql.AddParameter(pr);
+                    query.AddParameter(pr);
 
                     fields.Add(col.Name);
                     ps.Add(pr.ParameterName);
                 }                
             }
 
-            sql.Symbol(" (" + string.Join(", ", fields.ToArray()) + ")");         
-            sql.Values(string.Join(", ", ps.ToArray()));
+            query.Insert(fields.ToArray()).Values(ps.ToArray());         
 
-            return this.ExecuteNonQuery(sql.ToString(), sql.GetParameters()); 
+            return this.ExecuteNonQuery(query); 
         }
 
         /// <summary>
@@ -317,7 +308,7 @@ namespace System.Data.ODB
                 throw new Exception("No object to update.");
             }
 
-            TableMapping table = MappingHelper.Create<T>(t);
+            TableMapping table = MappingHelper.Create(t);
 
             ColumnMapping colKey = table.PrimaryKey;
 
@@ -326,7 +317,7 @@ namespace System.Data.ODB
 
             List<string> fields = new List<string>();
 
-            IQuery<T> query = this.BuildQuery<T>().Update(table.Name);
+            IQuery<T> query = this.Query<T>();
 
             if (!this.IsEntityTracking)
             {
@@ -357,14 +348,18 @@ namespace System.Data.ODB
                         }
                     }
                 }               
-            }   
+            }
 
-            query.Set(string.Join(", ", fields.ToArray())).Where(colKey.Name).Eq(colKey.Value);
+            int n = 0;
 
             if (fields.Count > 0)
-                return this.ExecuteNonQuery(query.ToString(), query.GetParameters());
-            else
-                return this.ExecuteNonQuery("");
+            {
+                query.Update().Set(fields.ToArray()).Where(colKey.Name).Eq(colKey.Value);
+
+                return this.ExecuteNonQuery(query);
+            }
+            
+            return n;   
         }
 
         /// <summary>
@@ -375,7 +370,7 @@ namespace System.Data.ODB
             if (t == null || !t.IsPersisted)
                 return 0;
 
-            TableMapping table = MappingHelper.Create<T>(t);
+            TableMapping table = MappingHelper.Create(t);
 
             ColumnMapping colKey = table.PrimaryKey;
 
@@ -384,7 +379,7 @@ namespace System.Data.ODB
                 throw new Exception("No key column.");
             }
 
-            IQuery<T> query = this.BuildQuery<T>().Delete().Where(colKey.Name).Eq(colKey.Value);
+            IQuery<T> query = this.Query<T>().Delete().Where(colKey.Name).Eq(colKey.Value);
 
             return this.ExecuteNonQuery(query.ToString(), query.GetParameters());          
         }
@@ -392,19 +387,19 @@ namespace System.Data.ODB
         /// <summary>
         /// Delete table
         /// </summary>
-        public int Clear<T>() where T : IEntity
+        public virtual int Clear<T>() where T : IEntity
         {
-            IQuery<T> q = this.BuildQuery<T>().Delete();
+            IQuery<T> q = this.Query<T>().Delete();
 
             return this.ExecuteNonQuery(q);
         }
 
-        public IQuery<T> Count<T>() where T : IEntity
+        public virtual IQuery<T> Count<T>() where T : IEntity
         {
-            return this.BuildQuery<T>().Count();
+            return this.Query<T>().Count();
         }
 
-        public abstract IQuery<T> BuildQuery<T>() where T : IEntity;
+        public abstract IQuery<T> Query<T>() where T : IEntity;
         public abstract IDbDataParameter CreateParameter(ColumnMapping col);
 
         #endregion

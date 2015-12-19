@@ -73,7 +73,7 @@ namespace System.Data.ODB.Linq
 
                 this.Visit(m.Arguments[0]);
 
-                this.Query.Symbol(") AS T WHERE ");
+                this.Query.Append(") AS T WHERE ");
 
                 LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
 
@@ -107,49 +107,49 @@ namespace System.Data.ODB.Linq
         
         protected Expression VisitBinary(BinaryExpression b)
         {
-            this.Query.Symbol(" (");
+            this.Query.Append(" (");
 
             this.Visit(b.Left);
 
             switch (b.NodeType)
             {
                 case ExpressionType.And:
-                    this.Query.Symbol(" AND ");
+                    this.Query.Append(" AND ");
 
                     break;
 
                 case ExpressionType.Or:
-                    this.Query.Symbol(" OR");
+                    this.Query.Append(" OR");
 
                     break;
 
                 case ExpressionType.Equal:
-                    this.Query.Symbol(" = ");
+                    this.Query.Append(" = ");
 
                     break;
 
                 case ExpressionType.NotEqual:
-                    this.Query.Symbol(" <> ");
+                    this.Query.Append(" <> ");
 
                     break;
 
                 case ExpressionType.LessThan:
-                    this.Query.Symbol(" < ");
+                    this.Query.Append(" < ");
 
                     break;
 
                 case ExpressionType.LessThanOrEqual:
-                    this.Query.Symbol(" <= ");
+                    this.Query.Append(" <= ");
 
                     break;
 
                 case ExpressionType.GreaterThan:
-                    this.Query.Symbol(" > ");
+                    this.Query.Append(" > ");
 
                     break;
 
                 case ExpressionType.GreaterThanOrEqual:
-                    this.Query.Symbol(" >= ");
+                    this.Query.Append(" >= ");
 
                     break;
 
@@ -161,7 +161,7 @@ namespace System.Data.ODB.Linq
 
             this.Visit(b.Right);
 
-            this.Query.Symbol(") ");
+            this.Query.Append(") ");
 
             return b;
         }
@@ -170,7 +170,7 @@ namespace System.Data.ODB.Linq
         {
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
-                this.Query.Symbol(m.Member.Name);
+                this.Query.Append(m.Member.Name);
 
                 return m;
             }

@@ -5,28 +5,31 @@ namespace System.Data.ODB.SQLite
 {
     public class SQLiteQuery<T> : QueryBuilder<T> 
         where T : IEntity
-    { 
+    {
+        private int length;
+                
         public SQLiteQuery(DbContext db) : base(db)
-        {            
+        {
+            this.length = 0;
         }
 
-        public IQuery<T> Skip(int start)
+        public override IQuery<T> Skip(int start)
         {
-            this.SqlStr.Append(" LIMIT " + start.ToString());
+            this._sb.Append(" LIMIT " + start.ToString());
 
             return this;
         }
 
-        public IQuery<T> Take(int count)
+        public override IQuery<T> Take(int count)
         {
-            this.SqlStr.Append(" , " + count.ToString());
+            this._sb.Append(" , " + count.ToString());
 
             return this;
         }
 
         public override IDbDataParameter AddValue(object obj)
-        {
-            string name = "@p" + this.LastIndex();
+        { 
+            string name = "@p" + this.length++;
 
             SQLiteParameter p = new SQLiteParameter(name, obj);
 

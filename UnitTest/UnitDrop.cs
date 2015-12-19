@@ -1,4 +1,4 @@
-﻿using System;
+﻿//using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Data.ODB;
 using System.Data.ODB.SQLite;
@@ -13,9 +13,13 @@ namespace UnitTest
         {            
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            db.Drop<User>();
+            //db.Drop<User>();
             db.Drop<Book>();
-            db.Drop<Address>();
+            //db.Drop<Address>();
+
+            //db.Create<User>();
+            db.Create<Book>();
+            //db.Create<Address>();
 
             bool a = true;
 

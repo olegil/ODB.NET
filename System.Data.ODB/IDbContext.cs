@@ -5,7 +5,7 @@ namespace System.Data.ODB
 {
     public interface IDbContext 
     {
-        bool Create<T>() where T : IEntity;
+        int Create<T>() where T : IEntity;
 
         IQuery<T> Query<T>() where T : IEntity;
        

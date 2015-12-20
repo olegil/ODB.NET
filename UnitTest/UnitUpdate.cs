@@ -14,7 +14,9 @@ namespace UnitTest
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
             db.IsEntityTracking = true;
-            
+
+            db.Insert(new User() { Name = "Peter" });
+
             User user = db.Table<User>().First();
 
             int ret = 0;

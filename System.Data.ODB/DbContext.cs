@@ -5,8 +5,7 @@ using System.Reflection;
 namespace System.Data.ODB
 {
     public abstract class DbContext : IDbContext, IDisposable       
-    {
-        public string ConnectionString { get; private set; }
+    {         
         public bool IsEntityTracking { get; set; }
          
         public Dictionary<string, EntityState> DbState { get; private set; }
@@ -30,35 +29,23 @@ namespace System.Data.ODB
         {
             this.Dispose(true);
             GC.SuppressFinalize(this);
-        }
+        } 
 
-        protected IDbConnection _conn;
-        public IDbConnection Connection
-        {
-            get
-            {
-                if (this._conn == null)
-                    this._conn = this.Init();
-
-                return this._conn;
-            }
-        }
+        public IDbConnection Connection { get; private set; }
 
         private IDbTransaction _trans { get; set; }
 
         private bool _inTrans;
         public bool InTransaction { get { return this._inTrans; } }
 
-        public DbContext(string dbconn)
+        public DbContext(IDbConnection DbConnection)
         {
-            this.ConnectionString = dbconn;
+            this.Connection = DbConnection;
 
             this.IsEntityTracking = false;
 
             this.DbState = new Dictionary<string, EntityState>();
         }
-
-        public abstract IDbConnection Init();
 
         public void Close()
         {
@@ -69,10 +56,10 @@ namespace System.Data.ODB
                 this._trans = null;
             }
 
-            if (this._conn != null)
+            if (this.Connection != null)
             {
-                if (this._conn.State == ConnectionState.Open)
-                    this._conn.Close();
+                if (this.Connection.State == ConnectionState.Open)
+                    this.Connection.Close();
             }               
         }
 
@@ -121,71 +108,27 @@ namespace System.Data.ODB
         #region ORM 
 
         /// <summary>
-        /// Create a Table if not exists
+        /// Create a Table 
         /// </summary>
-        public virtual bool Create<T>() where T : IEntity
+        public virtual int Create<T>() where T : IEntity
         {
-            Type type = typeof(T); 
+            IQuery<T> query = this.Query<T>().Create();
 
-            List<string> fields = new List<string>(); 
-
-            foreach (PropertyInfo pi in type.GetProperties())
-            {
-                ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
-
-                if (colAttr != null)
-                {
-                    string def = colAttr.Name == "" ? pi.Name : colAttr.Name;
-
-                    def += " " + MappingHelper.DataConvert(pi.PropertyType);               
-
-                    if (colAttr.IsPrimaryKey)
-                    {
-                        def += " PRIMARY KEY";
-                    }
-
-                    if (colAttr.IsAuto)
-                    {
-                        def += " AUTOINCREMENT";
-                    }
-
-                    if (colAttr.IsNullable)
-                    {
-                        def += " NULL";
-                    }
-                    else
-                    {
-                        def += " NOT NULL";
-                    }
-
-                    fields.Add(def);                     
-                }
-            }
-
-            int n = 0;
-
-            if (fields.Count > 0)
-            {
-                IQuery<T> query = this.Query<T>().Create(fields.ToArray());
-
-                n = this.ExecuteNonQuery(query);
-            }
- 
-            return n > 0;
+            return this.ExecuteNonQuery(query); 
         }
 
         /// <summary>
-        /// Drop Table 
+        /// Drop a Table 
         /// </summary>
-        public virtual bool Drop<T>() where T : IEntity
+        public virtual int Drop<T>() where T : IEntity
         {
-            int n = this.ExecuteNonQuery(this.Query<T>().Drop().ToString(), null);
+            IQuery<T> query = this.Query<T>().Drop();
 
-            return n > 0;
+            return this.ExecuteNonQuery(query);
         }
 
         /// <summary>
-        /// Select a Table
+        /// Select from Table
         /// </summary>
         public virtual IQuery<T> Table<T>() where T : IEntity
         { 
@@ -198,7 +141,7 @@ namespace System.Data.ODB
         }
 
         /// <summary>
-        /// Get table result
+        /// Get query result
         /// </summary>
         public virtual IList<T> Get<T>(IQuery<T> q) where T : IEntity
         {
@@ -229,15 +172,8 @@ namespace System.Data.ODB
                         colName = string.IsNullOrEmpty(attr.Name) ? pi.Name : attr.Name;
 
                         object value = rdr[colName] == DBNull.Value ? null : rdr[colName];
-
-                        if (attr.EnumMapping)
-                        {
-                            pi.SetValue(instance, Enum.Parse(pi.PropertyType, value.ToString(), false), null);
-                        }
-                        else
-                        {
-                            pi.SetValue(instance, value, null);
-                        }
+ 
+                        pi.SetValue(instance, value, null);                         
                     }
 
                     if (pi.Name == "IsPersisted")
@@ -245,10 +181,6 @@ namespace System.Data.ODB
                         pi.SetValue(instance, true, null);
                     }
                 }
-
-                //FieldInfo fi = type.BaseType.GetField("_oncreate", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-
-                //fi.SetValue(t, false);
             
                 list.Add(instance); 
 

@@ -12,23 +12,16 @@ namespace System.Data.ODB
         public bool IsForeignkey { get; set; }
         public bool IsAuto { get; set; }
         public bool IsNullable { get; set; }
-        public bool EnumMapping { get; private set; }
-
+      
         public ColumnAttribute(string name = "")
             : this(name, true)
         {             
-        }
-
-        public ColumnAttribute(string name, bool isNull)
-            : this(name, true, false)
-        {
-        }
+        } 
           
-        public ColumnAttribute(string name, bool isNull, bool isEnum)
+        public ColumnAttribute(string name, bool isNull)
         {
             this.Name = name;
-            this.IsNullable = isNull;   
-            this.EnumMapping = isEnum;
+            this.IsNullable = isNull;               
         }
     }
 }

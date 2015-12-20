@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Reflection;
 
 namespace System.Data.ODB
 {
@@ -11,7 +12,7 @@ namespace System.Data.ODB
 
         private string _table;
 
-        private IList<IDbDataParameter> _params;
+        private List<IDbDataParameter> _params; 
 
         protected IDbContext _db;
 
@@ -27,9 +28,51 @@ namespace System.Data.ODB
             this._table = MappingHelper.GetTableName(type);
         }
 
-        public virtual IQuery<T> Create(string[] cols)
+        public virtual IQuery<T> Create()
         {
-            this._sb.Append("CREATE TABLE IF NOT EXISTS \"" + this._table + "\" (\r\n"); 
+            Type type = typeof(T);
+
+            List<string> fields = new List<string>();
+
+            foreach (PropertyInfo pi in type.GetProperties())
+            {
+                ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
+
+                if (colAttr != null)
+                {
+                    string def = colAttr.Name == "" ? pi.Name : colAttr.Name;
+
+                    def += " " + MappingHelper.DataConvert(pi.PropertyType);
+
+                    if (colAttr.IsPrimaryKey)
+                    {
+                        def += " PRIMARY KEY";
+                    }
+
+                    if (colAttr.IsAuto)
+                    {
+                        def += " AUTOINCREMENT";
+                    }
+
+                    if (colAttr.IsNullable)
+                    {
+                        def += " NULL";
+                    }
+                    else
+                    {
+                        def += " NOT NULL";
+                    }
+
+                    fields.Add(def);
+                }
+            }
+
+            return this.Create(fields.ToArray());
+        }
+
+        public IQuery<T> Create(string[] cols)
+        {
+            this._sb.Append("CREATE TABLE IF NOT EXISTS \"" + this._table + "\" (\r\n");
             this._sb.Append(string.Join(",\r\n", cols));
             this._sb.Append("\r\n);");
 
@@ -275,25 +318,10 @@ namespace System.Data.ODB
 
         public IDbDataParameter[] GetParameters()
         {
-            IDbDataParameter[] retval = new IDbDataParameter[this._params.Count];
+            return this._params.ToArray();
+        }
 
-            for (int i = 0; i < retval.Length; i++)
-                retval[i] = this._params[i];
-
-            return retval;
-        } 
-
-        public T First()
-        {
-            this.Skip(0).Take(1);
-
-            IList<T> list = this._db.Get(this);
-
-            if (list.Count > 0)
-                return list[0];
-
-            return default(T);
-        } 
+        public abstract T First();       
 
         public List<T> ToList()
         {

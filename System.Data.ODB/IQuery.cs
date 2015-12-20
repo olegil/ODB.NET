@@ -5,7 +5,7 @@ namespace System.Data.ODB
 {
     public interface IQuery<T> where T : IEntity
     {
-        IQuery<T> Create(string[] cols);
+        IQuery<T> Create();
         IQuery<T> Drop();
         IQuery<T> Select(string[] cols);
         IQuery<T> From();

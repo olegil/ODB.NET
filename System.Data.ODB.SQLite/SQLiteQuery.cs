@@ -1,4 +1,4 @@
-﻿using System.Data.ODB;
+﻿using System.Collections.Generic;
 using System.Data.SQLite;
 
 namespace System.Data.ODB.SQLite
@@ -25,6 +25,18 @@ namespace System.Data.ODB.SQLite
             this._sb.Append(" , " + count.ToString());
 
             return this;
+        }
+
+        public override T First()
+        {
+            this.Skip(0).Take(1);
+
+            IList<T> list = this._db.Get(this);
+
+            if (list.Count > 0)
+                return list[0];
+
+            return default(T);
         }
 
         public override IDbDataParameter AddValue(object obj)

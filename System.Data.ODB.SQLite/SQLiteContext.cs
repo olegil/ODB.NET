@@ -6,14 +6,9 @@ namespace System.Data.ODB.SQLite
     public class SQLiteContext : DbContext
     {
         public SQLiteContext(string conn)
-            : base(conn)
+            : base(new SQLiteConnection(conn))
         {        
-        }
-
-        public override IDbConnection Init()
-        {
-            return new SQLiteConnection(this.ConnectionString);
-        }
+        }    
 
         public override IQuery<T> Query<T>()
         {

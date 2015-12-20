@@ -13,7 +13,7 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            db.Create<User>();
+            //db.Create<User>();
  
             db.Insert(new User() { Name = "Peter" });
 

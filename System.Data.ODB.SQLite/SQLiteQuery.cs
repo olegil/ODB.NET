@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Data.ODB;
 
 namespace System.Data.ODB.SQLite
 {
@@ -11,6 +12,32 @@ namespace System.Data.ODB.SQLite
         public SQLiteQuery(DbContext db) : base(db)
         {
             this.length = 0;
+        }
+
+        public override string AddColumn(string name, string dbtype, ColumnAttribute colAttr)
+        {
+            string def = name + " " + dbtype;
+
+            if (colAttr.IsPrimaryKey)
+            {
+                def += " PRIMARY KEY";
+            }
+
+            if (colAttr.IsAuto)
+            {
+                def += " AUTOINCREMENT";
+            }
+
+            if (colAttr.IsNullable)
+            {
+                def += " NULL";
+            }
+            else
+            {
+                def += " NOT NULL";
+            }
+
+            return def;
         }
 
         public override IQuery<T> Skip(int start)
@@ -50,6 +77,8 @@ namespace System.Data.ODB.SQLite
             this.AddParameter(p);
 
             return p;
-        }    
+        }
+
+       
     }
 }

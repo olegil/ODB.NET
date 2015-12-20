@@ -40,30 +40,12 @@ namespace System.Data.ODB
 
                 if (colAttr != null)
                 {
-                    string def = colAttr.Name == "" ? pi.Name : colAttr.Name;
+                    string name = colAttr.Name == "" ? pi.Name : colAttr.Name;
+                    string dbtype = MappingHelper.DataConvert(pi.PropertyType);
 
-                    def += " " + MappingHelper.DataConvert(pi.PropertyType);
+                    string col = this.AddColumn(name, dbtype, colAttr);
 
-                    if (colAttr.IsPrimaryKey)
-                    {
-                        def += " PRIMARY KEY";
-                    }
-
-                    if (colAttr.IsAuto)
-                    {
-                        def += " AUTOINCREMENT";
-                    }
-
-                    if (colAttr.IsNullable)
-                    {
-                        def += " NULL";
-                    }
-                    else
-                    {
-                        def += " NOT NULL";
-                    }
-
-                    fields.Add(def);
+                    fields.Add(col);
                 }
             }
 
@@ -78,6 +60,8 @@ namespace System.Data.ODB
 
             return this;
         }
+
+        public abstract string AddColumn(string name, string dbtype, ColumnAttribute col);
 
         public virtual IQuery<T> Drop()
         {

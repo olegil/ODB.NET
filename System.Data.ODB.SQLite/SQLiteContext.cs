@@ -8,13 +8,13 @@ namespace System.Data.ODB.SQLite
         public SQLiteContext(string conn)
             : base(new SQLiteConnection(conn))
         {        
-        }    
+        }
 
-        public override IQuery<T> Query<T>()
+        public override IQuery Query<T>()
         {
             return new SQLiteQuery<T>(this);
         }
-      
+
         public override DataSet ExecuteDataSet(string sql, params IDbDataParameter[] commandParameters)
         {
             //create a command and prepare it for execution
@@ -47,6 +47,8 @@ namespace System.Data.ODB.SQLite
 
             //return the dataset
             return ds;
-        } 
+        }
+
+      
     }
 }

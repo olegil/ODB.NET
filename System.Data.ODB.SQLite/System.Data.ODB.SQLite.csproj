@@ -64,11 +64,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DbQueryProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SQLiteExpression.cs" />
     <Compile Include="SQLiteQuery.cs" />
     <Compile Include="SQLiteContext.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\System.Data.ODB.Linq\System.Data.ODB.Linq.csproj">
+      <Project>{36e44fc8-b6a4-4bac-afda-02dcbe48d93e}</Project>
+      <Name>System.Data.ODB.Linq</Name>
+    </ProjectReference>
     <ProjectReference Include="..\System.Data.ODB\System.Data.ODB.csproj">
       <Project>{229d7b4e-1718-4c93-9d69-ec68938a9731}</Project>
       <Name>System.Data.ODB</Name>

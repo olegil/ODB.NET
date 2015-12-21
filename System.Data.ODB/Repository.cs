@@ -33,12 +33,12 @@ namespace System.Data.ODB
             GC.SuppressFinalize(this);
         }
 
-        public void Begin()
+        public virtual void Begin()
         {
             this.Db.StartTrans();
         }
 
-        public void SaveChanges()
+        public virtual void SaveChanges()
         {
             if (this.Db.InTransaction)
             {
@@ -46,7 +46,7 @@ namespace System.Data.ODB
             }
         }
 
-        public void Cancel()
+        public virtual void Cancel()
         {
             this.Db.RollBack();
         } 

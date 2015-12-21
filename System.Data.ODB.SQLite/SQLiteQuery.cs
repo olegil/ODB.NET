@@ -4,7 +4,7 @@ using System.Data.ODB;
 
 namespace System.Data.ODB.SQLite
 {
-    public class SQLiteQuery<T> : QueryBuilder<T> 
+    public class SQLiteQuery<T> : Query<T>
         where T : IEntity
     {
         public SQLiteQuery(IDbContext db) : base(db)
@@ -51,30 +51,30 @@ namespace System.Data.ODB.SQLite
             return def;
         }
 
-        public override IQuery<T> Skip(int start)
+        public override IQuery Skip(int start)
         {
             this._sb.Append(" LIMIT " + start.ToString());
 
             return this;
         }
 
-        public override IQuery<T> Take(int count)
+        public override IQuery Take(int count)
         {
             this._sb.Append(" , " + count.ToString());
 
             return this;
         }
 
-        public override T First()
+        public override T1 First<T1>() 
         {
             this.Skip(0).Take(1);
 
-            IList<T> list = this._db.Get(this);
+            IList<T1> list = this._db.Get<T1>(this);
 
             if (list.Count > 0)
                 return list[0];
 
-            return default(T);
+            return default(T1);
         }        
     }
 }

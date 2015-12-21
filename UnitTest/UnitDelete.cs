@@ -17,7 +17,7 @@ namespace UnitTest
  
             db.Insert(new User() { Name = "Peter" });
 
-            User user = db.Table<User>().First();
+            User user = db.Select<User>().First<User>();
                       
             int a = 0;
 

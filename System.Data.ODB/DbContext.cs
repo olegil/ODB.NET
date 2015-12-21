@@ -112,7 +112,7 @@ namespace System.Data.ODB
         /// </summary>
         public virtual int Create<T>() where T : IEntity
         {
-            IQuery<T> query = this.Query<T>().Create();
+            IQuery query = this.Query<T>().Create();
 
             return this.ExecuteNonQuery(query); 
         }
@@ -122,7 +122,7 @@ namespace System.Data.ODB
         /// </summary>
         public virtual int Drop<T>() where T : IEntity
         {
-            IQuery<T> query = this.Query<T>().Drop();
+            IQuery query = this.Query<T>().Drop();
 
             return this.ExecuteNonQuery(query);
         }
@@ -130,12 +130,12 @@ namespace System.Data.ODB
         /// <summary>
         /// Select from Table
         /// </summary>
-        public virtual IQuery<T> Table<T>() where T : IEntity
+        public virtual IQuery Select<T>() where T : IEntity
         { 
             return this.Select<T>(new[] { "*" });
         }
 
-        public virtual IQuery<T> Select<T>(string[] cols) where T : IEntity
+        public virtual IQuery Select<T>(string[] cols) where T : IEntity
         { 
             return this.Query<T>().Select(cols).From();
         }
@@ -143,9 +143,9 @@ namespace System.Data.ODB
         /// <summary>
         /// Get query result
         /// </summary>
-        public virtual IList<T> Get<T>(IQuery<T> q) where T : IEntity
+        public virtual IList<T> Get<T>(IQuery q) where T : IEntity
         {
-            using (IDataReader rdr = this.ExecuteReader(q))
+            using (IDataReader rdr = this.ExecuteReader<T>(q))
             {
                 return this.Get<T>(rdr);               
             }
@@ -210,7 +210,7 @@ namespace System.Data.ODB
  
             TableMapping table = MappingHelper.Create(t);
 
-            IQuery<T> query = this.Query<T>();
+            IQuery query = this.Query<T>();
 
             int n = 0;
 
@@ -252,7 +252,7 @@ namespace System.Data.ODB
 
             List<string> fields = new List<string>();
 
-            IQuery<T> query = this.Query<T>();
+            IQuery query = this.Query<T>();
 
             if (!this.IsEntityTracking)
             {
@@ -316,7 +316,7 @@ namespace System.Data.ODB
                 throw new Exception("No key column.");
             }
 
-            IQuery<T> query = this.Query<T>().Delete().Where(colKey.Name).Eq(colKey.Value);
+            IQuery query = this.Query<T>().Delete().Where(colKey.Name).Eq(colKey.Value);
 
             return this.ExecuteNonQuery(query.ToString(), query.Parameters.ToArray());          
         }
@@ -326,30 +326,30 @@ namespace System.Data.ODB
         /// </summary>
         public virtual int Clear<T>() where T : IEntity
         {
-            IQuery<T> q = this.Query<T>().Delete();
+            IQuery q = this.Query<T>().Delete();
 
             return this.ExecuteNonQuery(q);
         }
 
-        public virtual IQuery<T> Count<T>() where T : IEntity
+        public virtual IQuery Count<T>() where T : IEntity
         {
             return this.Query<T>().Count();
         }
 
-        public abstract IQuery<T> Query<T>() where T : IEntity;
+        public abstract IQuery Query<T>() where T : IEntity;
     
         #endregion
 
         #region Data Access  
 
-        public virtual DataSet ExecuteDataSet<T>(IQuery<T> query) where T : IEntity
+        public virtual DataSet ExecuteDataSet(IQuery query)
         {
             return this.ExecuteDataSet(query.ToString(), query.Parameters.ToArray());
         }
 
         public abstract DataSet ExecuteDataSet(string sql, params IDbDataParameter[] commandParameters);
 
-        public virtual IDataReader ExecuteReader<T>(IQuery<T> query) where T : IEntity
+        public virtual IDataReader ExecuteReader<T>(IQuery query) where T : IEntity
         {
             return this.ExecuteReader(query.ToString(), query.Parameters.ToArray());
         }
@@ -375,7 +375,7 @@ namespace System.Data.ODB
 
                 throw;
             }
-        }
+        } 
 
         public T ExecuteScalar<T>(string sql, params IDbDataParameter[] commandParameters)
         {
@@ -401,7 +401,7 @@ namespace System.Data.ODB
             }           
         }
 
-        public virtual int ExecuteNonQuery<T>(IQuery<T> query) where T : IEntity
+        public virtual int ExecuteNonQuery(IQuery query)
         {
             return this.ExecuteNonQuery(query.ToString(), query.Parameters.ToArray());
         }
@@ -440,7 +440,7 @@ namespace System.Data.ODB
             }
 
             return;
-        } 
+        }       
 
         #endregion
     }

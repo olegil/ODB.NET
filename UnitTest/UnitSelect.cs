@@ -15,7 +15,7 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            IQuery<Book> q = db.Select<Book>(new[] { "Id", "UserId" }).Where("Id").Eq(1).And("UserId").Eq(2);
+            IQuery q = db.Select<Book>(new[] { "Id", "UserId" }).Where("Id").Eq(1).And("UserId").Eq(2);
 
             DataTable dt = db.ExecuteDataSet(q).Tables[0];
 

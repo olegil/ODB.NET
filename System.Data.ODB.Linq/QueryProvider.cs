@@ -9,8 +9,15 @@ namespace System.Data.ODB.Linq
 {
     public abstract class QueryProvider : IQueryProvider
     {
-        protected QueryProvider()
+        protected IDbContext Db { get; set; }
+
+        protected QueryTranslator Translator;
+
+        protected QueryProvider(IDbContext db)
         {
+            this.Db = db;
+
+            this.Translator = new QueryTranslator();
         }
 
         IQueryable<S> IQueryProvider.CreateQuery<S>(Expression expression)

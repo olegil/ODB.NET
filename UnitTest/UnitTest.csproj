@@ -59,6 +59,7 @@
     <Compile Include="Command.cs" />
     <Compile Include="UnitDrop.cs" />
     <Compile Include="UnitDelete.cs" />
+    <Compile Include="UnitLinq.cs" />
     <Compile Include="UnitTable.cs" />
     <Compile Include="UnitInsert.cs" />
     <Compile Include="UnitJoin.cs" />
@@ -69,8 +70,13 @@
     <Compile Include="UnitCount.cs" />
     <Compile Include="UnitSelect.cs" />
     <Compile Include="UnitUpdate.cs" />
+    <Compile Include="UnitWhere.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\System.Data.ODB.Linq\System.Data.ODB.Linq.csproj">
+      <Project>{36e44fc8-b6a4-4bac-afda-02dcbe48d93e}</Project>
+      <Name>System.Data.ODB.Linq</Name>
+    </ProjectReference>
     <ProjectReference Include="..\System.Data.ODB.SQLite\System.Data.ODB.SQLite.csproj">
       <Project>{c7bbbe3b-d59b-4ee8-bb85-903b4b7bb8f2}</Project>
       <Name>System.Data.ODB.SQLite</Name>

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Data.ODB;
+using System.Data.ODB.Linq;
+using System.Data.ODB.SQLite;
 
 namespace UnitTest
 {
@@ -34,5 +36,19 @@ namespace UnitTest
 
         [Column]
         public string Street { get; set; }
+    }
+
+    public class MyRepository : Repository
+    {
+        public QueryTable<User> Users { get; set; }
+
+        public MyRepository()
+        {           
+            this.Db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
+
+            QueryProvider provider = new DbQueryProvider(this.Db);
+
+            this.Users = new QueryTable<User>(provider);
+        }
     }
 }

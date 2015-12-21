@@ -9,11 +9,11 @@ using System.Linq.Expressions;
 
 namespace System.Data.ODB.SQLite
 {
-    public class SQLiteExpression : QueryExpression
+    public class SQLiteExpression<T> : QueryExpression<T>
+        where T : IEntity
     { 
-        public SQLiteExpression(IQuery query) : base (query)
-        {
-            
+        public SQLiteExpression(IQuery query) : base(query)
+        {            
         }
 
         public override void Translate(Expression expression)

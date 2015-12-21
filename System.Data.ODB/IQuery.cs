@@ -35,20 +35,16 @@ namespace System.Data.ODB
         IQuery<T> Equal(string str);
         IQuery<T> SortAsc();
         IQuery<T> SortDesc();
-        
+                
         IQuery<T> Append(string str);
-       
-        void AddParameter(IDbDataParameter p);
 
-        IDbDataParameter[] GetParameters();
+        IDbDataParameter BindParam(string name, object b, ColumnAttribute attr);
 
+        List<IDbDataParameter> Parameters { get; set; }
+  
         List<T> ToList();
 
         T First();
-
-        DataTable GetTable();
-
-        int ExecuteCommand();
 
         string ToString();
     }

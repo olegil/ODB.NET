@@ -12,16 +12,18 @@ namespace System.Data.ODB
 
         private string _table;
 
-        private List<IDbDataParameter> _params; 
-
         protected IDbContext _db;
+
+        public List<IDbDataParameter> Parameters { get; set; }
+
+        private int _count = 0;
 
         public QueryBuilder(IDbContext db)
         {
             this._db = db;
 
             this._sb = new StringBuilder();
-            this._params = new List<IDbDataParameter>();
+            this.Parameters = new List<IDbDataParameter>();
 
             Type type = typeof(T);
 
@@ -245,65 +247,64 @@ namespace System.Data.ODB
         public virtual IQuery<T> Eq(object val)
         {
             this._sb.Append(" = ");
-            this._sb.Append(this.AddValue(val).ParameterName);
-
-            return this;
+            
+            return this.Bind(val);
         }
 
         public virtual IQuery<T> NotEq(object val)
         {
-            this._sb.Append(" <> ");
-            this._sb.Append(this.AddValue(val).ParameterName);
+            this._sb.Append(" <> ");     
 
-            return this;
+            return this.Bind(val);
         }
 
         public virtual IQuery<T> Gt(object val)
         {
-            this._sb.Append(" > " + this.AddValue(val).ParameterName);
+            this._sb.Append(" > ");
 
-            return this;
+            return this.Bind(val);
         }
 
         public virtual IQuery<T> Lt(object val)
         {
-            this._sb.Append(" < " + this.AddValue(val).ParameterName);
+            this._sb.Append(" < ");
 
-            return this;
+            return this.Bind(val);
         }
 
         public virtual IQuery<T> Gte(object val)
         {
-            this._sb.Append(" >= " + this.AddValue(val).ParameterName);
+            this._sb.Append(" >= ");
 
-            return this;
+            return this.Bind(val);
         }
 
         public virtual IQuery<T> Lte(object val)
         {
-            this._sb.Append(" <= " + this.AddValue(val).ParameterName);
+            this._sb.Append(" <= ");
 
-            return this;
+            return this.Bind(val);
         }
 
         public virtual IQuery<T> Like(string str)
         {
-            this._sb.Append(" LIKE " + this.AddValue("%" + str + "%").ParameterName);
+            this._sb.Append(" LIKE ");
 
+            return this.Bind("%" + str + "%");
+        }
+
+        public virtual IQuery<T> Bind(object b)
+        {
+            string name = "p" + this._count++;
+
+            IDbDataParameter p = this.BindParam(name, b, null);
+
+            this._sb.Append(p.ParameterName);
+            
             return this;
-        } 
-
-        public abstract IDbDataParameter AddValue(object obj);
-        
-        public virtual void AddParameter(IDbDataParameter p)
-        {
-            this._params.Add(p);
         }
 
-        public IDbDataParameter[] GetParameters()
-        {
-            return this._params.ToArray();
-        }
+        public abstract IDbDataParameter BindParam(string name, object b, ColumnAttribute attr);
 
         public abstract T First();       
 
@@ -311,17 +312,7 @@ namespace System.Data.ODB
         {
             return this._db.Get(this) as List<T>;
         }
-
-        public DataTable GetTable()
-        {
-            return this._db.ExecuteDataSet(this).Tables[0];
-        }
-         
-        public int ExecuteCommand()
-        {
-            return this._db.ExecuteNonQuery(this);
-        }
-            
+    
         public override string ToString()
         {
             return this._sb.ToString();

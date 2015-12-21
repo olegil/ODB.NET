@@ -14,19 +14,7 @@ namespace System.Data.ODB.SQLite
         {
             return new SQLiteQuery<T>(this);
         }
-         
-        public override IDbDataParameter CreateParameter(ColumnMapping col)
-        {
-            SQLiteParameter p = new SQLiteParameter();
-
-            p.ParameterName = "@" + col.Name;
-            //p.Size = col.Attribute.Size;
-            p.DbType = MappingHelper.TypeConvert(col.Value);  
-            p.Value = col.Value;
-             
-            return p;
-        }
-
+      
         public override DataSet ExecuteDataSet(string sql, params IDbDataParameter[] commandParameters)
         {
             //create a command and prepare it for execution
@@ -55,6 +43,6 @@ namespace System.Data.ODB.SQLite
 
             //return the dataset
             return ds;
-        }
+        } 
     }
 }

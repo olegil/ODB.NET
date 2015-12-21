@@ -15,7 +15,7 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            db.Create<Book>();
+            //db.Create<Book>();
 
             Book book = new Book() { UserId = 1, Release = DateTime.Now };
 

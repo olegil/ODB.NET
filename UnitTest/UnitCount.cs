@@ -16,9 +16,9 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            Book book = new Book() { UserId = 19, Release = DateTime.Now };
+            //Book book = new Book() { UserId = 19, Release = DateTime.Now };
 
-            db.Insert(book);
+            //db.Insert(book);
 
             IQuery<Book> q = db.Count<Book>();
 

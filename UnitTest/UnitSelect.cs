@@ -17,7 +17,7 @@ namespace UnitTest
 
             IQuery<Book> q = db.Select<Book>(new[] { "Id", "UserId" }).Where("Id").Eq(1).And("UserId").Eq(2);
 
-            DataTable dt = q.GetTable();
+            DataTable dt = db.ExecuteDataSet(q).Tables[0];
 
             Assert.IsNotNull(dt);
         }

@@ -7,11 +7,22 @@ namespace System.Data.ODB.SQLite
     public class SQLiteQuery<T> : QueryBuilder<T> 
         where T : IEntity
     {
-        private int length;
-                
-        public SQLiteQuery(DbContext db) : base(db)
+        public SQLiteQuery(IDbContext db) : base(db)
         {
-            this.length = 0;
+        }
+
+        public override IDbDataParameter BindParam(string name, object b, ColumnAttribute attr)
+        {
+            SQLiteParameter p = new SQLiteParameter();
+
+            p.ParameterName = "@" + name;
+            p.Value = b;
+            //p.Size = attr.Size;
+            p.DbType = MappingHelper.TypeConvert(b);
+
+            this.Parameters.Add(p);
+
+            return p;
         }
 
         public override string AddColumn(string name, string dbtype, ColumnAttribute colAttr)
@@ -64,21 +75,6 @@ namespace System.Data.ODB.SQLite
                 return list[0];
 
             return default(T);
-        }
-
-        public override IDbDataParameter AddValue(object obj)
-        { 
-            string name = "@p" + this.length++;
-
-            SQLiteParameter p = new SQLiteParameter(name, obj);
-
-            p.DbType = MappingHelper.TypeConvert(obj);
-
-            this.AddParameter(p);
-
-            return p;
-        }
-
-       
+        }        
     }
 }

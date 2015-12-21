@@ -62,7 +62,7 @@ namespace System.Data.ODB
                     this.Connection.Close();
             }               
         }
-
+ 
         #region Transaction
 
         public void StartTrans()
@@ -207,21 +207,24 @@ namespace System.Data.ODB
              
             List<string> fields = new List<string>();
             List<string> ps = new List<string>();
-
+ 
             TableMapping table = MappingHelper.Create(t);
 
             IQuery<T> query = this.Query<T>();
+
+            int n = 0;
 
             foreach (ColumnMapping col in table.Columns)
             {
                 if (!col.Attribute.IsAuto)
                 {
-                    IDbDataParameter pr = this.CreateParameter(col);
-
-                    query.AddParameter(pr);
+                    IDbDataParameter p = query.BindParam("p" + n, col.Value, col.Attribute);
 
                     fields.Add(col.Name);
-                    ps.Add(pr.ParameterName);
+
+                    ps.Add(p.ParameterName);
+
+                    n++;
                 }                
             }
 
@@ -253,13 +256,15 @@ namespace System.Data.ODB
 
             if (!this.IsEntityTracking)
             {
+                int n = 0;
+
                 foreach (ColumnMapping col in table.Columns)
                 {
-                    IDbDataParameter pr = this.CreateParameter(col);
-
-                    query.AddParameter(pr);
+                    IDbDataParameter pr = query.BindParam("p" + n, col.Value, col.Attribute);
 
                     fields.Add(col.Name + " = " + pr.ParameterName);
+
+                    n++;
                 }
             }
             else
@@ -268,21 +273,21 @@ namespace System.Data.ODB
                 {
                     EntityState au = this.DbState[t.EntityId];
 
+                    int n = 0;
+
                     foreach (ColumnMapping col in table.Columns)
                     {
                         if (au.IsModified(col.Name, col.Value))
                         {
-                            IDbDataParameter pr = this.CreateParameter(col);
-
-                            query.AddParameter(pr);
+                            IDbDataParameter pr = query.BindParam("p" + n, col.Value, col.Attribute);
 
                             fields.Add(col.Name + " = " + pr.ParameterName);
+
+                            n++;
                         }
                     }
                 }               
-            }
-
-            int n = 0;
+            } 
 
             if (fields.Count > 0)
             {
@@ -291,7 +296,7 @@ namespace System.Data.ODB
                 return this.ExecuteNonQuery(query);
             }
             
-            return n;   
+            return 0;   
         }
 
         /// <summary>
@@ -313,7 +318,7 @@ namespace System.Data.ODB
 
             IQuery<T> query = this.Query<T>().Delete().Where(colKey.Name).Eq(colKey.Value);
 
-            return this.ExecuteNonQuery(query.ToString(), query.GetParameters());          
+            return this.ExecuteNonQuery(query.ToString(), query.Parameters.ToArray());          
         }
 
         /// <summary>
@@ -332,22 +337,21 @@ namespace System.Data.ODB
         }
 
         public abstract IQuery<T> Query<T>() where T : IEntity;
-        public abstract IDbDataParameter CreateParameter(ColumnMapping col);
-
+    
         #endregion
 
         #region Data Access  
 
         public virtual DataSet ExecuteDataSet<T>(IQuery<T> query) where T : IEntity
         {
-            return this.ExecuteDataSet(query.ToString(), query.GetParameters());
+            return this.ExecuteDataSet(query.ToString(), query.Parameters.ToArray());
         }
 
         public abstract DataSet ExecuteDataSet(string sql, params IDbDataParameter[] commandParameters);
 
         public virtual IDataReader ExecuteReader<T>(IQuery<T> query) where T : IEntity
         {
-            return this.ExecuteReader(query.ToString(), query.GetParameters());
+            return this.ExecuteReader(query.ToString(), query.Parameters.ToArray());
         }
 
         public IDataReader ExecuteReader(string sql, params IDbDataParameter[] commandParameters)
@@ -390,7 +394,7 @@ namespace System.Data.ODB
 
         public virtual int ExecuteNonQuery<T>(IQuery<T> query) where T : IEntity
         {
-            return this.ExecuteNonQuery(query.ToString(), query.GetParameters());
+            return this.ExecuteNonQuery(query.ToString(), query.Parameters.ToArray());
         }
 
         public int ExecuteNonQuery(string sql, params IDbDataParameter[] commandParameters)
@@ -427,7 +431,7 @@ namespace System.Data.ODB
             }
 
             return;
-        }
+        } 
 
         #endregion
     }

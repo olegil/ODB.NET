@@ -385,11 +385,20 @@ namespace System.Data.ODB
             SetCommand(cmd, sql, commandParameters);
 
             //execute the command & return the results
-            T retval = (T)cmd.ExecuteScalar();
-                     
-            cmd.Parameters.Clear();
+            try
+            {
+                T retval = (T)cmd.ExecuteScalar();
 
-            return retval;
+                cmd.Parameters.Clear();
+
+                return retval;
+            }
+            catch
+            {
+                this.Connection.Close();
+
+                throw;
+            }           
         }
 
         public virtual int ExecuteNonQuery<T>(IQuery<T> query) where T : IEntity
@@ -406,7 +415,7 @@ namespace System.Data.ODB
 
             int n = cmd.ExecuteNonQuery();
             cmd.Parameters.Clear();
-
+ 
             return n;
         }
 

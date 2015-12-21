@@ -24,10 +24,8 @@ namespace System.Data.ODB
 
             this._sb = new StringBuilder();
             this.Parameters = new List<IDbDataParameter>();
-
-            Type type = typeof(T);
-
-            this._table = MappingHelper.GetTableName(type);
+ 
+            this._table = MappingHelper.GetTableName(typeof(T));
         }
 
         public virtual IQuery<T> Create()

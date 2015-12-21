@@ -23,13 +23,13 @@ namespace System.Data.ODB.SQLite
             this.SetCommand(cmd, sql, commandParameters);
 
             //create the DataAdapter & DataSet 
-            IDataAdapter da = new SQLiteDataAdapter(cmd as SQLiteCommand);
+            SQLiteDataAdapter da = new SQLiteDataAdapter(cmd as SQLiteCommand);
 
             DataSet ds = new DataSet();
 
             try
             {
-                //fill the DataSet using default values for DataTable names, etc.
+                //fill the DataSet using default values for DataTable names
                 da.Fill(ds);
 
                 cmd.Parameters.Clear();
@@ -39,6 +39,10 @@ namespace System.Data.ODB.SQLite
                 this.Connection.Close();
 
                 throw;
+            }
+            finally
+            {
+                da.Dispose();
             }
 
             //return the dataset

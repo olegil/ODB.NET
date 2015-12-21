@@ -3,48 +3,48 @@ using System.Collections.Generic;
 
 namespace System.Data.ODB
 {
-    public interface IQuery
+    public interface IQuery<T> where T : IEntity
     {
-        IQuery Create();
-        IQuery Drop();
-        IQuery Select(string[] cols);
-        IQuery From();
-        IQuery Insert(string[] cols);
-        IQuery Update();
-        IQuery Delete();
-        IQuery Values(string[] cols);
-        IQuery Set(string[] cols);
-        IQuery Where(string str);
-        IQuery And(string str);
-        IQuery Or(string str);
-        IQuery OrderBy(string str);
-        IQuery Eq(object val);
-        IQuery NotEq(object val);
-        IQuery Gt(object val);
-        IQuery Lt(object val);
-        IQuery Gte(object val);
-        IQuery Lte(object val);
-        IQuery Like(string str);
-        IQuery Count();
-        IQuery Skip(int start);
-        IQuery Take(int count);
-        IQuery Join<T>() where T : IEntity;
-        IQuery LeftJoin<T>() where T : IEntity;
-        IQuery As(string str);
-        IQuery On(string str);
-        IQuery Equal(string str);
-        IQuery SortAsc();
-        IQuery SortDesc();
+        IQuery<T> Create();
+        IQuery<T> Drop();
+        IQuery<T> Select(string[] cols);
+        IQuery<T> From();
+        IQuery<T> Insert(string[] cols);
+        IQuery<T> Update();
+        IQuery<T> Delete();
+        IQuery<T> Values(string[] cols);
+        IQuery<T> Set(string[] cols);
+        IQuery<T> Where(string str);
+        IQuery<T> And(string str);
+        IQuery<T> Or(string str);
+        IQuery<T> OrderBy(string str);
+        IQuery<T> Eq(object val);
+        IQuery<T> NotEq(object val);
+        IQuery<T> Gt(object val);
+        IQuery<T> Lt(object val);
+        IQuery<T> Gte(object val);
+        IQuery<T> Lte(object val);
+        IQuery<T> Like(string str);
+        IQuery<T> Count();
+        IQuery<T> Skip(int start);
+        IQuery<T> Take(int count);
+        IQuery<T> Join<T1>() where T1 : IEntity;
+        IQuery<T> LeftJoin<T1>() where T1 : IEntity;
+        IQuery<T> As(string str);
+        IQuery<T> On(string str);
+        IQuery<T> Equal(string str);
+        IQuery<T> SortAsc();
+        IQuery<T> SortDesc();
 
-        IQuery Append(string str);
+        IQuery<T> Append(string str);
 
         IDbDataParameter BindParam(string name, object b, ColumnAttribute attr);
 
         List<IDbDataParameter> Parameters { get; set; }
 
-        T First<T>() where T : IEntity;
+        T First();
 
-        List<T> ToList<T>() where T : IEntity;
+        List<T> ToList();
 
         string ToString();
     }

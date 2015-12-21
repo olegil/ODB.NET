@@ -10,7 +10,7 @@ namespace System.Data.ODB.SQLite
         {        
         }
 
-        public override IQuery Query<T>()
+        public override IQuery<T> Query<T>()
         {
             return new SQLiteQuery<T>(this);
         }

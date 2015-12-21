@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace System.Data.ODB
 {
-    public abstract class Query<T> : IQuery 
+    public abstract class Query<T> : IQuery<T> 
         where T : IEntity
     {
         public StringBuilder _sb;
@@ -28,7 +28,7 @@ namespace System.Data.ODB
             this._table = MappingHelper.GetTableName(typeof(T));
         }
 
-        public virtual IQuery Create()
+        public virtual IQuery<T> Create()
         {
             Type type = typeof(T);
 
@@ -52,7 +52,7 @@ namespace System.Data.ODB
             return this.Create(fields.ToArray());
         }
 
-        public IQuery Create(string[] cols)
+        public IQuery<T> Create(string[] cols)
         {
             this._sb.Append("CREATE TABLE IF NOT EXISTS \"" + this._table + "\" (\r\n");
             this._sb.Append(string.Join(",\r\n", cols));
@@ -63,7 +63,7 @@ namespace System.Data.ODB
 
         public abstract string AddColumn(string name, string dbtype, ColumnAttribute col);
 
-        public virtual IQuery Drop()
+        public virtual IQuery<T> Drop()
         {
             this._sb.Append("DROP TABLE IF EXISTS ");
             this._sb.Append(this._table);
@@ -71,7 +71,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery Select(string[] cols)
+        public virtual IQuery<T> Select(string[] cols)
         { 
             this._sb.Append("SELECT ");
             this._sb.Append(string.Join(",", cols));
@@ -79,7 +79,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery From()
+        public virtual IQuery<T> From()
         {
             this._sb.Append(" FROM ");
             this._sb.Append(this._table);
@@ -87,7 +87,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery Insert(string[] cols)
+        public virtual IQuery<T> Insert(string[] cols)
         {
             this._sb.Append("INSERT INTO " + this._table);            
             this._sb.Append(" (");
@@ -97,7 +97,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery Values(string[] cols)
+        public virtual IQuery<T> Values(string[] cols)
         {
             this._sb.Append(" VALUES (");
             this._sb.Append(string.Join(", ", cols));
@@ -106,7 +106,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery Update()
+        public virtual IQuery<T> Update()
         {
             this._sb.Append("UPDATE ");
             this._sb.Append(this._table);
@@ -114,7 +114,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery Set(string[] cols)
+        public virtual IQuery<T> Set(string[] cols)
         {
             this._sb.Append(" SET ");
             this._sb.Append(string.Join(", ", cols));
@@ -122,14 +122,14 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery Delete()
+        public virtual IQuery<T> Delete()
         {
             this._sb.Append("DELETE");
 
             return this.From();
         }
 
-        public virtual IQuery Join<T1>() where T1 : IEntity
+        public virtual IQuery<T> Join<T1>() where T1 : IEntity
         {
             Type type = typeof(T1);
 
@@ -139,14 +139,14 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery LeftJoin<T1>() where T1 : IEntity
+        public virtual IQuery<T> LeftJoin<T1>() where T1 : IEntity
         {           
             this._sb.Append(" LEFT");
         
             return this.Join<T1>();
         }
 
-        public virtual IQuery Where(string str)
+        public virtual IQuery<T> Where(string str)
         {
             if (!string.IsNullOrEmpty(str))
             {
@@ -157,7 +157,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery And(string str)
+        public virtual IQuery<T> And(string str)
         {
             this._sb.Append(" AND ");
             this._sb.Append(str);
@@ -165,7 +165,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery Or(string str)
+        public virtual IQuery<T> Or(string str)
         {
             this._sb.Append(" OR ");
             this._sb.Append(str);
@@ -173,35 +173,35 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery Equal(string str)
+        public virtual IQuery<T> Equal(string str)
         {
             this._sb.Append(" = " + str);
 
             return this;
         }
 
-        public virtual IQuery As(string str)
+        public virtual IQuery<T> As(string str)
         {
             this._sb.Append(" AS " + str);
 
             return this;
         }
 
-        public virtual IQuery On(string str)
+        public virtual IQuery<T> On(string str)
         {
             this._sb.Append(" ON " + str);
 
             return this;
         }
 
-        public virtual IQuery Append(string str)
+        public virtual IQuery<T> Append(string str)
         {
             this._sb.Append(str);
 
             return this;
         }
 
-        public virtual IQuery OrderBy(string str)
+        public virtual IQuery<T> OrderBy(string str)
         {
             if (!string.IsNullOrEmpty(str))
             {
@@ -212,86 +212,86 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery SortAsc()
+        public virtual IQuery<T> SortAsc()
         {
             this._sb.Append(" ASC");
 
             return this;
         }
 
-        public virtual IQuery SortDesc()
+        public virtual IQuery<T> SortDesc()
         {
             this._sb.Append(" DESC");
 
             return this;
         } 
 
-        public virtual IQuery Count(string str)  
+        public virtual IQuery<T> Count(string str)  
         {            
             this._sb.Append("SELECT COUNT(" + str + ")");
             
             return this.From();
         }
 
-        public virtual IQuery Count()
+        public virtual IQuery<T> Count()
         {
             return this.Count("*");
         }
 
-        public abstract IQuery Skip(int start);
+        public abstract IQuery<T> Skip(int start);
 
-        public abstract IQuery Take(int count);
+        public abstract IQuery<T> Take(int count);
 
-        public virtual IQuery Eq(object val)
+        public virtual IQuery<T> Eq(object val)
         {
             this._sb.Append(" = ");
             
             return this.Bind(val);
         }
 
-        public virtual IQuery NotEq(object val)
+        public virtual IQuery<T> NotEq(object val)
         {
             this._sb.Append(" <> ");     
 
             return this.Bind(val);
         }
 
-        public virtual IQuery Gt(object val)
+        public virtual IQuery<T> Gt(object val)
         {
             this._sb.Append(" > ");
 
             return this.Bind(val);
         }
 
-        public virtual IQuery Lt(object val)
+        public virtual IQuery<T> Lt(object val)
         {
             this._sb.Append(" < ");
 
             return this.Bind(val);
         }
 
-        public virtual IQuery Gte(object val)
+        public virtual IQuery<T> Gte(object val)
         {
             this._sb.Append(" >= ");
 
             return this.Bind(val);
         }
 
-        public virtual IQuery Lte(object val)
+        public virtual IQuery<T> Lte(object val)
         {
             this._sb.Append(" <= ");
 
             return this.Bind(val);
         }
 
-        public virtual IQuery Like(string str)
+        public virtual IQuery<T> Like(string str)
         {
             this._sb.Append(" LIKE ");
 
             return this.Bind("%" + str + "%");
         }
 
-        public virtual IQuery Bind(object b)
+        public virtual IQuery<T> Bind(object b)
         {
             string name = "p" + this._count++;
 
@@ -309,11 +309,11 @@ namespace System.Data.ODB
             return this._sb.ToString();
         }
 
-        public abstract T1 First<T1>() where T1 : IEntity;        
+        public abstract T First();        
 
-        public List<T1> ToList<T1>() where T1 : IEntity
+        public List<T> ToList()
         {
-            return this._db.Get<T1>(this) as List<T1>;
+            return this._db.Get(this) as List<T>;
         }
     }
 }

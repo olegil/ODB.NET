@@ -22,7 +22,7 @@ namespace UnitTest
 
             db.Insert(user);
 
-            int n = db.Select<User>().ToList<User>().Count;
+            int n = db.Select<User>().ToList().Count;
              
             db.Close();
 

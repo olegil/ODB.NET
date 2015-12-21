@@ -16,7 +16,7 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            IQuery q = db.Select<Book>(new[] { "T1.*" }).As("T1").LeftJoin<User>().As("T2").On("T1.UserId").Equal("T2.Id");
+            IQuery<Book> q = db.Select<Book>(new[] { "T1.*" }).As("T1").LeftJoin<User>().As("T2").On("T1.UserId").Equal("T2.Id");
 
             DataTable dt = db.ExecuteDataSet(q).Tables[0];
 

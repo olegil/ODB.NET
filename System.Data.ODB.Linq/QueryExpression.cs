@@ -10,9 +10,9 @@ namespace System.Data.ODB.Linq
 {
     public abstract class QueryExpression<T> : IExpression<T> where T : IEntity
     {
-        public IQuery Query { get; private set; }
+        public IQuery<T> Query { get; private set; }
 
-        public QueryExpression(IQuery query)  
+        public QueryExpression(IQuery<T> query)  
         {
             this.Query = query;
         }

@@ -51,30 +51,30 @@ namespace System.Data.ODB.SQLite
             return def;
         }
 
-        public override IQuery Skip(int start)
+        public override IQuery<T> Skip(int start)
         {
             this._sb.Append(" LIMIT " + start.ToString());
 
             return this;
         }
 
-        public override IQuery Take(int count)
+        public override IQuery<T> Take(int count)
         {
             this._sb.Append(" , " + count.ToString());
 
             return this;
         }
 
-        public override T1 First<T1>() 
+        public override T First() 
         {
             this.Skip(0).Take(1);
 
-            IList<T1> list = this._db.Get<T1>(this);
+            IList<T> list = this._db.Get(this);
 
             if (list.Count > 0)
                 return list[0];
 
-            return default(T1);
+            return default(T);
         }        
     }
 }

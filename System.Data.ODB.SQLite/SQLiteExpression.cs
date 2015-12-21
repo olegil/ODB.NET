@@ -12,7 +12,7 @@ namespace System.Data.ODB.SQLite
     public class SQLiteExpression<T> : QueryExpression<T>
         where T : IEntity
     { 
-        public SQLiteExpression(IQuery query) : base(query)
+        public SQLiteExpression(IQuery<T> query) : base(query)
         {            
         }
 

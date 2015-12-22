@@ -1,4 +1,5 @@
-﻿using System.Data.ODB.Linq;
+﻿using System.Collections.Generic;
+using System.Data.ODB.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -16,7 +17,7 @@ namespace System.Data.ODB.SQLite
 
             Type type = TypeSystem.GetElementType(expression.Type);
 
-            return null;
+            return new List<IEntity>();
         }                
     }
 }

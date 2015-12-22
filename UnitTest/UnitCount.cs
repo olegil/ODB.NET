@@ -20,10 +20,8 @@ namespace UnitTest
 
             //db.Insert(book);
 
-            IQuery<Book> q = db.Count<Book>();
-
-            long n = db.ExecuteScalar<Int64>(q.ToString());
-
+            long n = db.Count<Book>().Single<Int64>(); 
+ 
             db.Close();
 
             Assert.IsTrue(n > 0);

@@ -14,7 +14,7 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            IQuery<Book> q = db.Select<Book>().Where("Id").Gt(0);
+            IQuery<Book> q = db.From<Book>().Where("Id").Gt(0);
 
             List<Book> books = q.ToList();
 

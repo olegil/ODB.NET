@@ -15,11 +15,11 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            IQuery<Book> q = db.Select<Book>(new[] { "Id", "UserId" }).Where("Id").Eq(1).And("UserId").Eq(2);
+            IQuery<Book> q = db.From<Book>().Where("Id").Eq(1).And("UserId").Eq(2);
 
-            DataTable dt = db.ExecuteDataSet(q).Tables[0];
+            List<Book> books = q.ToList();
 
-            Assert.IsNotNull(dt);
+            Assert.IsTrue(books.Count > 0);
         }
     }
 }

@@ -69,7 +69,7 @@ namespace System.Data.ODB.SQLite
         {
             this.Skip(0).Take(1);
 
-            IList<T> list = this._db.Get(this);
+            IList<T> list = this._db.Get<T>(this);
 
             if (list.Count > 0)
                 return list[0];

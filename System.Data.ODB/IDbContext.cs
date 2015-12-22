@@ -7,12 +7,16 @@ namespace System.Data.ODB
     {
         int Create<T>() where T : IEntity;
 
-        IList<T> Get<T>(IQuery<T> query) where T : IEntity;
+        int Remove<T>() where T : IEntity;
 
-        DataSet ExecuteDataSet<T>(IQuery<T> query) where T : IEntity;
+        IList<T> Get<T>(IQuery query) where T : IEntity;
+  
+        DataSet ExecuteDataSet(IQuery query);
 
-        IDataReader ExecuteReader<T>(IQuery<T> query) where T : IEntity;
+        IDataReader ExecuteReader(IQuery query);
 
-        int ExecuteNonQuery<T>(IQuery<T> query) where T : IEntity;       
+        int ExecuteNonQuery(IQuery query);
+
+        T ExecuteScalar<T>(IQuery query);
     }
 }

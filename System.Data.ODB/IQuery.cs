@@ -3,17 +3,29 @@ using System.Collections.Generic;
 
 namespace System.Data.ODB
 {
-    public interface IQuery<T> where T : IEntity
+    public interface IQuery
     {
-        IQuery<T> Create();
-        IQuery<T> Drop();
-        IQuery<T> Select(string[] cols);
-        IQuery<T> From();
-        IQuery<T> Insert(string[] cols);
-        IQuery<T> Update();
+        IQuery Create();
+        IQuery Drop();         
+        IQuery Insert(string[] cols);
+        IQuery Values(string[] cols);              
+        IQuery Append(string str);
+
+        IDbDataParameter BindParam(string name, object b, ColumnAttribute attr);
+
+        List<IDbDataParameter> Parameters { get; set; }
+
+        DataSet Result();
+
+        string ToString();
+    }
+
+    public interface IQuery<T> : IQuery
+    {
         IQuery<T> Delete();
-        IQuery<T> Values(string[] cols);
-        IQuery<T> Set(string[] cols);
+        IQuery<T> Update();
+        IQuery<T> Select(string str);        
+        IQuery<T> From();
         IQuery<T> Where(string str);
         IQuery<T> And(string str);
         IQuery<T> Or(string str);
@@ -25,7 +37,8 @@ namespace System.Data.ODB
         IQuery<T> Gte(object val);
         IQuery<T> Lte(object val);
         IQuery<T> Like(string str);
-        IQuery<T> Count();
+        IQuery<T> Set(string[] cols);
+        IQuery<T> Count(string str);
         IQuery<T> Skip(int start);
         IQuery<T> Take(int count);
         IQuery<T> Join<T1>() where T1 : IEntity;
@@ -36,16 +49,10 @@ namespace System.Data.ODB
         IQuery<T> SortAsc();
         IQuery<T> SortDesc();
 
-        IQuery<T> Append(string str);
-
-        IDbDataParameter BindParam(string name, object b, ColumnAttribute attr);
-
-        List<IDbDataParameter> Parameters { get; set; }
-
         T First();
 
         List<T> ToList();
 
-        string ToString();
+        T Single<T>();
     }
 }

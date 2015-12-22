@@ -69,7 +69,7 @@ namespace System.Data.ODB.Linq
         {
             if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
             {
-                this.Query.Select(new[] { "*" }).From();             
+                this.Query.Select("*").From();             
 
                 this.Visit(m.Arguments[0]);
 

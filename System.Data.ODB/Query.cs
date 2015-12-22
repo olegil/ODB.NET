@@ -28,7 +28,7 @@ namespace System.Data.ODB
             this._table = MappingHelper.GetTableName(typeof(T));
         }
 
-        public virtual IQuery<T> Create()
+        public virtual IQuery Create()
         {
             Type type = typeof(T);
 
@@ -52,7 +52,7 @@ namespace System.Data.ODB
             return this.Create(fields.ToArray());
         }
 
-        public IQuery<T> Create(string[] cols)
+        public IQuery Create(string[] cols)
         {
             this._sb.Append("CREATE TABLE IF NOT EXISTS \"" + this._table + "\" (\r\n");
             this._sb.Append(string.Join(",\r\n", cols));
@@ -60,34 +60,18 @@ namespace System.Data.ODB
 
             return this;
         }
-
+   
         public abstract string AddColumn(string name, string dbtype, ColumnAttribute col);
 
-        public virtual IQuery<T> Drop()
+        public virtual IQuery Drop()
         {
             this._sb.Append("DROP TABLE IF EXISTS ");
             this._sb.Append(this._table);
 
             return this;
         }
-
-        public virtual IQuery<T> Select(string[] cols)
-        { 
-            this._sb.Append("SELECT ");
-            this._sb.Append(string.Join(",", cols));
-          
-            return this;
-        }
-
-        public virtual IQuery<T> From()
-        {
-            this._sb.Append(" FROM ");
-            this._sb.Append(this._table);
-
-            return this;
-        }
-
-        public virtual IQuery<T> Insert(string[] cols)
+         
+        public virtual IQuery Insert(string[] cols)
         {
             this._sb.Append("INSERT INTO " + this._table);            
             this._sb.Append(" (");
@@ -97,7 +81,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery<T> Values(string[] cols)
+        public virtual IQuery Values(string[] cols)
         {
             this._sb.Append(" VALUES (");
             this._sb.Append(string.Join(", ", cols));
@@ -128,6 +112,26 @@ namespace System.Data.ODB
 
             return this.From();
         }
+
+        public virtual IQuery<T> Select(string str)
+        {
+            this._sb.Append("SELECT " + str);
+        
+            return this;
+        }
+
+        public virtual IQuery<T> From(string str)
+        {
+            this._sb.Append(" FROM ");
+            this._sb.Append(str);
+
+            return this;
+        }
+
+        public virtual IQuery<T> From()
+        {
+            return From(this._table);
+        } 
 
         public virtual IQuery<T> Join<T1>() where T1 : IEntity
         {
@@ -194,7 +198,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery<T> Append(string str)
+        public virtual IQuery Append(string str)
         {
             this._sb.Append(str);
 
@@ -227,15 +231,8 @@ namespace System.Data.ODB
         } 
 
         public virtual IQuery<T> Count(string str)  
-        {            
-            this._sb.Append("SELECT COUNT(" + str + ")");
-            
-            return this.From();
-        }
-
-        public virtual IQuery<T> Count()
         {
-            return this.Count("*");
+            return this.Select(" COUNT(" + str + ")"); 
         }
 
         public abstract IQuery<T> Skip(int start);
@@ -311,9 +308,19 @@ namespace System.Data.ODB
 
         public abstract T First();        
 
+        public DataSet Result()
+        {
+            return this._db.ExecuteDataSet(this);
+        }
+
         public List<T> ToList()
         {
-            return this._db.Get(this) as List<T>;
+            return this._db.Get<T>(this) as List<T>;
+        }
+
+        public T1 Single<T1>()
+        {
+            return this._db.ExecuteScalar<T1>(this);
         }
     }
 }

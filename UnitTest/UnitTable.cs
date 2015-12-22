@@ -22,11 +22,11 @@ namespace UnitTest
 
             db.Insert(user);
 
-            int n = db.Select<User>().ToList().Count;
+            DataSet ds = db.From<User>().Result();
              
             db.Close();
 
-            Assert.IsTrue(n > 0);
+            Assert.IsNotNull(ds);
         }
     }
 }

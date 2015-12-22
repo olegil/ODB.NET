@@ -16,13 +16,13 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            IQuery<Book> q = db.Select<Book>(new[] { "T1.*" }).As("T1").LeftJoin<User>().As("T2").On("T1.UserId").Equal("T2.Id");
+            IQuery<Book> q = db.From<Book>(new[] { "T1.*" }).As("T1").LeftJoin<User>().As("T2").On("T1.UserId = T2.Id");
 
-            DataTable dt = db.ExecuteDataSet(q).Tables[0];
+            DataSet ds  = q.Result();
 
             db.Close();
 
-            Assert.IsNotNull(dt);
+            Assert.IsTrue(ds != null);
         }
     }
 }

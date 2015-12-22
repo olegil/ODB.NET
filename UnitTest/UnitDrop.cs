@@ -14,7 +14,7 @@ namespace UnitTest
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
             //db.Drop<User>();
-            db.Drop<Book>();
+            db.Remove<Book>();
             //db.Drop<Address>();
 
             //db.Create<User>();

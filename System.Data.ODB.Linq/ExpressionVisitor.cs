@@ -10,8 +10,30 @@ namespace System.Data.ODB.Linq
 {
     public abstract class ExpressionVisitor
     {
+        private StringBuilder sb;
+ 
+        public string SQL
+        {
+            get
+            {
+                return this.sb.ToString();
+            }
+        }
+
+        public List<IDbDataParameter> Parameters { get; set; }
+
         protected ExpressionVisitor()
         {
+            this.sb = new StringBuilder();
+
+            this.Parameters = new List<IDbDataParameter>();            
+        }
+
+        public abstract IDbDataParameter BindParam(string name, object b);
+
+        protected void Add(string str)
+        {
+            this.sb.Append(str);
         }
 
         protected virtual Expression Visit(Expression exp)
@@ -363,6 +385,6 @@ namespace System.Data.ODB.Linq
                 return Expression.Invoke(expr, args);
             }
             return iv;
-        }
+        } 
     }
 }

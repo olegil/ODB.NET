@@ -46,7 +46,7 @@ namespace UnitTest
         {           
             this.Db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            QueryProvider provider = new DbQueryProvider(this.Db);
+            QueryProvider provider = new SQLiteProvider(this.Db);
 
             this.Users = new QueryTable<User>(provider);
         }

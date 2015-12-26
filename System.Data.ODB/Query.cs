@@ -8,7 +8,7 @@ namespace System.Data.ODB
     public abstract class Query<T> : IQuery<T> 
         where T : IEntity
     {
-        public StringBuilder _sb;
+        protected StringBuilder _sb;
 
         private string _table;
 
@@ -281,6 +281,13 @@ namespace System.Data.ODB
             return this.Bind(val);
         }
 
+        public virtual IQuery<T> Not(string str)
+        {
+            this._sb.Append(" NOT ");
+
+            return this;
+        }
+
         public virtual IQuery<T> Like(string str)
         {
             this._sb.Append(" LIKE ");
@@ -318,9 +325,9 @@ namespace System.Data.ODB
             return this._db.Get<T>(this) as List<T>;
         }
 
-        public T1 Single<T1>()
+        public long Length()
         {
-            return this._db.ExecuteScalar<T1>(this);
+            return this._db.ExecuteScalar<Int64>(this);
         }
     }
 }

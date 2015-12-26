@@ -1,26 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
-using System.Threading.Tasks;
+using System.Data.SQLite;
 
 namespace System.Data.ODB.Linq
 {
-    public class QueryTranslator : ExpressionVisitor
-    {
-        StringBuilder sb;
-
-        public QueryTranslator()
+    public class SQLiteTranslator : ExpressionVisitor
+    { 
+        public SQLiteTranslator()
         {
         }
 
-        public string Translate(Expression expression)
+        public void Parse(Expression expression)
         {
-            this.sb = new StringBuilder();
-            this.Visit(expression);
+            //Type type = TypeSystem.GetElementType(expression.Type);
 
-            return this.sb.ToString();
+            this.Visit(expression); 
         }
 
         private static Expression StripQuotes(Expression e)
@@ -35,12 +30,14 @@ namespace System.Data.ODB.Linq
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
             if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
-            {
-                sb.Append("SELECT * FROM (");
+            {             
                 this.Visit(m.Arguments[0]);
-                sb.Append(") AS T WHERE ");
+                this.Add(" WHERE ");
+
                 LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
+
                 this.Visit(lambda.Body);
+
                 return m;
             }
             throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
@@ -51,7 +48,7 @@ namespace System.Data.ODB.Linq
             switch (u.NodeType)
             {
                 case ExpressionType.Not:
-                    sb.Append(" NOT ");
+                    this.Add(" NOT ");
                     this.Visit(u.Operand);
                     break;
                 default:
@@ -62,39 +59,39 @@ namespace System.Data.ODB.Linq
 
         protected override Expression VisitBinary(BinaryExpression b)
         {
-            sb.Append("(");
+            this.Add("(");
             this.Visit(b.Left);
             switch (b.NodeType)
             {
                 case ExpressionType.And:
-                    sb.Append(" AND ");
+                    this.Add(" AND ");
                     break;
                 case ExpressionType.Or:
-                    sb.Append(" OR");
+                    this.Add(" OR");
                     break;
                 case ExpressionType.Equal:
-                    sb.Append(" = ");
+                    this.Add(" = ");
                     break;
                 case ExpressionType.NotEqual:
-                    sb.Append(" <> ");
+                    this.Add(" <> ");
                     break;
                 case ExpressionType.LessThan:
-                    sb.Append(" < ");
+                    this.Add(" < ");
                     break;
                 case ExpressionType.LessThanOrEqual:
-                    sb.Append(" <= ");
+                    this.Add(" <= ");
                     break;
                 case ExpressionType.GreaterThan:
-                    sb.Append(" > ");
+                    this.Add(" > ");
                     break;
                 case ExpressionType.GreaterThanOrEqual:
-                    sb.Append(" >= ");
+                    this.Add(" >= ");
                     break;
                 default:
                     throw new NotSupportedException(string.Format("The binary operator '{0}' is not supported", b.NodeType));
             }
             this.Visit(b.Right);
-            sb.Append(")");
+            this.Add(")");
             return b;
         }
 
@@ -104,28 +101,30 @@ namespace System.Data.ODB.Linq
             if (q != null)
             {
                 // assume constant nodes w/ IQueryables are table references
-                sb.Append("SELECT * FROM ");
-                sb.Append(q.ElementType.Name);
+                this.Add("SELECT * FROM ");
+                this.Add(q.ElementType.Name);
             }
             else if (c.Value == null)
             {
-                sb.Append("NULL");
+                this.Add("NULL");
             }
             else {
                 switch (Type.GetTypeCode(c.Value.GetType()))
                 {
                     case TypeCode.Boolean:
-                        sb.Append(((bool)c.Value) ? 1 : 0);
+                        this.Add(((bool)c.Value) ? "1" : "0");
                         break;
-                    case TypeCode.String:
-                        sb.Append("'");
-                        sb.Append(c.Value);
-                        sb.Append("'");
-                        break;
+                    case TypeCode.String:                        
                     case TypeCode.Object:
-                        throw new NotSupportedException(string.Format("The constant for '{0}' is not supported", c.Value));
+                        string name = "@p" + Parameters.Count;
+
+                        this.Add(name);
+                        this.BindParam(name, c.Value);
+
+                        break;
                     default:
-                        sb.Append(c.Value);
+                        this.Add(c.Value.ToString());
+
                         break;
                 }
             }
@@ -136,10 +135,24 @@ namespace System.Data.ODB.Linq
         {
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
-                sb.Append(m.Member.Name);
+                this.Add(m.Member.Name);
                 return m;
             }
             throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
+        }
+
+        public override IDbDataParameter BindParam(string name, object b)
+        {
+            SQLiteParameter p = new SQLiteParameter();
+
+            p.ParameterName = name;
+            p.Value = b;
+            //p.Size = attr.Size;
+            p.DbType = MappingHelper.TypeConvert(b);
+
+            this.Parameters.Add(p);
+
+            return p;
         }
     }
 }

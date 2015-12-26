@@ -36,6 +36,7 @@ namespace System.Data.ODB
         IQuery<T> Lt(object val);
         IQuery<T> Gte(object val);
         IQuery<T> Lte(object val);
+        IQuery<T> Not(string str);
         IQuery<T> Like(string str);
         IQuery<T> Set(string[] cols);
         IQuery<T> Count(string str);
@@ -53,6 +54,6 @@ namespace System.Data.ODB
 
         List<T> ToList();
 
-        T Single<T>();
+        long Length();
     }
 }

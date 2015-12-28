@@ -7,18 +7,21 @@ namespace System.Data.ODB.SQLite
 {
     public class SQLiteProvider : QueryProvider
     {
-        private SQLiteTranslator trans;
-
         public SQLiteProvider(IDbContext db) : base(db)
         {
-            this.trans = new SQLiteTranslator();
         }     
 
         public override object Execute(Expression expression)
         {
-            this.trans.Parse(expression);
+            Type elementType = TypeSystem.GetElementType(expression.Type);
+         
+            SQLiteParser parser = new SQLiteParser();
 
-            return this.Db.ExecuteReader(this.trans.SQL, this.trans.Parameters.ToArray());
+            parser.Translate(expression);
+
+            IDataReader sr = this.Db.ExecuteReader(parser.ToString(), parser.Parameters.ToArray());
+ 
+            return Activator.CreateInstance(typeof(SQLiteReader<>).MakeGenericType(elementType), sr); 
         }                
     }
 }

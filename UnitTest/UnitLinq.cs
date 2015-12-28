@@ -15,9 +15,9 @@ namespace UnitTest
         {
             MyRepository respo = new MyRepository();
 
-            IQueryable<User> query = from u in respo.Users
-                                    where u.Name == "Stephen"
-                                    select u;
+            var query = from u in respo.Users
+                        where u.Name == "Stephen"
+                        select u;
 
             List<User> list = query.ToList();
 

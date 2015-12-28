@@ -20,6 +20,8 @@ namespace UnitTest
             Book book = new Book() { UserId = 1, Release = DateTime.Now };
 
             int a = db.Insert(book);
+
+            int b = db.Insert(new User() { Name = "Stephen" });
            
             db.Close();
 

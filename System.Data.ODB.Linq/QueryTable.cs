@@ -13,7 +13,7 @@ namespace System.Data.ODB.Linq
         public IQueryProvider Provider { get; private set; }
         public Expression Expression { get; private set; }
 
-        public QueryTable(QueryProvider provider)
+        public QueryTable(QueryProvider provider) 
         {
             if (provider == null)
             {
@@ -52,12 +52,12 @@ namespace System.Data.ODB.Linq
         
         public IEnumerator<T> GetEnumerator()
         {
-            return (Provider.Execute<IEnumerable<T>>(Expression)).GetEnumerator();
+            return (this.Provider.Execute<IEnumerable<T>>(Expression)).GetEnumerator();
         }
         
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return (Provider.Execute<IEnumerable>(Expression)).GetEnumerator();
+            return (this.Provider.Execute<IEnumerable>(Expression)).GetEnumerator();
         }      
     }
 }

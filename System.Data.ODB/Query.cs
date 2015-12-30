@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
+using System.Collections;
 
 namespace System.Data.ODB
 {
@@ -319,7 +320,7 @@ namespace System.Data.ODB
         {
             return this._db.ExecuteDataSet(this);
         }
-
+ 
         public List<T> ToList()
         {
             return this._db.Get<T>(this) as List<T>;
@@ -328,6 +329,6 @@ namespace System.Data.ODB
         public long Length()
         {
             return this._db.ExecuteScalar<Int64>(this);
-        }
+        } 
     }
 }

@@ -46,7 +46,6 @@ namespace System.Data.ODB.Linq
             return this.Execute(expression);
         } 
 
-        public abstract object Execute(Expression expression);
-        
+        public abstract object Execute(Expression expression);        
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Data.ODB;
 using System.Data.ODB.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -21,7 +22,7 @@ namespace System.Data.ODB.SQLite
 
             IDataReader sr = this.Db.ExecuteReader(parser.ToString(), parser.Parameters.ToArray());
  
-            return Activator.CreateInstance(typeof(SQLiteReader<>).MakeGenericType(elementType), sr); 
+            return Activator.CreateInstance(typeof(EntityReader<>).MakeGenericType(elementType), sr); 
         }                
     }
 }

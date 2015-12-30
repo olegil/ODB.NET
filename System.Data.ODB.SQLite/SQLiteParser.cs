@@ -15,6 +15,8 @@ namespace System.Data.ODB.Linq
             get; private set;
         }
 
+        private int _length = 0;
+
         public SQLiteParser()
         {
             this.sb = new StringBuilder();
@@ -33,6 +35,7 @@ namespace System.Data.ODB.Linq
             {
                 e = ((UnaryExpression)e).Operand;
             }
+
             return e;
         }
 
@@ -49,6 +52,7 @@ namespace System.Data.ODB.Linq
 
                 return m;
             }
+
             throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
         }
 
@@ -60,16 +64,20 @@ namespace System.Data.ODB.Linq
                     this.sb.Append(" NOT ");
                     this.Visit(u.Operand);
                     break;
+
                 default:
                     throw new NotSupportedException(string.Format("The unary operator '{0}' is not supported", u.NodeType));
             }
+
             return u;
         }
 
         protected override Expression VisitBinary(BinaryExpression b)
         {
             this.sb.Append("(");
+
             this.Visit(b.Left);
+
             switch (b.NodeType)
             {
                 case ExpressionType.And:
@@ -99,8 +107,11 @@ namespace System.Data.ODB.Linq
                 default:
                     throw new NotSupportedException(string.Format("The binary operator '{0}' is not supported", b.NodeType));
             }
+
             this.Visit(b.Right);
+
             this.sb.Append(")");
+
             return b;
         }
 
@@ -120,7 +131,7 @@ namespace System.Data.ODB.Linq
             }
             else
             {
-                string name = "@p" + Parameters.Count;
+                string name = "@p" + this._length++;
 
                 this.sb.Append(name);
 
@@ -135,12 +146,14 @@ namespace System.Data.ODB.Linq
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
                 this.sb.Append(m.Member.Name);
+
                 return m;
             }
+
             throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
         }
 
-        public virtual IDbDataParameter BindParam(string name, object b)
+        private IDbDataParameter BindParam(string name, object b)
         {
             SQLiteParameter p = new SQLiteParameter();
 

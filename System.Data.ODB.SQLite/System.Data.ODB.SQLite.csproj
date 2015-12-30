@@ -68,7 +68,6 @@
     <Compile Include="SQLiteParser.cs" />
     <Compile Include="SQLiteQuery.cs" />
     <Compile Include="SQLiteContext.cs" />
-    <Compile Include="SQLiteReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Data.ODB.Linq\System.Data.ODB.Linq.csproj">

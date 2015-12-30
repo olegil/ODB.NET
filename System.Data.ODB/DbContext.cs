@@ -151,48 +151,23 @@ namespace System.Data.ODB
             {
                 return this.Get<T>(rdr);               
             }
-        }
+        } 
 
         public virtual IList<T> Get<T>(IDataReader rdr) where T : IEntity
-        {
+        {           
             IList<T> list = new List<T>();
 
-            string colName = "";
+            EntityReader<T> edr = new EntityReader<T>(rdr);
 
-            PropertyInfo[] propertys = typeof(T).GetProperties();
-             
-            while (rdr.Read())
+            foreach(T t in edr)
             {
-                T instance = Activator.CreateInstance<T>(); 
-
-                foreach (PropertyInfo pi in propertys)
-                {
-                    ColumnAttribute attr = MappingHelper.GetColumnAttribute(pi);
-
-                    if (attr != null)
-                    {
-                        colName = string.IsNullOrEmpty(attr.Name) ? pi.Name : attr.Name;
-
-                        object value = rdr[colName] == DBNull.Value ? null : rdr[colName];
- 
-                        pi.SetValue(instance, value, null);                         
-                    }
-
-                    if (pi.Name == "IsPersisted")
-                    {
-                        pi.SetValue(instance, true, null);
-                    }
-                }
-            
-                list.Add(instance); 
+                list.Add(t);
 
                 if (IsEntityTracking)
                 {
-                    this.DbState.Add(instance.EntityId, new EntityState(instance));
+                    this.DbState.Add(t.EntityId, new EntityState(t));
                 }
-            }
-
-            rdr.Close();
+            }            
             
             return list;
         }

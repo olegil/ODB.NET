@@ -52,6 +52,7 @@
     <Compile Include="MappingHelper.cs" />
     <Compile Include="Query.cs" />
     <Compile Include="Repository.cs" />
+    <Compile Include="EntityReader.cs" />
     <Compile Include="TableAttribute.cs" />
     <Compile Include="TableMapping.cs" />
   </ItemGroup>

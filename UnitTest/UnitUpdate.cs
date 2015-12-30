@@ -23,7 +23,7 @@ namespace UnitTest
 
             if (user != null)
             {
-                user.Name = "Good";
+                user.Name = "ABC";
 
                 ret = db.Update(user);
             }

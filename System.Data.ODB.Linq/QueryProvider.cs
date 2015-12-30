@@ -44,8 +44,21 @@ namespace System.Data.ODB.Linq
         object IQueryProvider.Execute(Expression expression)
         {
             return this.Execute(expression);
-        } 
+        }
 
-        public abstract object Execute(Expression expression);        
+        public abstract IQueryParser QueryParser();
+
+        public virtual object Execute(Expression expression)
+        {
+            Type elementType = TypeSystem.GetElementType(expression.Type);
+
+            IQueryParser parser = this.QueryParser();
+
+            parser.Translate(expression);
+
+            IDataReader sr = this.Db.ExecuteReader(parser.ToString(), parser.Parameters.ToArray());
+
+            return Activator.CreateInstance(typeof(EntityReader<>).MakeGenericType(elementType), sr);
+        }         
     }
 }

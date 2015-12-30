@@ -21,6 +21,7 @@ namespace System.Data.ODB
         public IEnumerator<T> GetEnumerator()
         {
             PropertyInfo[] propertys = typeof(T).GetProperties();
+
             while (this.sr.Read())
             {
                 T instance = Activator.CreateInstance<T>();
@@ -43,10 +44,10 @@ namespace System.Data.ODB
                     if (pi.Name == "IsPersisted")
                     {
                         pi.SetValue(instance, true, null);
-                    }
+                    }                    
+                }
 
-                    yield return instance;
-                }   
+                yield return instance;
             }
 
             this.sr.Close();

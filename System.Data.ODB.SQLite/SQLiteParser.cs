@@ -6,13 +6,13 @@ using System.Data.SQLite;
 
 namespace System.Data.ODB.Linq
 {
-    public class SQLiteParser : ExpressionVisitor
+    public class SQLiteParser : ExpressionVisitor, IQueryParser
     {
         private StringBuilder sb;
 
         public List<IDbDataParameter> Parameters
         {
-            get; private set;
+            get; set;
         }
 
         private int _length = 0;

@@ -158,8 +158,8 @@ namespace System.Data.ODB
             IList<T> list = new List<T>();
 
             EntityReader<T> edr = new EntityReader<T>(rdr);
-
-            foreach(T t in edr)
+           
+            foreach (T t in edr)
             {
                 list.Add(t);
 
@@ -167,7 +167,7 @@ namespace System.Data.ODB
                 {
                     this.DbState.Add(t.EntityId, new EntityState(t));
                 }
-            }            
+            }                                       
             
             return list;
         }

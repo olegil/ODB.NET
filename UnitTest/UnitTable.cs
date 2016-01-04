@@ -16,9 +16,10 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
+            db.Remove<User>();
             db.Create<User>();
 
-            User user = new User() { Name = "Stephen" };                   
+            User user = new User() { Name = "Stephen", Birthday = DateTime.Parse("1991/8/16") };                   
 
             db.Insert(user);
 

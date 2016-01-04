@@ -11,7 +11,10 @@ namespace UnitTest
         public Int64 Id { get; private set; }
 
         [Column]
-        public string Name { get; set; }        
+        public string Name { get; set; }
+
+        [Column]
+        public DateTime Birthday { get; set; }
     }
     
     public class Book : EntityBase

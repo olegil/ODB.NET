@@ -8,15 +8,16 @@ using System.Data.ODB.Linq;
 namespace UnitTest
 {
     [TestClass]
-    public class UnitLinq
+    public class UnitOrderBy
     {
         [TestMethod]
-        public void TestExpression()
+        public void TestOrder()
         {
             MyRepository respo = new MyRepository();
 
             var query = from u in respo.Users
-                        where u.Name.Contains("hen") || u.Name.StartsWith("Chan")
+                        where u.Name.Contains("hen")
+                        orderby u.Id ascending, u.Name descending                        
                         select u;
 
             string sql = query.ToString();

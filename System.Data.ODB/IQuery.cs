@@ -54,6 +54,8 @@ namespace System.Data.ODB
 
         List<T> ToList();
 
+        int Exec();
+
         long Length();
     }
 }

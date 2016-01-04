@@ -10,11 +10,28 @@ namespace System.Data.ODB.SQLite
     {
         public SQLiteProvider(IDbContext db) : base(db)
         {
-        }     
- 
-        public override IQueryParser QueryParser()
-        {
-            return new SQLiteParser();
         }
+
+        public override object Execute(Expression expression)
+        {
+            Type elementType = TypeSystem.GetElementType(expression.Type);
+
+            IQueryParser parser = new SQLiteParser();
+
+            parser.Translate(expression);
+
+            IDataReader sr = this.Db.ExecuteReader(parser.ToString(), parser.GetParamters());
+
+            return Activator.CreateInstance(typeof(EntityReader<>).MakeGenericType(elementType), sr);
+        }
+
+        public override string GetSQL(Expression expression)
+        {
+            IQueryParser parser = new SQLiteParser();
+
+            parser.Translate(expression);
+
+            return parser.ToString();
+        } 
     }
 }

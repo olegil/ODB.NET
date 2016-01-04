@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace System.Data.ODB.Linq
 {
-    public class QueryTable<T> : IQueryable<T>, IQueryable, IEnumerable<T>, IEnumerable
+    public class QueryTable<T> : IQueryable<T>, IQueryable, IOrderedQueryable<T>, IOrderedQueryable, IEnumerable<T>, IEnumerable
     {
-        public IQueryProvider Provider { get; private set; }
+        public QueryProvider Provider { get; private set; }
         public Expression Expression { get; private set; }
 
         public QueryTable(QueryProvider provider) 
@@ -48,16 +48,29 @@ namespace System.Data.ODB.Linq
         public Type ElementType
         {
             get { return typeof(T); }
-        }       
-        
+        }
+
+        IQueryProvider IQueryable.Provider
+        {
+            get
+            {
+                return this.Provider;
+            }
+        }
+
         public IEnumerator<T> GetEnumerator()
         {
-            return (this.Provider.Execute<IEnumerable<T>>(Expression)).GetEnumerator();
+            return ((IEnumerable<T>)this.Provider.Execute(Expression)).GetEnumerator();
         }
         
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return (this.Provider.Execute<IEnumerable>(Expression)).GetEnumerator();
-        }      
+            return ((IEnumerable)this.Provider.Execute(Expression)).GetEnumerator();
+        }
+
+        public override string ToString()
+        {
+            return this.Provider.GetSQL(this.Expression);  
+        }
     }
 }

@@ -167,8 +167,8 @@ namespace System.Data.ODB
                 {
                     this.DbState.Add(t.EntityId, new EntityState(t));
                 }
-            }                                       
-            
+            }
+ 
             return list;
         }
 

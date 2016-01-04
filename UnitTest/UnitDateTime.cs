@@ -8,15 +8,15 @@ using System.Data.ODB.Linq;
 namespace UnitTest
 {
     [TestClass]
-    public class UnitLinq
+    public class UnitDateTime
     {
         [TestMethod]
-        public void TestExpression()
+        public void TestDateTime()
         {
             MyRepository respo = new MyRepository();
 
             var query = from u in respo.Users
-                        where u.Name.Contains("hen") || u.Name.StartsWith("Chan")
+                        where u.Birthday <= DateTime.Now
                         select u;
 
             string sql = query.ToString();

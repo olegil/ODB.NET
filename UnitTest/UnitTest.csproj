@@ -57,9 +57,11 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Command.cs" />
+    <Compile Include="UnitDateTime.cs" />
     <Compile Include="UnitDrop.cs" />
     <Compile Include="UnitDelete.cs" />
     <Compile Include="UnitLinq.cs" />
+    <Compile Include="UnitOrderBy.cs" />
     <Compile Include="UnitTable.cs" />
     <Compile Include="UnitInsert.cs" />
     <Compile Include="UnitJoin.cs" />

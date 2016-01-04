@@ -325,6 +325,11 @@ namespace System.Data.ODB
         {
             return this._db.Get<T>(this) as List<T>;
         }
+        
+        public int Exec()
+        {
+            return this._db.ExecuteNonQuery(this);
+        }
 
         public long Length()
         {

@@ -9,7 +9,7 @@ namespace System.Data.ODB
 {
     public interface IQueryParser
     {
-        List<IDbDataParameter> Parameters { get; set; }
+        IDbDataParameter[] GetParamters();
 
         void Translate(Expression expression);
     }

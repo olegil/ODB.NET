@@ -6,16 +6,35 @@ namespace System.Data.ODB
 {
     public class EntityReader<T> : IEnumerable<T>, IDisposable where T : IEntity
     {
-        private IDataReader sr;      
+        private IDataReader sr;
+
+        private bool disposed = false;
 
         public EntityReader(IDataReader reader)
         {
             this.sr = reader;
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.disposed)
+            {
+                if (disposing)
+                {
+                    if (this.sr != null)
+                    {
+                        this.sr.Close();
+                    }
+                }
+            }
+
+            this.disposed = true;
+        }
+
         public void Dispose()
         {
-            this.sr.Close();
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         public IEnumerator<T> GetEnumerator()
@@ -45,12 +64,12 @@ namespace System.Data.ODB
                     {
                         pi.SetValue(instance, true, null);
                     }                    
-                }
+                } 
 
                 yield return instance;
             }
 
-            this.sr.Close();
+            this.Dispose();          
         }
 
         IEnumerator IEnumerable.GetEnumerator()

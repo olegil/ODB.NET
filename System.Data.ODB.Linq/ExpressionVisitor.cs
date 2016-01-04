@@ -422,6 +422,11 @@ namespace System.Data.ODB.Linq
             }
 
             return iv;
-        } 
+        }
+
+        protected virtual bool IsNullConstant(Expression exp)
+        {
+            return (exp.NodeType == ExpressionType.Constant && ((ConstantExpression)exp).Value == null);
+        }
     }
 }

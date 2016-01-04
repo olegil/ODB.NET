@@ -10,22 +10,25 @@ namespace System.Data.ODB.Linq
     {
         private StringBuilder sb;
 
-        public List<IDbDataParameter> Parameters
-        {
-            get; set;
-        }
-
+        private List<IDbDataParameter> ps;
+        List<string> orders;
+ 
         private int _length = 0;
 
         public SQLiteParser()
         {
             this.sb = new StringBuilder();
 
-            this.Parameters = new List<IDbDataParameter>();
+            this.orders = new List<string>();
+
+            this.ps = new List<IDbDataParameter>();
         }
 
         public void Translate(Expression expression)
-        { 
+        {
+            this.sb.Clear();
+            this.ps.Clear();
+
             this.Visit(expression); 
         }
 
@@ -44,16 +47,51 @@ namespace System.Data.ODB.Linq
             if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
             {             
                 this.Visit(m.Arguments[0]);
+
                 this.sb.Append(" WHERE ");
 
                 LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
 
-                this.Visit(lambda.Body);
-
-                return m;
+                this.Visit(lambda.Body);                               
             }
+            else if (m.Method.Name == "Contains")
+            {
+                this.Visit(m.Object);
 
-            throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
+                this.sb.Append(" LIKE ('%' || ");
+ 
+                this.Visit(m.Arguments[0]);
+
+                this.sb.Append(" || '%')");
+            }
+            else if (m.Method.Name == "StartsWith")
+            {
+                this.Visit(m.Object);
+
+                this.sb.Append(" LIKE (");
+                
+                this.Visit(m.Arguments[0]);
+
+                this.sb.Append(" || '%')");
+            }
+            else if (m.Method.Name == "EndsWith")
+            {
+                this.Visit(m.Object);
+
+                this.sb.Append(" LIKE ('%' || ");
+
+                this.Visit(m.Arguments[0]);
+
+                this.sb.Append(")");
+            }
+            else if (m.Method.Name == "OrderBy")
+            {
+                 
+            }
+            else 
+                throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
+
+            return m;            
         }
 
         protected override Expression VisitUnary(UnaryExpression u)
@@ -73,45 +111,47 @@ namespace System.Data.ODB.Linq
         }
 
         protected override Expression VisitBinary(BinaryExpression b)
-        {
-            this.sb.Append("(");
-
+        {            
             this.Visit(b.Left);
 
             switch (b.NodeType)
-            {
-                case ExpressionType.And:
-                    this.sb.Append(" AND ");
-                    break;
-                case ExpressionType.Or:
-                    this.sb.Append(" OR");
-                    break;
+            {               
+                case ExpressionType.AndAlso:
+                        this.sb.Append(" AND ");
+                        break;
+                case ExpressionType.OrElse:
+                        this.sb.Append(" OR ");
+                     break;
                 case ExpressionType.Equal:
-                    this.sb.Append(" = ");
-                    break;
+                        if (IsNullConstant(b.Right))
+                            this.sb.Append(" IS ");
+                        else
+                            this.sb.Append(" = ");
+                        break;
                 case ExpressionType.NotEqual:
-                    this.sb.Append(" <> ");
-                    break;
+                        if (IsNullConstant(b.Right))
+                            this.sb.Append(" IS NOT ");
+                        else
+                            this.sb.Append(" <> ");
+                        break;
                 case ExpressionType.LessThan:
-                    this.sb.Append(" < ");
-                    break;
+                        this.sb.Append(" < ");
+                        break;
                 case ExpressionType.LessThanOrEqual:
-                    this.sb.Append(" <= ");
-                    break;
+                        this.sb.Append(" <= ");
+                        break;
                 case ExpressionType.GreaterThan:
-                    this.sb.Append(" > ");
-                    break;
+                        this.sb.Append(" > ");
+                        break;
                 case ExpressionType.GreaterThanOrEqual:
-                    this.sb.Append(" >= ");
-                    break;
+                        this.sb.Append(" >= ");
+                        break;
                 default:
                     throw new NotSupportedException(string.Format("The binary operator '{0}' is not supported", b.NodeType));
             }
 
             this.Visit(b.Right);
-
-            this.sb.Append(")");
-
+ 
             return b;
         }
 
@@ -145,12 +185,16 @@ namespace System.Data.ODB.Linq
         {
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
-                this.sb.Append(m.Member.Name);
-
-                return m;
+                this.sb.Append(m.Member.Name);               
             }
-
-            throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
+            else if (m.Type == typeof(DateTime))
+            {
+                this.sb.Append("datetime()");
+            }
+            else
+                throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
+            
+            return m;           
         }
 
         private IDbDataParameter BindParam(string name, object b)
@@ -162,14 +206,19 @@ namespace System.Data.ODB.Linq
             //p.Size = attr.Size;
             p.DbType = MappingHelper.TypeConvert(b);
 
-            this.Parameters.Add(p);
+            this.ps.Add(p);
 
             return p;
-        }
+        } 
 
         public override string ToString()
         {
             return this.sb.ToString();
+        }
+
+        public IDbDataParameter[] GetParamters()
+        {
+            return this.ps.ToArray();
         }
     }
 }

@@ -9,25 +9,23 @@ namespace System.Data.ODB.Linq
     public class SQLiteParser : ExpressionVisitor, IQueryParser
     {
         private StringBuilder sb;
-
         private List<IDbDataParameter> ps;
-        List<string> orders;
- 
+        private bool _limit = false;     
         private int _length = 0;
 
         public SQLiteParser()
         {
-            this.sb = new StringBuilder();
-
-            this.orders = new List<string>();
-
-            this.ps = new List<IDbDataParameter>();
+            this.sb = new StringBuilder();        
+            this.ps = new List<IDbDataParameter>(); 
         }
 
         public void Translate(Expression expression)
         {
             this.sb.Clear();
             this.ps.Clear();
+
+            this._length = 0;
+            this._limit = false;
 
             this.Visit(expression); 
         }
@@ -43,51 +41,143 @@ namespace System.Data.ODB.Linq
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
-        {
+        {           
             if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
             {             
                 this.Visit(m.Arguments[0]);
-
                 this.sb.Append(" WHERE ");
-
                 LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
-
                 this.Visit(lambda.Body);                               
+            }
+            else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Select")
+            {
+                this.Visit(m.Arguments[0]);
+                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);                
+                this.Visit(lambda.Body);
+            }
+            else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Skip")
+            {
+                this.Visit(m.Arguments[0]);
+                if (!this._limit)
+                {
+                    this.sb.Append(" LIMIT ");
+
+                    this._limit = true;
+                }
+                else
+                {
+                    this.sb.Append(" OFFSET ");
+                }
+                this.Visit(m.Arguments[1]);
+            }
+            else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Take")
+            {
+                this.Visit(m.Arguments[0]);
+                if (!this._limit)
+                {
+                    this.sb.Append(" LIMIT ");
+
+                    this._limit = true;
+                }
+                else
+                {
+                    this.sb.Append(", ");
+                }
+                this.Visit(m.Arguments[1]);
+            }
+            else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "OrderBy")
+            {
+                this.Visit(m.Arguments[0]);
+                this.sb.Append(" ORDER BY ");
+                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]); 
+                this.Visit(lambda.Body);
+            }
+            else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "OrderByDescending")
+            {
+                this.Visit(m.Arguments[0]);
+                this.sb.Append(" ORDER BY ");                
+                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);                 
+                this.Visit(lambda.Body);
+                this.sb.Append(" DESC");
+            }
+            else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "ThenBy")
+            {
+                this.Visit(m.Arguments[0]);
+                this.sb.Append(", ");
+                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]); 
+                this.Visit(lambda.Body);
+            }
+            else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "ThenByDescending")
+            {
+                this.Visit(m.Arguments[0]);
+                this.sb.Append(", ");
+                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
+                this.Visit(lambda.Body);
+                this.sb.Append(" DESC");
             }
             else if (m.Method.Name == "Contains")
             {
                 this.Visit(m.Object);
-
-                this.sb.Append(" LIKE ('%' || ");
- 
+                this.sb.Append(" LIKE ('%' || "); 
                 this.Visit(m.Arguments[0]);
-
                 this.sb.Append(" || '%')");
             }
             else if (m.Method.Name == "StartsWith")
             {
                 this.Visit(m.Object);
-
-                this.sb.Append(" LIKE (");
-                
+                this.sb.Append(" LIKE (");                
                 this.Visit(m.Arguments[0]);
-
                 this.sb.Append(" || '%')");
             }
             else if (m.Method.Name == "EndsWith")
             {
                 this.Visit(m.Object);
-
                 this.sb.Append(" LIKE ('%' || ");
-
                 this.Visit(m.Arguments[0]);
-
                 this.sb.Append(")");
             }
-            else if (m.Method.Name == "OrderBy")
+            else if (m.Method.Name == "Equals")
             {
-                 
+                this.Visit(m.Object);
+                this.sb.Append(" = ");
+                this.Visit(m.Arguments[0]);
             }
+            else if (m.Method.Name == "Trim")
+            {
+                this.sb.Append(" TRIM(");
+                this.Visit(m.Object);
+                this.sb.Append(")");
+            }
+            else if (m.Method.Name == "ToLower")
+            {
+                this.sb.Append(" LOWER(");
+                this.Visit(m.Object);
+                this.sb.Append(")");
+            }
+            else if (m.Method.Name == "ToUpper")
+            {
+                this.sb.Append(" UPPER(");
+                this.Visit(m.Object);
+                this.sb.Append(")");
+            }          
+            else if (m.Method.Name == "IndexOf")
+            {
+                this.sb.Append(" INSTR(");
+                this.Visit(m.Object);
+                this.sb.Append(", ");
+                this.Visit(m.Arguments[0]);
+                this.sb.Append(")");
+            }
+            else if (m.Method.Name == "Substring")
+            {
+                this.sb.Append(" SUBSTR(");
+                this.Visit(m.Object);
+                this.sb.Append(", ");
+                this.Visit(m.Arguments[0]);
+                this.sb.Append(", ");
+                this.Visit(m.Arguments[1]);
+                this.sb.Append(")");
+            } 
             else 
                 throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
 
@@ -187,11 +277,25 @@ namespace System.Data.ODB.Linq
             {
                 this.sb.Append(m.Member.Name);               
             }
-            else if (m.Type == typeof(DateTime))
+            else if (m.Member.DeclaringType == typeof(DateTime))
             {
-                this.sb.Append("datetime()");
+                if (m.Member.Name == "Now")
+                {
+                    this.sb.Append("datetime()");
+                }
             }
-            else
+            else if (m.Member.DeclaringType == typeof(string))
+            {
+                if (m.Member.Name == "Length")
+                {
+                    this.sb.Append("LENGTH(");
+
+                    this.Visit(m.Expression);
+
+                    this.sb.Append(")");
+                }
+            }
+            else 
                 throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
             
             return m;           

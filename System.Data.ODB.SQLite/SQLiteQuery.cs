@@ -18,9 +18,7 @@ namespace System.Data.ODB.SQLite
             p.ParameterName = "@" + name;
             p.Value = b;
             //p.Size = attr.Size;
-            p.DbType = MappingHelper.TypeConvert(b);
-
-            this.Parameters.Add(p);
+            p.DbType = MappingHelper.TypeConvert(b);          
 
             return p;
         }

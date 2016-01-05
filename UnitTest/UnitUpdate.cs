@@ -15,7 +15,7 @@ namespace UnitTest
 
             db.IsEntityTracking = true;
 
-            db.Insert(new User() { Name = "Peter" });
+            db.Insert(new User() { Name = "Peter", Birthday = DateTime.Now });
 
             User user = db.From<User>().First();
 

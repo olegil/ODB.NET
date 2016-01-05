@@ -9,14 +9,48 @@ namespace UnitTest
 {
     [TestClass]
     public class UnitLinq
-    {
+    {         
         [TestMethod]
         public void TestExpression()
         {
             MyRepository respo = new MyRepository();
 
             var query = from u in respo.Users
-                        where u.Name.Contains("hen") || u.Name.StartsWith("Chan")
+                        select u;
+
+            string sql = query.ToString();
+
+            List<User> users = query.ToList();
+
+            respo.Dispose();
+        }        
+
+        [TestMethod]
+        public void TestLinq()
+        {
+            MyRepository respo = new MyRepository();
+
+            var query = from u in respo.Users
+                        where u.Name.Contains("hen") || u.Name.Length > 2 || u.Name.Trim() == "avsd" || u.Name != null && u.Name.ToLower() == "haweg" || u.Name.Equals("gasdhasdh")
+                        select u; 
+
+            string sql = query.ToString();
+
+            List<User> list = query.ToList();
+
+            respo.Dispose();
+
+            Assert.IsTrue(list.Count > 0);
+        }
+
+        [TestMethod]
+        public void TestString()
+        {
+            MyRepository respo = new MyRepository();
+
+            var query = from u in respo.Users
+                        where u.Name.IndexOf('t') > 0 || u.Name.Substring(2, 4) == "abc"
+                        orderby u.Id, u.Name descending
                         select u;
 
             string sql = query.ToString();

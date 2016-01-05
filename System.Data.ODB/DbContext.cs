@@ -195,11 +195,13 @@ namespace System.Data.ODB
             {
                 if (!col.Attribute.IsAuto)
                 {
-                    IDbDataParameter p = query.BindParam("p" + n, col.Value, col.Attribute);
+                    IDbDataParameter pr = query.BindParam("p" + n, col.Value, col.Attribute);
 
                     fields.Add(col.Name);
 
-                    ps.Add(p.ParameterName);
+                    ps.Add(pr.ParameterName);
+
+                    query.Parameters.Add(pr);
 
                     n++;
                 }                
@@ -241,6 +243,8 @@ namespace System.Data.ODB
 
                     fields.Add(col.Name + " = " + pr.ParameterName);
 
+                    query.Parameters.Add(pr);
+
                     n++;
                 }
             }
@@ -248,17 +252,19 @@ namespace System.Data.ODB
             {
                 if (this.DbState.ContainsKey(t.EntityId))
                 {
-                    EntityState au = this.DbState[t.EntityId];
+                    EntityState state = this.DbState[t.EntityId];
 
                     int n = 0;
 
                     foreach (ColumnMapping col in table.Columns)
                     {
-                        if (au.IsModified(col.Name, col.Value))
+                        if (state.IsModified(col.Name, col.Value))
                         {
                             IDbDataParameter pr = query.BindParam("p" + n, col.Value, col.Attribute);
 
                             fields.Add(col.Name + " = " + pr.ParameterName);
+
+                            query.Parameters.Add(pr);
 
                             n++;
                         }

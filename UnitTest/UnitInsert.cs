@@ -21,7 +21,7 @@ namespace UnitTest
 
             int a = db.Insert(book);
 
-            int b = db.Insert(new User() { Name = "Stephen" });
+            int b = db.Insert(new User() { Name = "Peter", Birthday = DateTime.Now });
            
             db.Close();
 

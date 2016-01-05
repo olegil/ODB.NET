@@ -15,9 +15,7 @@ namespace System.Data.ODB
 
         protected IDbContext _db;
 
-        public List<IDbDataParameter> Parameters { get; set; }
-
-        private int _count = 0;
+        public List<IDbDataParameter> Parameters { get; set; } 
 
         public Query(IDbContext db)
         {
@@ -298,12 +296,14 @@ namespace System.Data.ODB
 
         public virtual IQuery<T> Bind(object b)
         {
-            string name = "p" + this._count++;
+            string name = "p" + this.Parameters.Count; 
 
             IDbDataParameter p = this.BindParam(name, b, null);
 
             this._sb.Append(p.ParameterName);
-            
+
+            this.Parameters.Add(p);
+
             return this;
         }
 

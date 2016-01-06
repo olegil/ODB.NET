@@ -114,7 +114,7 @@ namespace System.Data.ODB.Linq
                 LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
                 this.Visit(lambda.Body);
                 this.sb.Append(" DESC");
-            }
+            }          
             else if (m.Method.Name == "Contains")
             {
                 this.Visit(m.Object);

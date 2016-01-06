@@ -62,6 +62,7 @@
     <Compile Include="UnitDelete.cs" />
     <Compile Include="UnitLinq.cs" />
     <Compile Include="UnitOrderBy.cs" />
+    <Compile Include="UnitReturnId.cs" />
     <Compile Include="UnitTable.cs" />
     <Compile Include="UnitInsert.cs" />
     <Compile Include="UnitJoin.cs" />

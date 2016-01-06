@@ -61,5 +61,21 @@ namespace UnitTest
 
             Assert.IsTrue(list.Count > 0);
         }
+
+        [TestMethod]
+        public void TestLingSelect()
+        {
+            MyRepository respo = new MyRepository();
+
+            var query = respo.Users.Select(p => p);
+                        
+            string sql = query.ToString();
+
+            List<User> list = query.ToList();
+
+            respo.Dispose();
+
+            Assert.IsTrue(list.Count > 0);
+        }
     }
 }

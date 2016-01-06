@@ -15,14 +15,13 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            //db.Create<Book>();
+            db.Clear<User>();
+            db.Clear<Address>();
 
-            Book book = new Book() { UserId = 1, Release = DateTime.Now };
-
-            int a = db.Insert(book);
-
-            int b = db.Insert(new User() { Name = "Peter", Birthday = DateTime.Now });
-           
+            User user = new User() { Name = "Peter", Birthday = DateTime.Now, Address = new Address() { Flat = "64", Street = "Queen Road", City = "HK" } };
+                    
+            int a = db.Insert(user);
+ 
             db.Close();
 
             Assert.IsTrue(a > 0);

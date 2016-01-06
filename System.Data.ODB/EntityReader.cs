@@ -51,7 +51,7 @@ namespace System.Data.ODB
                 {
                     ColumnAttribute attr = MappingHelper.GetColumnAttribute(pi);
 
-                    if (attr != null)
+                    if (attr != null && !attr.IsForeignkey)
                     {
                         colName = string.IsNullOrEmpty(attr.Name) ? pi.Name : attr.Name;
 

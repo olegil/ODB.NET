@@ -18,11 +18,7 @@ namespace UnitTest
 
             db.Remove<User>();
             db.Create<User>();
-
-            User user = new User() { Name = "Stephen", Birthday = DateTime.Parse("1991/8/16") };                   
-
-            db.Insert(user);
-
+             
             DataSet ds = db.From<User>().Result();
              
             db.Close();

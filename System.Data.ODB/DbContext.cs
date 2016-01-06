@@ -165,7 +165,7 @@ namespace System.Data.ODB
 
                 if (IsEntityTracking)
                 {
-                    this.DbState.Add(t.EntityId, new EntityState(t));
+                    this.DbState.Add(t.ObjectId, new EntityState(t));
                 }
             }
  
@@ -177,31 +177,54 @@ namespace System.Data.ODB
         /// </summary>
         public virtual int Insert<T>(T t) where T : IEntity
         {
-            if (t == null)
+            if (t == null || t.IsPersisted)
             {
-                throw new Exception("No object to insert.");
+                return -1;
             }
              
             List<string> fields = new List<string>();
             List<string> ps = new List<string>();
- 
-            TableMapping table = MappingHelper.Create(t);
 
+            TableMapping table = MappingHelper.Create(t);
+          
             IQuery<T> query = this.Query<T>();
 
+            query.Table = table.Name;
+
             int n = 0;
+
+            string colName = "";
+            IDbDataParameter pr;
+
+            Type type = t.GetType();
 
             foreach (ColumnMapping col in table.Columns)
             {
                 if (!col.Attribute.IsAuto)
                 {
-                    IDbDataParameter pr = query.BindParam("p" + n, col.Value, col.Attribute);
+                    colName = col.Name;
 
-                    fields.Add(col.Name);
+                    if (!col.Attribute.IsForeignkey)
+                    {
+                        pr = query.BindParam("p" + n, col.Value, col.Attribute);                                        
+                    }
+                    else
+                    {
+                        colName += "Id";
+
+                        long i = this.InsertReturnId(col.Value as IEntity);
+                            
+                        if (i > 0)
+                            pr = query.BindParam("p" + n, i, col.Attribute); 
+                        else 
+                            pr = query.BindParam("p" + n, null, col.Attribute);
+                    }
+
+                    fields.Add(colName);
 
                     ps.Add(pr.ParameterName);
 
-                    query.Parameters.Add(pr);
+                    query.Parameters.Add(pr);      
 
                     n++;
                 }                
@@ -212,6 +235,8 @@ namespace System.Data.ODB
             return this.ExecuteNonQuery(query); 
         }
 
+        public abstract long InsertReturnId<T>(T t) where T : IEntity;
+        
         /// <summary>
         /// Update object
         /// </summary>
@@ -219,7 +244,7 @@ namespace System.Data.ODB
         {
             if (t == null || !t.IsPersisted)
             {
-                throw new Exception("No object to update.");
+                return -1;
             }
 
             TableMapping table = MappingHelper.Create(t);
@@ -233,45 +258,31 @@ namespace System.Data.ODB
 
             IQuery<T> query = this.Query<T>();
 
-            if (!this.IsEntityTracking)
+            query.Table = table.Name;
+           
+            int n = 0;
+
+            foreach (ColumnMapping col in table.Columns)
             {
-                int n = 0;
-
-                foreach (ColumnMapping col in table.Columns)
+                if (col.Attribute.IsForeignkey)
                 {
-                    IDbDataParameter pr = query.BindParam("p" + n, col.Value, col.Attribute);
+                    this.Update(col.Value as IEntity);
+                }
+                else
+                {
+                    if (!col.Attribute.IsPrimaryKey)
+                    {
+                        IDbDataParameter pr = query.BindParam("p" + n, col.Value, col.Attribute);
 
-                    fields.Add(col.Name + " = " + pr.ParameterName);
+                        fields.Add(col.Name + " = " + pr.ParameterName);
 
-                    query.Parameters.Add(pr);
+                        query.Parameters.Add(pr);
 
-                    n++;
+                        n++;
+                    }
                 }
             }
-            else
-            {
-                if (this.DbState.ContainsKey(t.EntityId))
-                {
-                    EntityState state = this.DbState[t.EntityId];
-
-                    int n = 0;
-
-                    foreach (ColumnMapping col in table.Columns)
-                    {
-                        if (state.IsModified(col.Name, col.Value))
-                        {
-                            IDbDataParameter pr = query.BindParam("p" + n, col.Value, col.Attribute);
-
-                            fields.Add(col.Name + " = " + pr.ParameterName);
-
-                            query.Parameters.Add(pr);
-
-                            n++;
-                        }
-                    }
-                }               
-            } 
-
+         
             if (fields.Count > 0)
             {
                 query.Update().Set(fields.ToArray()).Where(colKey.Name).Eq(colKey.Value);
@@ -401,7 +412,7 @@ namespace System.Data.ODB
 
             int n = cmd.ExecuteNonQuery();
             cmd.Parameters.Clear();
- 
+             
             return n;
         }
 

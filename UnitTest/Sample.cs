@@ -4,7 +4,7 @@ using System.Data.ODB.Linq;
 using System.Data.ODB.SQLite;
 
 namespace UnitTest
-{
+{   
     public class User : EntityBase
     {
         [Column(IsPrimaryKey = true, IsAuto = true, IsNullable = false)]
@@ -15,31 +15,39 @@ namespace UnitTest
 
         [Column]
         public DateTime Birthday { get; set; }
-    }
-    
-    public class Book : EntityBase
-    {
-        [Column(IsPrimaryKey = true, IsAuto = true, IsNullable = false)]
-        public Int64 Id { get; private set; }
 
-        [Column]
-        public Int64 UserId { get; set; }
-       
-        [Column]
-        public DateTime Release { get; set; }        
+        [Column(IsForeignkey = true)]
+        public Address Address { get; set; }
     }
- 
+      
     public class Address : EntityBase
     {
         [Column(IsPrimaryKey = true, IsAuto = true, IsNullable = false)]
         public Int64 Id { get; private set; }
 
         [Column]
-        public int Flat { get; set; }
+        public string Flat { get; set; }
 
         [Column]
         public string Street { get; set; }
+
+        [Column]
+        public string City { get; set; }
     }
+
+    public class Book : EntityBase
+    {
+        [Column(IsPrimaryKey = true, IsAuto = true, IsNullable = false)]
+        public Int64 Id { get; private set; }
+
+        public User User { get; set; }
+
+        [Column]
+        public string ISBN { get; set; }
+
+        [Column]
+        public DateTime Release { get; set; }        
+    } 
 
     public class MyRepository : Repository
     {

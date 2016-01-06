@@ -4,12 +4,12 @@ namespace System.Data.ODB
 {
     public abstract class EntityBase : IEntity
     {  
-        public virtual string EntityId { get; private set; }
+        public virtual string ObjectId { get; private set; }
         public virtual bool IsPersisted { get; protected set; }
-
+         
         public EntityBase()
         {
-            this.EntityId = this.GetHashCode().ToString();            
+            this.ObjectId = this.GetHashCode().ToString();            
         }      
 
         public IEntity Copy()

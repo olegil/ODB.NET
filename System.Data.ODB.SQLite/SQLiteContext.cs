@@ -47,6 +47,14 @@ namespace System.Data.ODB.SQLite
 
             //return the dataset
             return ds;
-        }       
+        }
+
+        public override long InsertReturnId<T>(T t)
+        {
+            if (this.Insert(t) > 0)
+                return (this.Connection as SQLiteConnection).LastInsertRowId;
+
+            return -1;
+        }
     }
 }

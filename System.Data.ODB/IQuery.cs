@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace System.Data.ODB
 {
     public interface IQuery
-    {
+    { 
         IQuery Create();
         IQuery Drop();         
         IQuery Insert(string[] cols);
@@ -22,6 +22,8 @@ namespace System.Data.ODB
 
     public interface IQuery<T> : IQuery
     {
+        string Table { get; set; }
+
         IQuery<T> Delete();
         IQuery<T> Update();
         IQuery<T> Select(string str);        

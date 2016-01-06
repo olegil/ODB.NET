@@ -9,13 +9,13 @@ namespace System.Data.ODB
     public abstract class Query<T> : IQuery<T> 
         where T : IEntity
     {
-        protected StringBuilder _sb;
-
-        private string _table;
+        protected StringBuilder _sb; 
 
         protected IDbContext _db;
 
-        public List<IDbDataParameter> Parameters { get; set; } 
+        public List<IDbDataParameter> Parameters { get; set; }
+
+        public string Table { get; set; }
 
         public Query(IDbContext db)
         {
@@ -24,7 +24,7 @@ namespace System.Data.ODB
             this._sb = new StringBuilder();
             this.Parameters = new List<IDbDataParameter>();
  
-            this._table = MappingHelper.GetTableName(typeof(T));
+            this.Table = MappingHelper.GetTableName(typeof(T));
         }
 
         public virtual IQuery Create()
@@ -33,16 +33,28 @@ namespace System.Data.ODB
 
             List<string> fields = new List<string>();
 
+            string name = "";
+            string dbtype = "";
+            string col = "";
+
             foreach (PropertyInfo pi in type.GetProperties())
             {
                 ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
 
                 if (colAttr != null)
                 {
-                    string name = colAttr.Name == "" ? pi.Name : colAttr.Name;
-                    string dbtype = MappingHelper.DataConvert(pi.PropertyType);
+                    if (!colAttr.IsForeignkey)
+                    {
+                        name = colAttr.Name == "" ? pi.Name : colAttr.Name;
+                        dbtype = MappingHelper.DataConvert(pi.PropertyType);                    
+                    }
+                    else
+                    {
+                        name = colAttr.Name == "" ? pi.Name + "Id" : colAttr.Name;
+                        dbtype = MappingHelper.DataConvert(typeof(long)); 
+                    }
 
-                    string col = this.AddColumn(name, dbtype, colAttr);
+                    col = this.AddColumn(name, dbtype, colAttr);
 
                     fields.Add(col);
                 }
@@ -53,7 +65,7 @@ namespace System.Data.ODB
 
         public IQuery Create(string[] cols)
         {
-            this._sb.Append("CREATE TABLE IF NOT EXISTS \"" + this._table + "\" (\r\n");
+            this._sb.Append("CREATE TABLE IF NOT EXISTS \"" + this.Table + "\" (\r\n");
             this._sb.Append(string.Join(",\r\n", cols));
             this._sb.Append("\r\n);");
 
@@ -65,14 +77,14 @@ namespace System.Data.ODB
         public virtual IQuery Drop()
         {
             this._sb.Append("DROP TABLE IF EXISTS ");
-            this._sb.Append(this._table);
+            this._sb.Append(this.Table);
 
             return this;
         }
          
         public virtual IQuery Insert(string[] cols)
         {
-            this._sb.Append("INSERT INTO " + this._table);            
+            this._sb.Append("INSERT INTO " + this.Table);            
             this._sb.Append(" (");
             this._sb.Append(string.Join(", ", cols));
             this._sb.Append(")");                
@@ -92,7 +104,7 @@ namespace System.Data.ODB
         public virtual IQuery<T> Update()
         {
             this._sb.Append("UPDATE ");
-            this._sb.Append(this._table);
+            this._sb.Append(this.Table);
 
             return this;
         }
@@ -129,7 +141,7 @@ namespace System.Data.ODB
 
         public virtual IQuery<T> From()
         {
-            return From(this._table);
+            return From(this.Table);
         } 
 
         public virtual IQuery<T> Join<T1>() where T1 : IEntity

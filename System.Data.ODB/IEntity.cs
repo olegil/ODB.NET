@@ -4,7 +4,7 @@ namespace System.Data.ODB
 {
     public interface IEntity
     {
-        string EntityId { get; }
+        string ObjectId { get; }
         bool IsPersisted { get; }
         IEntity Copy();    
     }

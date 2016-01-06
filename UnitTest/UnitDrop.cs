@@ -13,13 +13,12 @@ namespace UnitTest
         {            
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            //db.Drop<User>();
+           
             db.Remove<Book>();
-            //db.Drop<Address>();
-
+          
             //db.Create<User>();
             db.Create<Book>();
-            //db.Create<Address>();
+            db.Create<Address>();
 
             bool a = true;
 

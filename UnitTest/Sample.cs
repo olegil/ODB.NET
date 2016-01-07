@@ -7,9 +7,6 @@ namespace UnitTest
 {   
     public class User : EntityBase
     {
-        [Column(IsPrimaryKey = true, IsAuto = true, IsNullable = false)]
-        public Int64 Id { get; private set; }
-
         [Column]
         public string Name { get; set; }
 
@@ -21,10 +18,7 @@ namespace UnitTest
     }
       
     public class Address : EntityBase
-    {
-        [Column(IsPrimaryKey = true, IsAuto = true, IsNullable = false)]
-        public Int64 Id { get; private set; }
-
+    { 
         [Column]
         public string Flat { get; set; }
 
@@ -37,9 +31,7 @@ namespace UnitTest
 
     public class Book : EntityBase
     {
-        [Column(IsPrimaryKey = true, IsAuto = true, IsNullable = false)]
-        public Int64 Id { get; private set; }
-
+        [Column(IsForeignkey = true)]
         public User User { get; set; }
 
         [Column]

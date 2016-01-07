@@ -18,12 +18,27 @@ namespace UnitTest
 
             db.Remove<User>();
             db.Create<User>();
-             
-            DataSet ds = db.From<User>().Result();
-             
+
+            db.Remove<Book>();
+            db.Create<Book>();
+ 
             db.Close();
 
-            Assert.IsNotNull(ds);
+            int a = 0;
+
+            Assert.IsTrue(a == 0);
+        }
+
+        [TestMethod]
+        public void TestClear()
+        {
+            SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
+
+            int a = db.Clear<User>();
+
+            db.Close();
+
+            Assert.IsTrue(a > 0);
         }
     }
 }

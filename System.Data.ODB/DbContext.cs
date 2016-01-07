@@ -7,9 +7,7 @@ namespace System.Data.ODB
     public abstract class DbContext : IDbContext, IDisposable       
     {         
         public bool IsEntityTracking { get; set; }
-         
-        public Dictionary<string, EntityState> DbState { get; private set; }
-
+      
         private bool disposed = false;
 
         protected virtual void Dispose(bool disposing)
@@ -42,9 +40,7 @@ namespace System.Data.ODB
         {
             this.Connection = DbConnection;
 
-            this.IsEntityTracking = false;
-
-            this.DbState = new Dictionary<string, EntityState>();
+            this.IsEntityTracking = false;            
         }
 
         public void Close()
@@ -161,15 +157,18 @@ namespace System.Data.ODB
            
             foreach (T t in edr)
             {
-                list.Add(t);
-
-                if (IsEntityTracking)
-                {
-                    this.DbState.Add(t.ObjectId, new EntityState(t));
-                }
+                list.Add(t);            
             }
  
             return list;
+        }
+
+        public int Store<T>(T t) where T : IEntity
+        {
+            if (t.IsPersisted)
+                return this.Update(t);
+
+            return this.Insert(t);
         }
 
         /// <summary>
@@ -192,8 +191,7 @@ namespace System.Data.ODB
             query.Table = table.Name;
 
             int n = 0;
-
-            string colName = "";
+                      
             IDbDataParameter pr;
 
             Type type = t.GetType();
@@ -201,33 +199,42 @@ namespace System.Data.ODB
             foreach (ColumnMapping col in table.Columns)
             {
                 if (!col.Attribute.IsAuto)
-                {
-                    colName = col.Name;
-
+                { 
                     if (!col.Attribute.IsForeignkey)
                     {
-                        pr = query.BindParam("p" + n, col.Value, col.Attribute);                                        
+                        pr = query.BindParam("p" + n, col.Value, col.Attribute);
                     }
                     else
-                    {
-                        colName += "Id";
+                    { 
+                        if (col.Value != null)
+                        {
+                            IEntity entry = col.Value as IEntity;
 
-                        long i = this.InsertReturnId(col.Value as IEntity);
-                            
-                        if (i > 0)
-                            pr = query.BindParam("p" + n, i, col.Attribute); 
-                        else 
+                            if (entry.IsPersisted)
+                            {                                
+                                pr = query.BindParam("p" + n, entry.Id, col.Attribute);
+                            }
+                            else
+                            {
+                                long i = this.InsertReturnId(entry);
+
+                                pr = query.BindParam("p" + n, i, col.Attribute);
+                            }
+                        }
+                        else
+                        {
                             pr = query.BindParam("p" + n, null, col.Attribute);
+                        }
                     }
 
-                    fields.Add(colName);
+                    fields.Add(col.Name);
 
                     ps.Add(pr.ParameterName);
 
                     query.Parameters.Add(pr);      
 
                     n++;
-                }                
+                }                           
             }
 
             query.Insert(fields.ToArray()).Values(ps.ToArray());         
@@ -261,26 +268,50 @@ namespace System.Data.ODB
             query.Table = table.Name;
            
             int n = 0;
+           
+            IDbDataParameter pr;
 
             foreach (ColumnMapping col in table.Columns)
             {
-                if (col.Attribute.IsForeignkey)
-                {
-                    this.Update(col.Value as IEntity);
-                }
-                else
-                {
-                    if (!col.Attribute.IsPrimaryKey)
-                    {
-                        IDbDataParameter pr = query.BindParam("p" + n, col.Value, col.Attribute);
+                if (!col.Attribute.IsPrimaryKey && !col.Attribute.IsAuto)
+                { 
+                    if (col.Attribute.IsForeignkey)
+                    {                    
+                        IEntity entry = col.Value as IEntity;
+ 
+                        if (entry == null)
+                        {
+                            this.Delete(col.Value as IEntity);
 
-                        fields.Add(col.Name + " = " + pr.ParameterName);
+                            pr = query.BindParam("p" + n, null, col.Attribute);
+                        }
+                        else
+                        {
+                            if (entry.IsPersisted)
+                            {
+                                this.Update(entry);
 
-                        query.Parameters.Add(pr);
+                                pr = query.BindParam("p" + n, entry.Id, col.Attribute);
+                            }
+                            else
+                            {
+                                long i = this.InsertReturnId(entry);
 
-                        n++;
+                                pr = query.BindParam("p" + n, i, col.Attribute);
+                            }
+                        }
                     }
-                }
+                    else
+                    {
+                        pr = query.BindParam("p" + n, col.Value, col.Attribute);
+                    }
+ 
+                    fields.Add(col.Name + " = " + pr.ParameterName);
+
+                    query.Parameters.Add(pr);
+
+                    n++;
+                } 
             }
          
             if (fields.Count > 0)
@@ -299,7 +330,7 @@ namespace System.Data.ODB
         public virtual int Delete<T>(T t) where T : IEntity
         {
             if (t == null || !t.IsPersisted)
-                return 0;
+                return -1;
 
             TableMapping table = MappingHelper.Create(t);
 
@@ -316,7 +347,7 @@ namespace System.Data.ODB
         }
 
         /// <summary>
-        /// Delete table
+        /// Delete all table data
         /// </summary>
         public virtual int Clear<T>() where T : IEntity
         {
@@ -325,6 +356,9 @@ namespace System.Data.ODB
             return this.ExecuteNonQuery(q);
         }
 
+        /// <summary>
+        /// Count table rows
+        /// </summary>
         public virtual IQuery<T> Count<T>() where T : IEntity
         {
             return this.Query<T>().Count("*").From();

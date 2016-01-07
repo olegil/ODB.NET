@@ -58,11 +58,10 @@
   <ItemGroup>
     <Compile Include="Command.cs" />
     <Compile Include="UnitDateTime.cs" />
-    <Compile Include="UnitDrop.cs" />
-    <Compile Include="UnitDelete.cs" />
     <Compile Include="UnitLinq.cs" />
     <Compile Include="UnitOrderBy.cs" />
     <Compile Include="UnitReturnId.cs" />
+    <Compile Include="UnitStore.cs" />
     <Compile Include="UnitTable.cs" />
     <Compile Include="UnitInsert.cs" />
     <Compile Include="UnitJoin.cs" />
@@ -70,11 +69,8 @@
     <Compile Include="UnitTake.cs" />
     <Compile Include="UnitTransaction.cs" />
     <Compile Include="Sample.cs" />
-    <Compile Include="UnitClear.cs" />
     <Compile Include="UnitCount.cs" />
     <Compile Include="UnitSelect.cs" />
-    <Compile Include="UnitUpdate.cs" />
-    <Compile Include="UnitWhere.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Data.ODB.Linq\System.Data.ODB.Linq.csproj">

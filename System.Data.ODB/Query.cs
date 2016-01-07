@@ -44,15 +44,15 @@ namespace System.Data.ODB
                 if (colAttr != null)
                 {
                     if (!colAttr.IsForeignkey)
-                    {
-                        name = colAttr.Name == "" ? pi.Name : colAttr.Name;
+                    {                         
                         dbtype = MappingHelper.DataConvert(pi.PropertyType);                    
                     }
                     else
-                    {
-                        name = colAttr.Name == "" ? pi.Name + "Id" : colAttr.Name;
+                    {                        
                         dbtype = MappingHelper.DataConvert(typeof(long)); 
                     }
+
+                    name = colAttr.Name == "" ? pi.Name : colAttr.Name;
 
                     col = this.AddColumn(name, dbtype, colAttr);
 

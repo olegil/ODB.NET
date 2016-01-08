@@ -26,8 +26,9 @@ namespace System.Data.ODB
 
         IQuery<T> Delete();
         IQuery<T> Update();
-        IQuery<T> Select(string str);        
+        IQuery<T> Select(string str);
         IQuery<T> From();
+        IQuery<T> From(string str);
         IQuery<T> Where(string str);
         IQuery<T> And(string str);
         IQuery<T> Or(string str);
@@ -55,9 +56,5 @@ namespace System.Data.ODB
         T First();
 
         List<T> ToList();
-
-        int Exec();
-
-        long Length();
     }
 }

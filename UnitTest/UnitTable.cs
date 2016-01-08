@@ -34,7 +34,7 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            int a = db.Clear<User>();
+            int a = db.Clear<Address>();
 
             db.Close();
 

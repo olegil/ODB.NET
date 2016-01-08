@@ -5,6 +5,8 @@ namespace System.Data.ODB
 {
     public interface IDbContext 
     {
+        int Depth { get; set; }
+
         int Create<T>() where T : IEntity;
 
         int Remove<T>() where T : IEntity;

@@ -4,8 +4,7 @@ namespace System.Data.ODB
 {
     public interface IEntity
     {
-        long Id { get; set; }
-        string ObjectId { get; }
+        long Id { get; set; }       
         bool IsPersisted { get; }
     }
 }

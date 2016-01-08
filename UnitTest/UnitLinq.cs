@@ -67,7 +67,7 @@ namespace UnitTest
         {
             MyRepository respo = new MyRepository();
 
-            var query = respo.Users.Select(p => p);
+            var query = respo.Users.Where(p => p.Name == "Chan");
                         
             string sql = query.ToString();
 

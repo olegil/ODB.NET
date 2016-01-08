@@ -15,25 +15,31 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            IQuery<Book> q = db.From<Book>();
+            db.Depth = 2;
 
-            List<Book> books = q.ToList();
+            Book book = new Book() { ISBN = "asdfaghsd", User = new User() { Name = "Joanne", Birthday = DateTime.Now, Address = new Address() { City = "HK", Flat = "7", Street = "Kings Road" } }, Release = DateTime.Now };
 
-            Assert.IsTrue(books.Count > 0);
+            db.Store(book);
+
+            IQuery<Book> q = db.Table<Book>();
+            
+            Book b = q.First();
+ 
+            Assert.IsTrue(b != null);
         }
 
         [TestMethod]
         public void TestWhere()
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
+             
+            IQuery<Book> q = db.Table<Book>().Where("Id").Gt(0);
 
-            IQuery<Book> q = db.From<Book>().Where("Id").Gt(0);
-
-            List<Book> books = q.ToList();
+            List<Book> list = q.ToList();
 
             db.Close();
 
-            Assert.IsTrue(books.Count > 0);
+            Assert.IsTrue(list.Count > 0);
         }
     }
 }

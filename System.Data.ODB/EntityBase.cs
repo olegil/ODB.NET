@@ -8,15 +8,11 @@ namespace System.Data.ODB
         [Column(IsPrimaryKey = true, IsAuto = true, IsNullable = false)]
         public long Id { get; set; }
 
-        //Object unique id
-        public string ObjectId { get; private set; }
-
         //Object state
         public bool IsPersisted { get; protected set; }
          
         public EntityBase()
-        {
-            this.ObjectId = this.GetHashCode().ToString();            
+        {  
         }    
     }
 }

@@ -13,7 +13,22 @@ namespace System.Data.ODB.SQLite
         public override IQuery<T> Query<T>()
         {
             return new SQLiteQuery<T>(this);
-        } 
+        }
+ 
+        public virtual long Count<T>() where T : IEntity
+        {
+            IQuery q = this.Query<T>().Count("*").From();
+
+            return this.ExecuteScalar<long>(q);
+        }
+
+        public override long InsertReturnId<T>(T t)
+        {
+            if (this.Insert(t) > 0)
+                return (this.Connection as SQLiteConnection).LastInsertRowId;
+
+            return -1;
+        }
 
         public override DataSet ExecuteDataSet(string sql, params IDbDataParameter[] commandParameters)
         {
@@ -47,14 +62,6 @@ namespace System.Data.ODB.SQLite
 
             //return the dataset
             return ds;
-        }
-
-        public override long InsertReturnId<T>(T t)
-        {
-            if (this.Insert(t) > 0)
-                return (this.Connection as SQLiteConnection).LastInsertRowId;
-
-            return -1;
-        }
+        } 
     }
 }

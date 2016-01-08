@@ -6,7 +6,7 @@ namespace System.Data.ODB
 {
     public abstract class DbContext : IDbContext, IDisposable       
     {         
-        public bool IsEntityTracking { get; set; }
+        public int Depth { get; set; }
       
         private bool disposed = false;
 
@@ -40,7 +40,7 @@ namespace System.Data.ODB
         {
             this.Connection = DbConnection;
 
-            this.IsEntityTracking = false;            
+            this.Depth = 1;            
         }
 
         public void Close()
@@ -128,16 +128,26 @@ namespace System.Data.ODB
         /// <summary>
         /// Select from Table
         /// </summary>
-        public virtual IQuery<T> From<T>() where T : IEntity
+        public virtual IQuery<T> Table<T>() where T : IEntity
         { 
-            return this.From<T>(new[] { "*" });
-        }
+            ColumnSelector csel = new ColumnSelector();
+            csel.Level = this.Depth;
 
-        public virtual IQuery<T> From<T>(string[] cols) where T : IEntity
-        { 
-            return this.Query<T>().Select(string.Join(", ", cols)).From();
-        }
+            csel.Find(typeof(T));
 
+            IQuery<T> q = this.Query<T>().Select(string.Join(", ", csel.Colums.ToArray())).From(csel.Tables[0]);
+
+            if (this.Depth == 1)
+                return q;
+
+            for(int n = 1; n < this.Depth; n++)
+            {
+                q.Append(" LEFT JOIN " + csel.Tables[n] + " ON " + csel.Keys[n - 1]);
+            }
+
+            return q;
+        }
+ 
         /// <summary>
         /// Get query result
         /// </summary>
@@ -275,7 +285,11 @@ namespace System.Data.ODB
             {
                 if (!col.Attribute.IsPrimaryKey && !col.Attribute.IsAuto)
                 { 
-                    if (col.Attribute.IsForeignkey)
+                    if (!col.Attribute.IsForeignkey) 
+                    {
+                        pr = query.BindParam("p" + n, col.Value, col.Attribute);
+                    }
+                    else
                     {                    
                         IEntity entry = col.Value as IEntity;
  
@@ -300,11 +314,7 @@ namespace System.Data.ODB
                                 pr = query.BindParam("p" + n, i, col.Attribute);
                             }
                         }
-                    }
-                    else
-                    {
-                        pr = query.BindParam("p" + n, col.Value, col.Attribute);
-                    }
+                    }                   
  
                     fields.Add(col.Name + " = " + pr.ParameterName);
 
@@ -313,15 +323,10 @@ namespace System.Data.ODB
                     n++;
                 } 
             }
-         
-            if (fields.Count > 0)
-            {
-                query.Update().Set(fields.ToArray()).Where(colKey.Name).Eq(colKey.Value);
+          
+            query.Update().Set(fields.ToArray()).Where(colKey.Name).Eq(colKey.Value);
 
-                return this.ExecuteNonQuery(query);
-            }
-            
-            return 0;   
+            return this.ExecuteNonQuery(query);            
         }
 
         /// <summary>
@@ -341,8 +346,12 @@ namespace System.Data.ODB
                 throw new Exception("No key column.");
             }
 
-            IQuery<T> query = this.Query<T>().Delete().Where(colKey.Name).Eq(colKey.Value);
+            IQuery<T> query = this.Query<T>();
 
+            query.Table = table.Name;
+            
+            query.Delete().Where(colKey.Name).Eq(colKey.Value);
+            
             return this.ExecuteNonQuery(query.ToString(), query.Parameters.ToArray());          
         }
 
@@ -355,14 +364,6 @@ namespace System.Data.ODB
 
             return this.ExecuteNonQuery(q);
         }
-
-        /// <summary>
-        /// Count table rows
-        /// </summary>
-        public virtual IQuery<T> Count<T>() where T : IEntity
-        {
-            return this.Query<T>().Count("*").From();
-        } 
 
         #endregion
 

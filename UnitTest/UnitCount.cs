@@ -20,7 +20,7 @@ namespace UnitTest
 
             //db.Insert(book);
 
-            long n = db.Count<Book>().Length(); 
+            long n = db.Count<Book>(); 
  
             db.Close();
 

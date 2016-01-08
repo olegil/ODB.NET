@@ -31,7 +31,7 @@ namespace UnitTest
 
             //Address addr = db.From<Address>().First();
 
-            User user = db.From<User>().Where("Name").Eq("Stephen").First();
+            User user = db.Table<User>().Where("Name").Eq("Stephen").First();
 
             int a = 0;
 

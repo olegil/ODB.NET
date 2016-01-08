@@ -336,16 +336,6 @@ namespace System.Data.ODB
         public List<T> ToList()
         {
             return this._db.Get<T>(this) as List<T>;
-        }
-        
-        public int Exec()
-        {
-            return this._db.ExecuteNonQuery(this);
-        }
-
-        public long Length()
-        {
-            return this._db.ExecuteScalar<Int64>(this);
-        } 
+        }      
     }
 }

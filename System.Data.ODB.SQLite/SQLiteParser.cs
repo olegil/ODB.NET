@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Reflection;
 using System.Data.SQLite;
 
 namespace System.Data.ODB.Linq
@@ -289,7 +290,7 @@ namespace System.Data.ODB.Linq
                 if (m.Member.Name == "Now")
                 {
                     this.sb.Append("datetime()");
-                }                 
+                }               
             }
             else if (m.Member.DeclaringType == typeof(string))
             {
@@ -301,10 +302,14 @@ namespace System.Data.ODB.Linq
 
                     this.sb.Append(")");
                 }
-            }
+            }           
             else if (m.Expression.NodeType == ExpressionType.Constant)
             {
-                this.Visit((ConstantExpression)m.Expression);
+                ConstantExpression mc = m.Expression as ConstantExpression;
+
+                object b = (m.Member as FieldInfo).GetValue(mc.Value);
+                           
+                this.Visit(Expression.Constant(b));
             }
             else 
                 throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
@@ -319,6 +324,7 @@ namespace System.Data.ODB.Linq
             p.ParameterName = name;
             p.Value = b;
             //p.Size = attr.Size;
+
             p.DbType = MappingHelper.TypeConvert(b);
 
             this.ps.Add(p);

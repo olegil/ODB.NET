@@ -16,9 +16,9 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            //Book book = new Book() { UserId = 19, Release = DateTime.Now };
+            Book book = new Book() {  ISBN = "ANDSAGSDAH", Release = DateTime.Now, User = new User() { Birthday = DateTime.Now, Name = "Chan Peter" } };
 
-            //db.Insert(book);
+            db.Insert(book);
 
             long n = db.Count<Book>(); 
  

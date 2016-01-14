@@ -16,9 +16,9 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            db.Remove<User>(false);
-
-            db.Create<User>(true);
+            db.Remove<Book>(true);
+ 
+            db.Create<Book>(true);
 
             db.Close();
 
@@ -32,7 +32,7 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            int a = db.Clear<Book>();
+            int a = db.Clear<User>();
 
             db.Close();
 

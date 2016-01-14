@@ -7,7 +7,7 @@ namespace System.Data.ODB
     public abstract class DbContext : IDbContext, IDisposable       
     {         
         public int Depth { get; set; }
-      
+ 
         private bool disposed = false;
 
         protected virtual void Dispose(bool disposing)
@@ -108,41 +108,111 @@ namespace System.Data.ODB
         /// <summary>
         /// Create a Table 
         /// </summary>
-        public virtual int Create<T>() where T : IEntity
-        {
-            IQuery query = this.Query<T>().Create();
+        public virtual int Create<T>(bool isCascade) where T : IEntity
+        { 
+            Type type = typeof(T);
 
-            return this.ExecuteNonQuery(query); 
+            return this.Create(type, isCascade);
         }
+
+        private int Create(Type type, bool isCascade)
+        {
+            List<string> fields = new List<string>();
+
+            string name = "";
+            string dbtype = "";
+            string col = "";
+
+            foreach (PropertyInfo pi in type.GetProperties())
+            {
+                ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
+
+                if (colAttr != null)
+                {
+                    if (!colAttr.IsForeignkey)
+                    {
+                        dbtype = MappingHelper.DataConvert(pi.PropertyType);
+                    }
+                    else
+                    {
+                        dbtype = MappingHelper.DataConvert(typeof(long));
+
+                        if (isCascade)
+                        {
+                            this.Create(pi.PropertyType, isCascade);
+                        }
+                    }
+
+                    name = colAttr.Name == "" ? pi.Name : colAttr.Name;
+
+                    col = this.AddColumn(name, dbtype, colAttr);
+
+                    fields.Add(col);
+                }
+            }
+
+            return this.Create(type.Name, fields.ToArray());
+        }
+
+        private int Create(string table, string[] cols)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("CREATE TABLE IF NOT EXISTS \"" + table + "\" (\r\n");
+            sb.Append(string.Join(",\r\n", cols));
+            sb.Append("\r\n);");
+
+            return this.ExecuteNonQuery(sb.ToString());
+        }
+
+        public abstract string AddColumn(string name, string dbtype, ColumnAttribute colAttr);         
 
         /// <summary>
         /// Drop a Table 
         /// </summary>
-        public virtual int Remove<T>() where T : IEntity
+        public virtual int Remove<T>(bool isCascade) where T : IEntity
         {
-            IQuery query = this.Query<T>().Drop();
+            Type type = typeof(T);
 
-            return this.ExecuteNonQuery(query);
+            foreach (PropertyInfo pi in type.GetProperties())
+            {
+                ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
+
+                if (colAttr != null && colAttr.IsForeignkey)
+                {
+                    if (isCascade)
+                    {
+                        this.Drop(pi.PropertyType);
+                    }
+                }
+            }
+
+            return this.Drop(type);
+        }
+
+        private int Drop(Type type)
+        {
+            string sql = "DROP TABLE IF EXISTS " + type.Name;
+
+            return this.ExecuteNonQuery(sql);
         }
 
         /// <summary>
         /// Select from Table
         /// </summary>
-        public virtual IQuery<T> Table<T>() where T : IEntity
+        public virtual IQuery<T> Get<T>() where T : IEntity
         { 
-            ColumnSelector csel = new ColumnSelector();
-            csel.Level = this.Depth;
+            TableSelector tableSel = new TableSelector();
+            tableSel.Level = this.Depth;
 
-            csel.Find(typeof(T));
+            Type type = typeof(T);
+            tableSel.Find(type);
 
-            IQuery<T> q = this.Query<T>().Select(string.Join(", ", csel.Colums.ToArray())).From(csel.Tables[0]);
+            IQuery<T> q = this.Query<T>().Select(string.Join(", ", tableSel.Colums.ToArray())).From(type.Name).As("T0");
 
-            if (this.Depth == 1)
-                return q;
-
-            for(int n = 1; n < this.Depth; n++)
+            foreach(string s in tableSel.Tables)
             {
-                q.Append(" LEFT JOIN " + csel.Tables[n] + " ON " + csel.Keys[n - 1]);
+                q.Append(s);
             }
 
             return q;
@@ -163,7 +233,7 @@ namespace System.Data.ODB
         {           
             IList<T> list = new List<T>();
 
-            EntityReader<T> edr = new EntityReader<T>(rdr);
+            EntityReader<T> edr = new EntityReader<T>(rdr, this.Depth);
            
             foreach (T t in edr)
             {

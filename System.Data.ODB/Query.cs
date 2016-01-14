@@ -26,62 +26,7 @@ namespace System.Data.ODB
  
             this.Table = MappingHelper.GetTableName(typeof(T));
         }
-
-        public virtual IQuery Create()
-        {
-            Type type = typeof(T);
-
-            List<string> fields = new List<string>();
-
-            string name = "";
-            string dbtype = "";
-            string col = "";
-
-            foreach (PropertyInfo pi in type.GetProperties())
-            {
-                ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
-
-                if (colAttr != null)
-                {
-                    if (!colAttr.IsForeignkey)
-                    {                         
-                        dbtype = MappingHelper.DataConvert(pi.PropertyType);                    
-                    }
-                    else
-                    {                        
-                        dbtype = MappingHelper.DataConvert(typeof(long)); 
-                    }
-
-                    name = colAttr.Name == "" ? pi.Name : colAttr.Name;
-
-                    col = this.AddColumn(name, dbtype, colAttr);
-
-                    fields.Add(col);
-                }
-            }
-
-            return this.Create(fields.ToArray());
-        }
-
-        public IQuery Create(string[] cols)
-        {
-            this._sb.Append("CREATE TABLE IF NOT EXISTS \"" + this.Table + "\" (\r\n");
-            this._sb.Append(string.Join(",\r\n", cols));
-            this._sb.Append("\r\n);");
-
-            return this;
-        }
-   
-        public abstract string AddColumn(string name, string dbtype, ColumnAttribute col);
-
-        public virtual IQuery Drop()
-        {
-            this._sb.Append("DROP TABLE IF EXISTS ");
-            this._sb.Append(this.Table);
-
-            return this;
-        }
-         
+        
         public virtual IQuery Insert(string[] cols)
         {
             this._sb.Append("INSERT INTO " + this.Table);            

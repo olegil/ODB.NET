@@ -21,33 +21,7 @@ namespace System.Data.ODB.SQLite
             p.DbType = MappingHelper.TypeConvert(b);          
 
             return p;
-        }
-
-        public override string AddColumn(string name, string dbtype, ColumnAttribute colAttr)
-        {
-            string def = name + " " + dbtype;
-
-            if (colAttr.IsPrimaryKey)
-            {
-                def += " PRIMARY KEY";
-            }
-
-            if (colAttr.IsAuto)
-            {
-                def += " AUTOINCREMENT";
-            }
-
-            if (colAttr.IsNullable)
-            {
-                def += " NULL";
-            }
-            else
-            {
-                def += " NOT NULL";
-            }
-
-            return def;
-        }
+        } 
 
         public override IQuery<T> Skip(int start)
         {

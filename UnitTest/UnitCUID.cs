@@ -29,7 +29,7 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            User user = db.Table<User>().First();
+            User user = db.Get<User>().First();
 
             int ret = 0;
 
@@ -50,7 +50,7 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
                      
-            User user = db.Table<User>().First();
+            User user = db.Get<User>().First();
 
             int a = 0;
 

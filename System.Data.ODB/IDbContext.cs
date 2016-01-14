@@ -7,9 +7,9 @@ namespace System.Data.ODB
     {
         int Depth { get; set; }
 
-        int Create<T>() where T : IEntity;
+        int Create<T>(bool isCascade) where T : IEntity;
 
-        int Remove<T>() where T : IEntity;
+        int Remove<T>(bool isCascade) where T : IEntity;
 
         IList<T> Get<T>(IQuery query) where T : IEntity;
   

@@ -10,11 +10,14 @@ namespace System.Data.ODB
 
         private bool disposed = false;
 
-        private int n = 0;
+        public int Level { get; set; }
+        private int _n = 0;
 
-        public EntityReader(IDataReader reader)
+        public EntityReader(IDataReader reader, int depth)
         {
             this.sr = reader;
+
+            this.Level = depth;
         }
 
         protected virtual void Dispose(bool disposing)
@@ -44,10 +47,8 @@ namespace System.Data.ODB
             Type type = typeof(T); 
 
             while (this.sr.Read())
-            {
-                int level = 0;
-
-                object b = this.getEntry(sr, type, level);               
+            { 
+                object b = this.getEntry(sr, type);               
                 
                 yield return (T)b;
             }
@@ -55,33 +56,40 @@ namespace System.Data.ODB
             this.Dispose();          
         }
 
-        private object getEntry(IDataReader sr, Type type, int level)
+        private object getEntry(IDataReader sr, Type type)
         {
             object instance = Activator.CreateInstance(type);  
+
             foreach (PropertyInfo pi in type.GetProperties())
             {
                 ColumnAttribute attr = MappingHelper.GetColumnAttribute(pi);
 
                 if (attr != null)
                 {
-                    if (!attr.IsForeignkey)
+                    if (attr.IsForeignkey)
+                    {
+                        if (_n < this.Level - 1)
+                        {
+                            _n++;
+
+                            object b = this.getEntry(sr, pi.PropertyType);
+
+                            _n--;
+
+                            pi.SetValue(instance, b, null);
+                        }
+                    }
+                    else 
                     {
                         string colName = string.IsNullOrEmpty(attr.Name) ? pi.Name : attr.Name;
 
-                        colName = "T" + level + "." + colName; 
+                        colName = "T" + _n + "." + colName; 
 
                         object value = this.sr[colName] == DBNull.Value ? null : this.sr[colName];
 
                         pi.SetValue(instance, value, null);                        
                     }
-                    else
-                    {
-                        //object b = this.getEntry(sr, pi.PropertyType);
-
-                        //object b = Activator.CreateInstance(pi.PropertyType);  
-
-                        //pi.SetValue(instance, b, null);
-                    }
+                  
                 }
 
                 if (pi.Name == "IsPersisted")

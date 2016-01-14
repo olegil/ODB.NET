@@ -5,8 +5,6 @@ namespace System.Data.ODB
 {
     public interface IQuery
     { 
-        IQuery Create();
-        IQuery Drop();         
         IQuery Insert(string[] cols);
         IQuery Values(string[] cols);              
         IQuery Append(string str);

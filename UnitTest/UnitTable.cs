@@ -16,12 +16,10 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            db.Remove<User>();
-            db.Create<User>();
+            db.Remove<User>(false);
 
-            db.Remove<Book>();
-            db.Create<Book>();
- 
+            db.Create<User>(true);
+
             db.Close();
 
             int a = 0;
@@ -34,7 +32,7 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            int a = db.Clear<Address>();
+            int a = db.Clear<Book>();
 
             db.Close();
 

@@ -17,15 +17,15 @@ namespace UnitTest
 
             db.Depth = 2;
 
-            Book book = new Book() { ISBN = "asdfaghsd", User = new User() { Name = "Joanne", Birthday = DateTime.Now, Address = new Address() { City = "HK", Flat = "7", Street = "Kings Road" } }, Release = DateTime.Now };
+            Book book = new Book() { ISBN = "RAYAWEVQhg-3464528", User = new User() { Name = "Joanne", Birthday = DateTime.Now, Address = new Address() { City = "HK", Flat = "7", Street = "Kings Road" } }, Release = DateTime.Now };
 
             db.Store(book);
 
-            IQuery<Book> q = db.Table<Book>();
+            IQuery<Book> q = db.Get<Book>();
             
-            Book b = q.First();
+            List<Book> list = q.ToList();
  
-            Assert.IsTrue(b != null);
+            Assert.IsTrue(list.Count > 0);
         }
 
         [TestMethod]
@@ -33,13 +33,13 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
              
-            IQuery<Book> q = db.Table<Book>().Where("Id").Gt(0);
+            IQuery<Book> q = db.Get<Book>().Where("Id").Gt(0);
 
-            List<Book> list = q.ToList();
+            Book book = q.First();
 
             db.Close();
 
-            Assert.IsTrue(list.Count > 0);
+            Assert.IsNotNull(book);
         }
     }
 }

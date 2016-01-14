@@ -15,9 +15,11 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
  
-            User user = new User() { Name = "Stephen", Birthday = DateTime.Now };
+            User user = new User() { Name = "Peter", Birthday = DateTime.Now, Address = new Address() { City = "HK", Flat = "12", Street = "Queen" } };
+            
+            Book book = new Book() { ISBN = "JTSEWAGEASg-3457242", Release = DateTime.Now };
 
-            int a = db.Store(user);
+            int a = db.Store(book);
 
             db.Close();
 
@@ -29,9 +31,9 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            //Address addr = db.From<Address>().First();
+            db.Depth = 3;
 
-            User user = db.Table<User>().Where("Name").Eq("Stephen").First();
+            User user = db.Get<User>().Where("Name").Eq("Peter").First();
 
             int a = 0;
 

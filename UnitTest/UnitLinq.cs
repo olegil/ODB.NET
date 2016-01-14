@@ -23,6 +23,8 @@ namespace UnitTest
             List<User> users = query.ToList();
 
             respo.Dispose();
+
+            Assert.IsTrue(users.Count > 0);
         }        
 
         [TestMethod]

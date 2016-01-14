@@ -11,6 +11,6 @@ namespace System.Data.ODB
     {
         IDbDataParameter[] GetParamters();
 
-        void Translate(Expression expression);
+        void Translate(Expression expression, int depth);
     }
 }

@@ -18,18 +18,19 @@ namespace System.Data.ODB.SQLite
 
             IQueryParser parser = new SQLiteParser();
 
-            parser.Translate(expression);
+            
+            parser.Translate(expression, Db.Depth);
 
             IDataReader sr = this.Db.ExecuteReader(parser.ToString(), parser.GetParamters());
 
-            return Activator.CreateInstance(typeof(EntityReader<>).MakeGenericType(elementType), sr);
+            return Activator.CreateInstance(typeof(EntityReader<>).MakeGenericType(elementType), new object[] { sr, Db.Depth });
         }
 
         public override string GetSQL(Expression expression)
         {
             IQueryParser parser = new SQLiteParser();
 
-            parser.Translate(expression);
+            parser.Translate(expression, Db.Depth);
 
             return parser.ToString();
         } 

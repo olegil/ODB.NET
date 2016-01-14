@@ -10,7 +10,7 @@ namespace UnitTest
         [TestMethod]
         public void TestColumns()
         {
-            TableSelector col = new TableSelector();
+            TableSelector col = new TableSelector(3);
 
             col.Find(typeof(Book));
 

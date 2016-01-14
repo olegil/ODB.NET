@@ -12,10 +12,10 @@ namespace System.Data.ODB
         public List<string> Tables { get; private set; }
         public List<string> Colums { get; private set; }
        
-        public int Level { get; set; }
+        public int Level { get; private set; }
         private int _n = 0;
 
-        public TableSelector()
+        public TableSelector(int level)
         {
             this.Tables = new List<string>();
             this.Colums = new List<string>();

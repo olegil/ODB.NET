@@ -13,17 +13,20 @@ namespace System.Data.ODB.Linq
         private bool _limit = false;     
         private int _length = 0;
 
+        public int Depth { get; private set; }
+
         public SQLiteParser()
         {
             this.sb = new StringBuilder();        
             this.ps = new List<IDbDataParameter>(); 
         }
 
-        public void Translate(Expression expression)
+        public void Translate(Expression expression, int depth)
         {
             this.sb.Clear();
             this.ps.Clear();
 
+            this.Depth = depth;
             this._length = 0;
             this._limit = false;
 
@@ -252,8 +255,12 @@ namespace System.Data.ODB.Linq
             if (q != null)
             {
                 // assume constant nodes w/ IQueryables are table references
-                this.sb.Append("SELECT * FROM ");
-                this.sb.Append(q.ElementType.Name);
+                TableSelector tsel = new TableSelector(this.Depth);
+                tsel.Find(q.ElementType);
+
+                this.sb.Append("SELECT ");
+                this.sb.Append(string.Join(",", tsel.Colums.ToArray()));
+                this.sb.Append(" FROM " + q.ElementType.Name + " AS T0");
             }
             else if (c.Value == null)
             {

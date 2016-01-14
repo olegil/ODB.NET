@@ -202,9 +202,8 @@ namespace System.Data.ODB
         /// </summary>
         public virtual IQuery<T> Get<T>() where T : IEntity
         { 
-            TableSelector tableSel = new TableSelector();
-            tableSel.Level = this.Depth;
-
+            TableSelector tableSel = new TableSelector(this.Depth);
+       
             Type type = typeof(T);
             tableSel.Find(type);
 

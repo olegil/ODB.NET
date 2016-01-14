@@ -33,7 +33,7 @@ namespace UnitTest
 
             db.Depth = 3;
 
-            User user = db.Get<User>().Where("Name").Eq("Peter").First();
+            User user = db.Get<User>().Where("Name").Eq("Chan").First();
 
             int a = 0;
 

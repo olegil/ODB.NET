@@ -51,7 +51,7 @@ namespace UnitTest
             MyRepository respo = new MyRepository();
 
             var query = from u in respo.Users
-                        where u.Name.IndexOf('t') > 0 || u.Name.Substring(2, 4) == "abc"
+                        where u.Name.IndexOf('C') > 0 || u.Name.Substring(2, 4) == "abc"
                         orderby u.Id, u.Name descending
                         select u;
 

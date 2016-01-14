@@ -13,7 +13,7 @@ namespace UnitTest
         [Column]
         public DateTime Birthday { get; set; }
 
-        [Column(IsForeignkey = true)]
+        [Column(IsForeignkey = true, IsNullable = true)]
         public Address Address { get; set; }
     }
       
@@ -31,7 +31,7 @@ namespace UnitTest
 
     public class Book : EntityBase
     {
-        [Column(IsForeignkey = true)]
+        [Column(IsForeignkey = true, IsNullable = true)]
         public User User { get; set; }
 
         [Column]

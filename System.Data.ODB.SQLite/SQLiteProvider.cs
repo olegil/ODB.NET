@@ -17,7 +17,6 @@ namespace System.Data.ODB.SQLite
             Type elementType = TypeSystem.GetElementType(expression.Type);
 
             IQueryParser parser = new SQLiteParser();
-
             
             parser.Translate(expression, Db.Depth);
 

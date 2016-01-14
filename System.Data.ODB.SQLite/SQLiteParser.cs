@@ -282,14 +282,14 @@ namespace System.Data.ODB.Linq
         {
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
-                this.sb.Append(m.Member.Name);               
-            }
+                this.sb.Append("T0." + m.Member.Name);
+            }           
             else if (m.Member.DeclaringType == typeof(DateTime))
             {
                 if (m.Member.Name == "Now")
                 {
                     this.sb.Append("datetime()");
-                }
+                }                 
             }
             else if (m.Member.DeclaringType == typeof(string))
             {
@@ -301,6 +301,10 @@ namespace System.Data.ODB.Linq
 
                     this.sb.Append(")");
                 }
+            }
+            else if (m.Expression.NodeType == ExpressionType.Constant)
+            {
+                this.Visit((ConstantExpression)m.Expression);
             }
             else 
                 throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));

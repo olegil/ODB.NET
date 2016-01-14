@@ -17,6 +17,8 @@ namespace System.Data.ODB
 
         public TableSelector(int level)
         {
+            this.Level = level;
+
             this.Tables = new List<string>();
             this.Colums = new List<string>();
         }

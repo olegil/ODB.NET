@@ -8,13 +8,13 @@ namespace UnitTest
     public class User : EntityBase
     {
         [Column]
+        public string BID { get; set; }
+
+        [Column]
         public string Name { get; set; }
 
         [Column]
         public DateTime Birthday { get; set; }
-
-        [Column(IsForeignkey = true, IsNullable = true)]
-        public Address Address { get; set; }
     }
       
     public class Address : EntityBase
@@ -31,15 +31,27 @@ namespace UnitTest
 
     public class Book : EntityBase
     {
-        [Column(IsForeignkey = true, IsNullable = true)]
-        public User User { get; set; }
-
         [Column]
         public string ISBN { get; set; }
 
         [Column]
         public DateTime Release { get; set; }        
+
+        [Column(IsForeignkey = true, IsNullable = true)]
+        public User User { get; set; }
+
+        [Column(IsForeignkey = true, IsNullable = true)]
+        public Publish Publish { get; set; }
     } 
+
+    public class Publish : EntityBase
+    {
+        [Column]
+        public string Name { get; set; }
+
+        [Column(IsForeignkey = true, IsNullable = true)]
+        public Address Address { get; set; }
+    }
 
     public class MyRepository : Repository
     {

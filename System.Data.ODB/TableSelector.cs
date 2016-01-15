@@ -10,20 +10,37 @@ namespace System.Data.ODB
     public class TableSelector 
     { 
         public List<string> Tables { get; private set; }
-        public List<string> Colums { get; private set; }
-       
-        public int Level { get; private set; }
-        private int _n = 0;
 
+        private List<string> colums;
+       
+        public string Colums
+        {
+            get
+            {
+                return string.Join(",", this.colums.ToArray());
+            }
+        }
+
+        public int Level { get; private set; }
+        
         public TableSelector(int level)
         {
             this.Level = level;
 
             this.Tables = new List<string>();
-            this.Colums = new List<string>();
+            this.colums = new List<string>();
         }
 
-        public virtual void Find(Type type)
+        public virtual void Parser(Type type) 
+        {             
+            int index = 0;
+
+            this.Tables.Add(type.Name + " AS T" + index);
+
+            this.Find(type, index);
+        }
+
+        private void Find(Type type, int index)
         {
             foreach (PropertyInfo pi in type.GetProperties())
             {
@@ -32,19 +49,21 @@ namespace System.Data.ODB
                 if (attr != null)
                 {
                     string name = string.IsNullOrEmpty(attr.Name) ? pi.Name : attr.Name;
-                    string col = "T" + _n + "." + name;
+                    string col = "T" + index + "." + name;
 
-                    this.Colums.Add(col + " AS [" + col + "]");
+                    this.colums.Add(col + " AS [" + col + "]");
 
-                    if (attr.IsForeignkey && _n < this.Level - 1)
-                    {  
-                        _n++;
+                    if (attr.IsForeignkey && this.Level > 1)
+                    {
+                        this.Level--;
 
-                        this.Tables.Add(" LEFT JOIN " + pi.PropertyType.Name + " AS T" + _n + " ON " + col  + " = T" + _n + ".Id");
+                        int next = this.Tables.Count;
 
-                        this.Find(pi.PropertyType);
+                        this.Tables.Add(" LEFT JOIN " + pi.PropertyType.Name + " AS T" + next + " ON " + col  + " = T" + next + ".Id");
 
-                        _n--;
+                        this.Find(pi.PropertyType, next);
+
+                        this.Level++;                         
                     }                    
                 }
             }

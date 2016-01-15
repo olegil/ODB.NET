@@ -15,9 +15,9 @@ namespace UnitTest
         {            
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            User user = new User() { Name = "Stephen", Birthday = DateTime.Parse("1991/8/16"), Address = new Address() { City = "HK", Street = "Queen Road", Flat = "Westland" } };
+            Publish pub = new Publish() { Name = "Bloger", Address = new Address() { Street = "Queen Road", Flat = "Westland" } };
 
-            long i = db.Insert(user);
+            long i = db.Insert(pub);
 
             Assert.IsTrue(i != 0);
         }

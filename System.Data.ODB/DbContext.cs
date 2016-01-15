@@ -108,14 +108,14 @@ namespace System.Data.ODB
         /// <summary>
         /// Create a Table 
         /// </summary>
-        public virtual int Create<T>(bool isCascade) where T : IEntity
+        public virtual int Create<T>(bool is_cascade) where T : IEntity
         { 
             Type type = typeof(T);
 
-            return this.Create(type, isCascade);
+            return this.Create(type, is_cascade);
         }
 
-        private int Create(Type type, bool isCascade)
+        private int Create(Type type, bool is_cascade)
         {
             List<string> fields = new List<string>();
 
@@ -137,9 +137,9 @@ namespace System.Data.ODB
                     {
                         dbtype = MappingHelper.DataConvert(typeof(long));
 
-                        if (isCascade)
+                        if (is_cascade)
                         {
-                            this.Create(pi.PropertyType, isCascade);
+                            this.Create(pi.PropertyType, is_cascade);
                         }
                     }
 
@@ -170,31 +170,29 @@ namespace System.Data.ODB
         /// <summary>
         /// Drop a Table 
         /// </summary>
-        public virtual int Remove<T>(bool isCascade) where T : IEntity
+        public virtual int Remove<T>(bool is_cascade) where T : IEntity
         {
             Type type = typeof(T);
+            
+            return this.Drop(type, is_cascade);
+        }
 
-            foreach (PropertyInfo pi in type.GetProperties())
+        private int Drop(Type type, bool is_cascade)
+        {
+            if (is_cascade)
             {
-                ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
-
-                if (colAttr != null && colAttr.IsForeignkey)
+                foreach (PropertyInfo pi in type.GetProperties())
                 {
-                    if (isCascade)
+                    ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
+
+                    if (colAttr != null && colAttr.IsForeignkey)
                     {
-                        this.Drop(pi.PropertyType);
+                        this.Drop(pi.PropertyType, is_cascade);
                     }
                 }
             }
-
-            return this.Drop(type);
-        }
-
-        private int Drop(Type type)
-        {
-            string sql = "DROP TABLE IF EXISTS " + type.Name;
-
-            return this.ExecuteNonQuery(sql);
+         
+            return this.ExecuteNonQuery("DROP TABLE IF EXISTS " + type.Name);
         }
 
         /// <summary>
@@ -202,16 +200,15 @@ namespace System.Data.ODB
         /// </summary>
         public virtual IQuery<T> Get<T>() where T : IEntity
         { 
-            TableSelector tableSel = new TableSelector(this.Depth);
-       
-            Type type = typeof(T);
-            tableSel.Find(type);
+            TableSelector tsel = new TableSelector(this.Depth);
 
-            IQuery<T> q = this.Query<T>().Select(string.Join(", ", tableSel.Colums.ToArray())).From(type.Name).As("T0");
+            tsel.Parser(typeof(T));
 
-            foreach(string s in tableSel.Tables)
+            IQuery<T> q = this.Query<T>().Select(tsel.Colums).From(tsel.Tables[0]);
+
+            for(int i = 1; i < tsel.Tables.Count; i++)
             {
-                q.Append(s);
+                q.Append(tsel.Tables[i]);
             }
 
             return q;

@@ -11,8 +11,7 @@ namespace System.Data.ODB
         private bool disposed = false;
 
         public int Level { get; set; }
-        private int _n = 0;
-
+    
         public EntityReader(IDataReader reader, int depth)
         {
             this.sr = reader;
@@ -47,8 +46,10 @@ namespace System.Data.ODB
             Type type = typeof(T); 
 
             while (this.sr.Read())
-            { 
-                object b = this.getEntry(sr, type);               
+            {
+                int index = 0;
+
+                object b = this.getEntry(type, index);               
                 
                 yield return (T)b;
             }
@@ -56,7 +57,7 @@ namespace System.Data.ODB
             this.Dispose();          
         }
 
-        private object getEntry(IDataReader sr, Type type)
+        private object getEntry(Type type, int index)
         {
             object instance = Activator.CreateInstance(type);  
 
@@ -68,22 +69,27 @@ namespace System.Data.ODB
                 {
                     if (attr.IsForeignkey)
                     {
-                        if (_n < this.Level - 1)
+                        if (this.Level > 1)
                         {
-                            _n++;
+                            this.Level--;
 
-                            object b = this.getEntry(sr, pi.PropertyType);
+                            index++;
 
-                            _n--;
+                            object b = this.getEntry(pi.PropertyType, index);
 
-                            pi.SetValue(instance, b, null);
+                            this.Level++;
+
+                            if ((b as IEntity).Id != 0)
+                                pi.SetValue(instance, b, null);
+                            else
+                                pi.SetValue(instance, null, null);
                         }
                     }
                     else 
                     {
                         string colName = string.IsNullOrEmpty(attr.Name) ? pi.Name : attr.Name;
 
-                        colName = "T" + _n + "." + colName; 
+                        colName = "T" + index + "." + colName; 
 
                         object value = this.sr[colName] == DBNull.Value ? null : this.sr[colName];
 
@@ -92,11 +98,13 @@ namespace System.Data.ODB
                   
                 }
 
-                if (pi.Name == "IsPersisted")
-                {
-                    pi.SetValue(instance, true, null);
-                }
+                //if (pi.Name == "IsPersisted")
+                //{
+                //    pi.SetValue(instance, true, null);
+                //}
             }
+
+            type.GetProperty("IsPersisted").SetValue(instance, true, null);
 
             return instance;
         }

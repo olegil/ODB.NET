@@ -14,10 +14,16 @@ namespace UnitTest
         public void TestStore()
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
- 
-            User user = new User() { Name = "Peter", Birthday = DateTime.Now, Address = new Address() { City = "HK", Flat = "12", Street = "Queen" } };
-            
-            Book book = new Book() { ISBN = "JTSEWAGEASg-3457242", Release = DateTime.Now };
+  
+            Publish pub = new Publish() { Name = "Bloger", Address = new Address() { Flat = "64", Street = "ABC" } };
+
+            Book book = new Book()
+            {
+                ISBN = "JTSEWAGEASg-3457242",
+                Release = DateTime.Now,
+                Publish = pub,
+                User = new User() { Name = "Peter", BID = "439D5284-7A10-464B-9935-B8B7A49D309A" }
+            };      
 
             int a = db.Store(book);
 
@@ -39,7 +45,7 @@ namespace UnitTest
 
             if (user != null)
             {
-                user.Address = new Address() { Street = "Westland Road" };
+                user.BID = "5B4C7076-97F5-46F0-BE0B-18ACFE654472";
 
                 a = db.Store(user);
             }

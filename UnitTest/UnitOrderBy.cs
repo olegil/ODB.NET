@@ -16,7 +16,7 @@ namespace UnitTest
             MyRepository respo = new MyRepository();
 
             var query = from u in respo.Users                         
-                        orderby u.Id, u.Name, u.Birthday descending                                  
+                        orderby u.Id, u.Name                              
                         select u;
 
             string sql = query.ToString();

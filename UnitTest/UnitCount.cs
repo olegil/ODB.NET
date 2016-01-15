@@ -16,7 +16,7 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            Book book = new Book() {  ISBN = "ANDSAGSDAH", Release = DateTime.Now, User = new User() { Birthday = DateTime.Now, Name = "Chan Peter" } };
+            Book book = new Book() {  ISBN = "ANDSAGSDAH", Release = DateTime.Now, User = new User() { BID = "", Name = "Chan Peter" } };
 
             db.Insert(book);
 

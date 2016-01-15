@@ -38,7 +38,7 @@ namespace System.Data.ODB.Linq
         {
             while (e.NodeType == ExpressionType.Quote)
             {
-                e = ((UnaryExpression)e).Operand;
+                e = (e as UnaryExpression).Operand;
             }
 
             return e;
@@ -254,14 +254,13 @@ namespace System.Data.ODB.Linq
             IQueryable q = c.Value as IQueryable;
 
             if (q != null)
-            {
-                // assume constant nodes w/ IQueryables are table references
+            { 
                 TableSelector tsel = new TableSelector(this.Depth);
-                tsel.Find(q.ElementType);
+                tsel.Parser(q.ElementType);
 
                 this.sb.Append("SELECT ");
-                this.sb.Append(string.Join(",", tsel.Colums.ToArray()));
-                this.sb.Append(" FROM " + q.ElementType.Name + " AS T0");
+                this.sb.Append(tsel.Colums);
+                this.sb.Append(" FROM " + tsel.Tables[0]);
             }
             else if (c.Value == null)
             {
@@ -284,7 +283,15 @@ namespace System.Data.ODB.Linq
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
                 this.sb.Append("T0." + m.Member.Name);
-            }           
+            }
+            else if (m.Expression.NodeType == ExpressionType.Constant)
+            {
+                ConstantExpression mc = m.Expression as ConstantExpression;
+
+                object b = (m.Member as FieldInfo).GetValue(mc.Value);
+                           
+                this.Visit(Expression.Constant(b));
+            }
             else if (m.Member.DeclaringType == typeof(DateTime))
             {
                 if (m.Member.Name == "Now")
@@ -302,15 +309,7 @@ namespace System.Data.ODB.Linq
 
                     this.sb.Append(")");
                 }
-            }           
-            else if (m.Expression.NodeType == ExpressionType.Constant)
-            {
-                ConstantExpression mc = m.Expression as ConstantExpression;
-
-                object b = (m.Member as FieldInfo).GetValue(mc.Value);
-                           
-                this.Visit(Expression.Constant(b));
-            }
+            }          
             else 
                 throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
             

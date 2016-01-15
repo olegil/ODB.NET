@@ -12,10 +12,9 @@ namespace UnitTest
         {
             TableSelector col = new TableSelector(3);
 
-            col.Find(typeof(Book));
+            col.Parser(typeof(Book));
 
-            Assert.IsTrue(col.Colums.Count > 0);
-
+            Assert.IsTrue(col.Colums.Length > 0);
         }
     }
 }

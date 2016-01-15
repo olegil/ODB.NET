@@ -13,9 +13,8 @@ namespace UnitTest
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
             db.Clear<User>();
-            db.Clear<Address>();
-
-            User user = new User() { Name = "Peter", Birthday = DateTime.Now, Address = new Address() { Flat = "64", Street = "Queen Road", City = "HK" } };
+           
+            User user = new User() { Name = "Stephen", BID = "3B5A2DA0-9A4D-4093-9702-51DB611F7B33" };
                     
             int a = db.Insert(user);
  
@@ -35,7 +34,7 @@ namespace UnitTest
 
             if (user != null)
             {
-                user.Name = "ABC";
+                user.Birthday = DateTime.Now;
 
                 ret = db.Update(user);
             }

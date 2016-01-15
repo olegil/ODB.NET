@@ -19,7 +19,7 @@ namespace UnitTest
 
             for(int i = 0; i < 10; i++)
             {
-                User user = new User() { Name = "Chan", Birthday = DateTime.Now };
+                User user = new User() { Name = "Chan", BID = "" };
 
                 db.Insert(user);
             }

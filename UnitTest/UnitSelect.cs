@@ -39,5 +39,19 @@ namespace UnitTest
 
             Assert.IsNotNull(user);
         }
+
+        [TestMethod]
+        public void TestFirst()
+        {
+            SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
+
+            db.Depth = 2;
+
+            IQuery<Book> q = db.Get<Book>();
+
+            Book book = q.First();
+
+            Assert.IsTrue(book != null);
+        }
     }
 }

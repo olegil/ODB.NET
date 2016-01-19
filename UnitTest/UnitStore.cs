@@ -54,5 +54,30 @@ namespace UnitTest
 
             Assert.IsTrue(a > 0);
         }
+
+        [TestMethod]
+        public void TestStore3()
+        {
+            SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
+
+            db.Depth = 3;
+
+            db.Clear<User>();
+
+            Book book = db.Get<Book>().First();
+
+            int a = 0;
+
+            if (book != null)
+            {
+                book.Release = DateTime.Now;
+
+                a = db.Store(book);
+            }
+
+            db.Close();
+
+            Assert.IsTrue(a > 0);
+        }
     }
 }

@@ -9,10 +9,6 @@ namespace System.Data.ODB
         public long Id { get; set; }
 
         //Object state
-        public bool IsPersisted { get; protected set; }
-         
-        public EntityBase()
-        {  
-        }    
+        public bool IsPersisted { get; protected set; }       
     }
 }

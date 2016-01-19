@@ -21,8 +21,6 @@ namespace UnitTest
                         where u.Birthday > dt
                         select u;
 
-            //string sql = query.ToString();
-
             List<User> list = query.ToList();
 
             respo.Dispose();

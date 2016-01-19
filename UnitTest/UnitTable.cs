@@ -16,15 +16,13 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            //db.Remove<Book>(true);
+            db.Remove<Book>(true);
  
-            db.Create<Book>(true);
+            int a = db.Create<Book>(true);
 
-            db.Close();
+            db.Close(); 
 
-            int a = 0;
-
-            Assert.IsTrue(a == 0);
+            Assert.IsTrue(a > 0);
         }
 
         [TestMethod]

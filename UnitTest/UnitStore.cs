@@ -15,7 +15,7 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
   
-            Publish pub = new Publish() { Name = "Bloger", Address = new Address() { Flat = "64", Street = "ABC" } };
+            Publish pub = new Publish() { Name = "Bloger", Address = new Address() { Flat = "64", Street = "ABC", City = "Hong Kong" } };
 
             Book book = new Book()
             {

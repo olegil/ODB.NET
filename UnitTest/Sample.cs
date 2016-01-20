@@ -64,6 +64,7 @@ namespace UnitTest
             QueryProvider provider = new SQLiteProvider(this.Db);
 
             this.Users = new QueryTable<User>(provider);
+
         }
     }
 }

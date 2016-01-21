@@ -1,5 +1,4 @@
 ﻿using System.Data.SQLite;
-using System.Data.ODB;
 
 namespace System.Data.ODB.SQLite
 {

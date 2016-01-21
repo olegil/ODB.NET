@@ -1,8 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Data.ODB;
-using System.Data.ODB.Linq;
+﻿using System.Data.ODB.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace System.Data.ODB.SQLite
 {

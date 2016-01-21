@@ -10,7 +10,7 @@ namespace System.Data.ODB
 
         private bool disposed = false;
 
-        public int Level { get; set; }
+        public int Level { get; private set; }
     
         public EntityReader(IDataReader reader, int depth)
         {
@@ -86,10 +86,8 @@ namespace System.Data.ODB
                         }
                     }
                     else 
-                    {
-                        string colName = string.IsNullOrEmpty(attr.Name) ? pi.Name : attr.Name;
-
-                        colName = "T" + index + "." + colName; 
+                    { 
+                        string colName = "T" + index + "." + pi.Name; 
 
                         object value = this.sr[colName] == DBNull.Value ? null : this.sr[colName];
 

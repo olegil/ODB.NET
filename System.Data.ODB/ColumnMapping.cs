@@ -11,7 +11,7 @@ namespace System.Data.ODB
   
         public ColumnMapping(string name, object val, ColumnAttribute attr)
         {            
-            this.Name = string.IsNullOrEmpty(attr.Name) ? name : attr.Name;
+            this.Name = name;
             this.Value = val;
             this.Attribute = attr;
         }          

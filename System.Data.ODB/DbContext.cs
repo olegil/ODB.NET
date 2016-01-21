@@ -143,7 +143,7 @@ namespace System.Data.ODB
                         }
                     }
 
-                    name = colAttr.Name == "" ? pi.Name : colAttr.Name;
+                    name = pi.Name;
 
                     col = this.AddColumn(name, dbtype, colAttr);
 
@@ -229,8 +229,8 @@ namespace System.Data.ODB
         {           
             IList<T> list = new List<T>();
 
-            EntityReader<T> edr = new EntityReader<T>(rdr, this.Depth);
-           
+            EntityReader<T> edr = new EntityReader<T>(rdr,this.Depth);
+ 
             foreach (T t in edr)
             {
                 list.Add(t);            
@@ -357,9 +357,7 @@ namespace System.Data.ODB
                     }
                     else
                     {                    
-                        IEntity entry = col.Value as IEntity;
- 
-                        if (entry == null)
+                        if (col.Value == null)
                         {
                             this.Delete(col.Value as IEntity);
 
@@ -367,6 +365,8 @@ namespace System.Data.ODB
                         }
                         else
                         {
+                            IEntity entry = col.Value as IEntity;
+
                             if (entry.IsPersisted)
                             {
                                 this.Update(entry);

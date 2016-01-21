@@ -11,13 +11,13 @@ namespace System.Data.ODB
     { 
         public List<string> Tables { get; private set; }
 
-        private List<string> colums;
+        private List<string> _cols;
        
         public string Colums
         {
             get
             {
-                return string.Join(",", this.colums.ToArray());
+                return string.Join(",", this._cols.ToArray());
             }
         }
 
@@ -28,7 +28,7 @@ namespace System.Data.ODB
             this.Level = level;
 
             this.Tables = new List<string>();
-            this.colums = new List<string>();
+            this._cols = new List<string>();
         }
 
         public virtual void Parser(Type type) 
@@ -48,10 +48,9 @@ namespace System.Data.ODB
 
                 if (attr != null)
                 {
-                    string name = string.IsNullOrEmpty(attr.Name) ? pi.Name : attr.Name;
-                    string col = "T" + index + "." + name;
+                    string col = "T" + index + "." + pi.Name;
 
-                    this.colums.Add(col + " AS [" + col + "]");
+                    this._cols.Add(col + " AS [" + col + "]");
 
                     if (attr.IsForeignkey && this.Level > 1)
                     {

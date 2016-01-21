@@ -31,7 +31,7 @@ namespace System.Data.ODB
             this._cols = new List<string>();
         }
 
-        public virtual void Visit(Type type, int index)
+        public virtual void Visit(Type type, int index = 0)
         {
             if (index == 0)
                 this.Tables.Add(type.Name + " AS T" + index);

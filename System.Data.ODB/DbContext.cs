@@ -202,7 +202,7 @@ namespace System.Data.ODB
         { 
             TableVisitor tsel = new TableVisitor(this.Depth);
 
-            tsel.Visit(typeof(T), 0);
+            tsel.Visit(typeof(T));
 
             IQuery<T> q = this.Query<T>().Select(tsel.Colums).From(tsel.Tables[0]);
 

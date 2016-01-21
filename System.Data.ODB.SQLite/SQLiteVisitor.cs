@@ -256,7 +256,7 @@ namespace System.Data.ODB.Linq
             if (q != null)
             { 
                 TableVisitor tsel = new TableVisitor(this.Depth);
-                tsel.Visit(q.ElementType, 0);
+                tsel.Visit(q.ElementType);
 
                 this.sb.Append("SELECT ");
                 this.sb.Append(tsel.Colums);

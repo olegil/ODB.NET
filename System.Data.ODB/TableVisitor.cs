@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace System.Data.ODB
 {
-    public class TableSelector 
+    public class TableVisitor 
     { 
         public List<string> Tables { get; private set; }
 
@@ -23,7 +23,7 @@ namespace System.Data.ODB
 
         public int Level { get; private set; }
         
-        public TableSelector(int level)
+        public TableVisitor(int level)
         {
             this.Level = level;
 
@@ -31,17 +31,11 @@ namespace System.Data.ODB
             this._cols = new List<string>();
         }
 
-        public virtual void Parser(Type type) 
-        {             
-            int index = 0;
-
-            this.Tables.Add(type.Name + " AS T" + index);
-
-            this.Find(type, index);
-        }
-
-        private void Find(Type type, int index)
+        public virtual void Visit(Type type, int index)
         {
+            if (index == 0)
+                this.Tables.Add(type.Name + " AS T" + index);
+
             foreach (PropertyInfo pi in type.GetProperties())
             {
                 ColumnAttribute attr = MappingHelper.GetColumnAttribute(pi);
@@ -60,7 +54,7 @@ namespace System.Data.ODB
 
                         this.Tables.Add(" LEFT JOIN " + pi.PropertyType.Name + " AS T" + next + " ON " + col  + " = T" + next + ".Id");
 
-                        this.Find(pi.PropertyType, next);
+                        this.Visit(pi.PropertyType, next);
 
                         this.Level++;                         
                     }                    

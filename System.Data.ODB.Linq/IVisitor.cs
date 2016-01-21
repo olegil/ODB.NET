@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace System.Data.ODB
 {
-    public interface IQueryParser
+    public interface IVisitor
     {
         IDbDataParameter[] GetParamters();
 

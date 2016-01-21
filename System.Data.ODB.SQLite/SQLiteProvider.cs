@@ -16,22 +16,22 @@ namespace System.Data.ODB.SQLite
         {
             Type elementType = TypeSystem.GetElementType(expression.Type);
 
-            IQueryParser parser = new SQLiteParser();
-            
-            parser.Translate(expression, this.Db.Depth);
+            IVisitor expr = new SQLiteVisitor();
 
-            IDataReader sr = this.Db.ExecuteReader(parser.ToString(), parser.GetParamters());
+            expr.Translate(expression, this.Db.Depth);
+
+            IDataReader sr = this.Db.ExecuteReader(expr.ToString(), expr.GetParamters());
 
             return Activator.CreateInstance(typeof(EntityReader<>).MakeGenericType(elementType), new object[] { sr, this.Db.Depth });
         }
 
         public override string GetSQL(Expression expression)
         {
-            IQueryParser parser = new SQLiteParser();
+            IVisitor expr = new SQLiteVisitor();
 
-            parser.Translate(expression, this.Db.Depth);
+            expr.Translate(expression, this.Db.Depth);
 
-            return parser.ToString();
+            return expr.ToString();
         } 
     }
 }

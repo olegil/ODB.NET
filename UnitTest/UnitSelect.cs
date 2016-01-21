@@ -49,9 +49,9 @@ namespace UnitTest
 
             IQuery<Book> q = db.Get<Book>();
 
-            List<Book> books = q.ToList();
+            Book book = q.First();
 
-            Assert.IsTrue(books.Count > 0);
+            Assert.IsTrue(book != null);
         }
     }
 }

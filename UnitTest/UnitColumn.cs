@@ -10,9 +10,9 @@ namespace UnitTest
         [TestMethod]
         public void TestColumns()
         {
-            TableSelector col = new TableSelector(3);
+            TableVisitor col = new TableVisitor(3);
 
-            col.Parser(typeof(Book));
+            col.Visit(typeof(Book), 0);
 
             Assert.IsTrue(col.Colums.Length > 0);
         }

@@ -7,7 +7,7 @@ using System.Data.SQLite;
 
 namespace System.Data.ODB.Linq
 {
-    public class SQLiteParser : ExpressionVisitor, IQueryParser
+    public class SQLiteVisitor : ExpressionVisitor, IVisitor
     {
         private StringBuilder sb;
         private List<IDbDataParameter> ps;
@@ -16,7 +16,7 @@ namespace System.Data.ODB.Linq
 
         public int Depth { get; private set; }
 
-        public SQLiteParser()
+        public SQLiteVisitor()
         {
             this.sb = new StringBuilder();        
             this.ps = new List<IDbDataParameter>(); 
@@ -255,8 +255,8 @@ namespace System.Data.ODB.Linq
 
             if (q != null)
             { 
-                TableSelector tsel = new TableSelector(this.Depth);
-                tsel.Parser(q.ElementType);
+                TableVisitor tsel = new TableVisitor(this.Depth);
+                tsel.Visit(q.ElementType, 0);
 
                 this.sb.Append("SELECT ");
                 this.sb.Append(tsel.Colums);

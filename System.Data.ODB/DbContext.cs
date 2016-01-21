@@ -200,9 +200,9 @@ namespace System.Data.ODB
         /// </summary>
         public virtual IQuery<T> Get<T>() where T : IEntity
         { 
-            TableSelector tsel = new TableSelector(this.Depth);
+            TableVisitor tsel = new TableVisitor(this.Depth);
 
-            tsel.Parser(typeof(T));
+            tsel.Visit(typeof(T), 0);
 
             IQuery<T> q = this.Query<T>().Select(tsel.Colums).From(tsel.Tables[0]);
 

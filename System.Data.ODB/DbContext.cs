@@ -121,10 +121,17 @@ namespace System.Data.ODB
             return this.Query<T>().Drop();
         } 
 
+
+
+        public virtual IQuery<T> From<T>() where T : IEntity
+        {
+            return this.Query<T>().Select("*").From();
+        }
+
         /// <summary>
         /// Select from Table
         /// </summary>
-        public virtual IQuery<T> Select<T>() where T : IEntity
+        public virtual IQuery<T> Get<T>() where T : IEntity
         { 
             TableVisitor tsel = new TableVisitor(this.Depth);
 

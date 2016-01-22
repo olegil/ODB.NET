@@ -106,109 +106,40 @@ namespace System.Data.ODB
         #region ORM 
 
         /// <summary>
-        /// Create a Table 
+        /// Create Table 
         /// </summary>
-        public virtual int Create<T>(bool is_cascade) where T : IEntity
+        public virtual int Create<T>() where T : IEntity
         { 
-            Type type = typeof(T);
-
-            return this.Create(type, is_cascade);
-        }
-
-        private int Create(Type type, bool is_cascade)
-        {
-            List<string> fields = new List<string>();
-
-            string name = "";
-            string dbtype = "";
-            string col = "";
-
-            foreach (PropertyInfo pi in type.GetProperties())
-            {
-                ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
-
-                if (colAttr != null)
-                {
-                    if (!colAttr.IsForeignkey)
-                    {
-                        dbtype = MappingHelper.DataConvert(pi.PropertyType);
-                    }
-                    else
-                    {
-                        dbtype = MappingHelper.DataConvert(typeof(long));
-
-                        if (is_cascade)
-                        {
-                            this.Create(pi.PropertyType, is_cascade);
-                        }
-                    }
-
-                    name = pi.Name;
-
-                    col = this.AddColumn(name, dbtype, colAttr);
-
-                    fields.Add(col);
-                }
-            }
-
-            return this.Create(type.Name, fields.ToArray());
-        }
-
-        private int Create(string table, string[] cols)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            sb.Append("CREATE TABLE IF NOT EXISTS \"" + table + "\" (\r\n");
-            sb.Append(string.Join(",\r\n", cols));
-            sb.Append("\r\n);");
-
-            return this.ExecuteNonQuery(sb.ToString());
-        }
-
-        public abstract string AddColumn(string name, string dbtype, ColumnAttribute colAttr);         
+            return this.Query<T>().Create();
+        }                
 
         /// <summary>
-        /// Drop a Table 
+        /// Drop Table 
         /// </summary>
-        public virtual int Remove<T>(bool is_cascade) where T : IEntity
-        {
-            Type type = typeof(T);
-            
-            return this.Drop(type, is_cascade);
-        }
-
-        private int Drop(Type type, bool is_cascade)
-        {
-            if (is_cascade)
-            {
-                foreach (PropertyInfo pi in type.GetProperties())
-                {
-                    ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
-
-                    if (colAttr != null && colAttr.IsForeignkey)
-                    {
-                        this.Drop(pi.PropertyType, is_cascade);
-                    }
-                }
-            }
-         
-            return this.ExecuteNonQuery("DROP TABLE IF EXISTS " + type.Name);
-        }
+        public virtual int Remove<T>() where T : IEntity
+        { 
+            return this.Query<T>().Drop();
+        } 
 
         /// <summary>
         /// Select from Table
         /// </summary>
-        public virtual IQuery<T> Get<T>() where T : IEntity
+        public virtual IQuery<T> Select<T>() where T : IEntity
         { 
             TableVisitor tsel = new TableVisitor(this.Depth);
 
-            tsel.Visit(typeof(T));
+            Type type = typeof(T);
 
-            IQuery<T> q = this.Query<T>().Select(tsel.Colums).From(tsel.Tables[0]);
+            tsel.Visit(type);
 
-            for(int i = 1; i < tsel.Tables.Count; i++)
+            IQuery<T> q = this.Query<T>().Select(tsel.Colums);
+            
+            foreach(KeyValuePair<string, string> t in tsel.Tables)
             {
-                q.Append(tsel.Tables[i]);
+                if (t.Value == "")
+                    q.From(t.Key);
+                else
+                    q.LeftJoin(t.Key).On(t.Value);
             }
 
             return q;
@@ -239,7 +170,10 @@ namespace System.Data.ODB
             return list;
         }
 
-        public int Store<T>(T t) where T : IEntity
+        /// <summary>
+        /// Store object
+        /// </summary>
+        public virtual int Store(IEntity t)
         {
             if (t.IsPersisted)
                 return this.Update(t);

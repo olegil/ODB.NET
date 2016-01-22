@@ -5,7 +5,7 @@ namespace System.Data.ODB
 {
     public class TableVisitor 
     { 
-        public List<string> Tables { get; private set; }
+        public Dictionary<string, string> Tables { get; private set; }
 
         private List<string> _cols;
        
@@ -23,14 +23,14 @@ namespace System.Data.ODB
         {
             this.Level = level;
 
-            this.Tables = new List<string>();
+            this.Tables = new Dictionary<string, string>();
             this._cols = new List<string>();
         }
 
         public virtual void Visit(Type type, int index = 0)
         {
             if (index == 0)
-                this.Tables.Add(type.Name + " AS T" + index);
+                this.Tables.Add(type.Name + " AS T" + index, "");
 
             foreach (PropertyInfo pi in type.GetProperties())
             {
@@ -48,7 +48,7 @@ namespace System.Data.ODB
 
                         int next = this.Tables.Count;
 
-                        this.Tables.Add(" LEFT JOIN " + pi.PropertyType.Name + " AS T" + next + " ON " + col  + " = T" + next + ".Id");
+                        this.Tables.Add(pi.PropertyType.Name + " AS T" + next, col  + " = T" + next + ".Id");
 
                         this.Visit(pi.PropertyType, next);
 

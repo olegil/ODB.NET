@@ -258,9 +258,9 @@ namespace System.Data.ODB.Linq
                 TableVisitor tsel = new TableVisitor(this.Depth);
                 tsel.Visit(q.ElementType);
 
-                this.sb.Append("SELECT ");
-                this.sb.Append(tsel.Colums);
-                this.sb.Append(" FROM " + tsel.Tables[0]);
+                this.sb.Append("SELECT " + tsel.Colums);         
+                this.sb.Append(" FROM " + q.ElementType);
+                this.sb.Append(" AS T0");
             }
             else if (c.Value == null)
             {

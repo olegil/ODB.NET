@@ -1,4 +1,5 @@
-﻿using System.Data.SQLite;
+﻿using System;
+using System.Data.SQLite;
 
 namespace System.Data.ODB.SQLite
 {
@@ -13,33 +14,7 @@ namespace System.Data.ODB.SQLite
         {
             return new SQLiteQuery<T>(this);
         }
-
-        public override string AddColumn(string name, string dbtype, ColumnAttribute colAttr)
-        {
-            string def = name + " " + dbtype;
-
-            if (colAttr.IsPrimaryKey)
-            {
-                def += " PRIMARY KEY";
-            }
-
-            if (colAttr.IsAuto)
-            {
-                def += " AUTOINCREMENT";
-            }
-
-            if (colAttr.IsNullable)
-            {
-                def += " NULL";
-            }
-            else
-            {
-                def += " NOT NULL";
-            }
-
-            return def;
-        }
-
+                
         public virtual long Count<T>() where T : IEntity
         {
             IQuery q = this.Query<T>().Count("*").From();

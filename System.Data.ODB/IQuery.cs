@@ -22,11 +22,14 @@ namespace System.Data.ODB
     {
         string Table { get; set; }
 
+        int Create();
+        int Drop();
+
         IQuery<T> Delete();
         IQuery<T> Update();
         IQuery<T> Select(string str);
         IQuery<T> From();
-        IQuery<T> From(string str);
+        IQuery<T> From(string table);
         IQuery<T> Where(string str);
         IQuery<T> And(string str);
         IQuery<T> Or(string str);
@@ -44,7 +47,9 @@ namespace System.Data.ODB
         IQuery<T> Skip(int start);
         IQuery<T> Take(int count);
         IQuery<T> Join<T1>() where T1 : IEntity;
+        IQuery<T> Join(string table);
         IQuery<T> LeftJoin<T1>() where T1 : IEntity;
+        IQuery<T> LeftJoin(string table);
         IQuery<T> As(string str);
         IQuery<T> On(string str);
         IQuery<T> Equal(string str);

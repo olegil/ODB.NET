@@ -39,7 +39,7 @@ namespace UnitTest
 
             db.Depth = 3;
 
-            User user = db.Get<User>().Where("Name").Eq("Chan").First();
+            User user = db.Select<User>().Where("Name").Eq("Chan").First();
 
             int a = 0;
 
@@ -64,7 +64,7 @@ namespace UnitTest
 
             db.Clear<User>();
 
-            Book book = db.Get<Book>().First();
+            Book book = db.Select<Book>().First();
 
             int a = 0;
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using System.Reflection;
 
 namespace System.Data.ODB
 {
@@ -73,34 +74,46 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery<T> From(string str)
-        {
-            this._sb.Append(" FROM ");
-            this._sb.Append(str);
-
-            return this;
-        }
-
         public virtual IQuery<T> From()
         {
             return From(this.Table);
         } 
 
+        public virtual IQuery<T> From(string table)
+        {
+            this._sb.Append(" FROM ");
+            this._sb.Append(table);
+
+            return this;
+        }
+
         public virtual IQuery<T> Join<T1>() where T1 : IEntity
         {
             Type type = typeof(T1);
+ 
+            return this.Join(MappingHelper.GetTableName(type));
+        }
 
+        public virtual IQuery<T> Join(string table)
+        {
             this._sb.Append(" JOIN ");
-            this._sb.Append(MappingHelper.GetTableName(type));
+            this._sb.Append(table);
 
             return this;
         }
 
         public virtual IQuery<T> LeftJoin<T1>() where T1 : IEntity
-        {           
+        {
+            Type type = typeof(T1);
+
+            return this.LeftJoin(MappingHelper.GetTableName(type));
+        }
+
+        public virtual IQuery<T> LeftJoin(string table)
+        {
             this._sb.Append(" LEFT");
-        
-            return this.Join<T1>();
+
+            return this.Join(table);
         }
 
         public virtual IQuery<T> Where(string str)
@@ -261,6 +274,86 @@ namespace System.Data.ODB
             return this;
         }
 
+        public int Create()
+        {
+            Type type = typeof(T);
+
+            return this.Create(type);
+        }
+
+        public virtual int Create(string table, string[] cols)
+        {
+            this._sb.Clear();
+
+            this._sb.Append("CREATE TABLE IF NOT EXISTS \"" + table + "\" (\r\n");
+            this._sb.Append(string.Join(",\r\n", cols));
+            this._sb.Append("\r\n);");
+
+            return this._db.ExecuteNonQuery(this._sb.ToString());
+        }
+
+        public virtual int Create(Type type)
+        {
+            List<string> fields = new List<string>();
+
+            string dbtype = "";
+            string col = "";
+             
+            foreach (PropertyInfo pi in type.GetProperties())
+            {
+                ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
+
+                if (colAttr != null)
+                {
+                    if (!colAttr.IsForeignkey)
+                    {
+                        dbtype = MappingHelper.DataConvert(pi.PropertyType);
+                    }
+                    else
+                    {
+                        dbtype = MappingHelper.DataConvert(typeof(long));
+
+                        this.Create(pi.PropertyType);
+                    }
+
+                    col = this.AddColumn(pi.Name, dbtype, colAttr);
+
+                    fields.Add(col);
+                }
+            }
+
+            return this.Create(type.Name, fields.ToArray());
+        }
+
+        public abstract string AddColumn(string name, string dbtype, ColumnAttribute colAttr);
+        
+        public virtual int Drop()
+        {
+            Type type = typeof(T);
+
+            return this.Drop(type);
+        }
+
+        public virtual int Drop(string table)
+        {
+            return this._db.ExecuteNonQuery("DROP TABLE IF EXISTS " + table);
+        }
+
+        public virtual int Drop(Type type)
+        { 
+            foreach (PropertyInfo pi in type.GetProperties())
+            {
+                ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
+
+                if (colAttr != null && colAttr.IsForeignkey)
+                {
+                    this.Drop(pi.PropertyType);
+                }
+            }
+
+            return this.Drop(type.Name); 
+        }
+
         public abstract IDbDataParameter BindParam(string name, object b, ColumnAttribute attr);
                  
         public override string ToString()
@@ -272,12 +365,12 @@ namespace System.Data.ODB
 
         public DataSet Result()
         {
-            return this._db.ExecuteDataSet(this);
+            return this._db.ExecuteDataSet(this._sb.ToString(), this.Parameters.ToArray());
         }
  
         public List<T> ToList()
         {
             return this._db.Get<T>(this) as List<T>;
-        }      
+        }         
     }
 }

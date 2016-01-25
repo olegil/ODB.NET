@@ -120,12 +120,10 @@ namespace System.Data.ODB
         { 
             return this.Query<T>().Drop();
         } 
-
-
-
+        
         public virtual IQuery<T> From<T>() where T : IEntity
         {
-            return this.Query<T>().Select("*").From();
+            return this.Query<T>().Select(new string[] { "*" }).From();
         }
 
         /// <summary>

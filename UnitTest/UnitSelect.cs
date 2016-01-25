@@ -33,6 +33,7 @@ namespace UnitTest
 
             IQuery<User> q = db.Get<User>().Where("Name").Eq("Peter");
 
+
             User user = q.First();
 
             db.Close();

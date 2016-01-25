@@ -67,9 +67,9 @@ namespace System.Data.ODB
             return this.From();
         }
 
-        public virtual IQuery<T> Select(string str)
+        public virtual IQuery<T> Select(string[] cols)
         {
-            this._sb.Append("SELECT " + str);
+            this._sb.Append("SELECT " + string.Join(",", cols));
         
             return this;
         }
@@ -198,7 +198,8 @@ namespace System.Data.ODB
 
         public virtual IQuery<T> Count(string str)  
         {
-            return this.Select(" COUNT(" + str + ")"); 
+            string[] cols = { " COUNT(" + str + ")" };
+            return this.Select(cols); 
         }
 
         public abstract IQuery<T> Skip(int start);
@@ -372,5 +373,10 @@ namespace System.Data.ODB
         {
             return this._db.Get<T>(this) as List<T>;
         }         
+
+        public long ToInt()
+        {
+            return this._db.ExecuteScalar<long>(this._sb.ToString(), this.Parameters.ToArray());
+        }
     }
 }

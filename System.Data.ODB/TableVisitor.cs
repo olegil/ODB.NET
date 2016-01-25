@@ -9,11 +9,11 @@ namespace System.Data.ODB
 
         private List<string> _cols;
        
-        public string Colums
+        public string[] Colums
         {
             get
             {
-                return string.Join(",", this._cols.ToArray());
+                return this._cols.ToArray();
             }
         }
 

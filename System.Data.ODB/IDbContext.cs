@@ -13,6 +13,8 @@ namespace System.Data.ODB
 
         int Store(IEntity t);
 
+        IQuery<T> From<T>() where T : IEntity;
+
         IList<T> Get<T>(IQuery query) where T : IEntity;
   
         DataSet ExecuteDataSet(string sql, params IDbDataParameter[] commandParameters);

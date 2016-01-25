@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Linq.Expressions;
 using System.Collections.Generic;
 using System.Data.SQLite;
 
@@ -47,7 +48,7 @@ namespace System.Data.ODB.SQLite
             p.DbType = MappingHelper.TypeConvert(b);          
 
             return p;
-        } 
+        }
 
         public override IQuery<T> Skip(int start)
         {

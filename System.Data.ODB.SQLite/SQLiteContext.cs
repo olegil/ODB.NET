@@ -15,11 +15,16 @@ namespace System.Data.ODB.SQLite
             return new SQLiteQuery<T>(this);
         }
                 
-        public virtual long Count<T>() where T : IEntity
+        public virtual IQuery<T> Count<T>(string str) where T : IEntity
         {
-            IQuery q = this.Query<T>().Count("*").From();
+            IQuery<T> q = this.Query<T>().Count(str).From();
 
-            return this.ExecuteScalar<long>(q);
+            return q;
+        }
+
+        public virtual IQuery<T> Count<T>() where T : IEntity
+        {             
+            return this.Count<T>("*");
         }
 
         public override long InsertReturnId<T>(T t)

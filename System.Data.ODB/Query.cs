@@ -199,6 +199,7 @@ namespace System.Data.ODB
         public virtual IQuery<T> Count(string str)  
         {
             string[] cols = { " COUNT(" + str + ")" };
+
             return this.Select(cols); 
         }
 

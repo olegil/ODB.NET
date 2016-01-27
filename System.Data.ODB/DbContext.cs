@@ -126,6 +126,28 @@ namespace System.Data.ODB
             return this.Query<T>().Select(new string[] { "*" }).From();
         }
 
+        public virtual IQuery<T> Count<T>(string str) where T : IEntity
+        {
+            IQuery<T> q = this.Query<T>().Count(str).From();
+
+            return q;
+        }
+
+        public virtual IQuery<T> Count<T>() where T : IEntity
+        {
+            return this.Count<T>("*");
+        }
+
+        public virtual IQuery<T> Update<T>() where T : IEntity
+        {
+            return this.Query<T>().Update();
+        }
+
+        public virtual IQuery<T> Delete<T>() where T : IEntity
+        {
+            return this.Query<T>().Delete();
+        }
+
         /// <summary>
         /// Select from Table
         /// </summary>

@@ -62,18 +62,18 @@ namespace UnitTest
 
             db.Depth = 3;
 
-            db.Clear<User>();
+            db.Create<EmsGroup>();
 
-            Book book = db.Get<Book>().First();
+            User user = new User() { BID = "asdfsdaf", Name = "Peter", Birthday = DateTime.Now };
+            Role role = new Role() { Name = "Root" };
 
-            int a = 0;
+            EmsGroup g = new EmsGroup() { User = user, Role = role };
 
-            if (book != null)
-            {
-                book.Release = DateTime.Now;
+            int a = db.Store(g);
 
-                a = db.Store(book);
-            }
+            IQuery<EmsGroup> query = db.Get<EmsGroup>().Where("User").Eq(1);
+
+            List<EmsGroup> list = query.ToList();
 
             db.Close();
 

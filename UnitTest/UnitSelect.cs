@@ -60,7 +60,7 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            User user = db.From<User>().First();
+            User user = db.Get<User>().First();
              
             Assert.IsTrue(user != null);
         }

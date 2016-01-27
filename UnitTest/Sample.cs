@@ -53,6 +53,21 @@ namespace UnitTest
         public Address Address { get; set; }
     }
 
+    public class EmsGroup : EntityBase
+    {
+        [Column(IsForeignkey = true)]
+        public User User { get; set; }
+
+        [Column(IsForeignkey = true)]
+        public Role Role { get; set; }
+    }
+
+    public class Role : EntityBase
+    {
+        [Column]
+        public string Name { get; set; }      
+    }
+
     public class MyRepository : Repository
     {
         public QueryTable<User> Users { get; set; }

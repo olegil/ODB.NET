@@ -121,11 +121,6 @@ namespace System.Data.ODB
             return this.Query<T>().Drop();
         } 
         
-        public virtual IQuery<T> From<T>() where T : IEntity
-        {
-            return this.Query<T>().Select(new string[] { "*" }).From();
-        }
-
         public virtual IQuery<T> Count<T>(string str) where T : IEntity
         {
             IQuery<T> q = this.Query<T>().Count(str).From();

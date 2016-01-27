@@ -62,22 +62,25 @@ namespace UnitTest
 
             db.Depth = 3;
 
-            db.Create<EmsGroup>();
+            //  db.Clear<EmsGroup>();
+            //  db.Clear<User>();
+            //  db.Clear<Role>();
 
-            User user = new User() { BID = "asdfsdaf", Name = "Peter", Birthday = DateTime.Now };
-            Role role = new Role() { Name = "Root" };
+            //  User user = new User() { Name = "Peter", BID = "342623472357", Birthday = DateTime.Now };
 
-            EmsGroup g = new EmsGroup() { User = user, Role = role };
+         //   User user = db.Get<User>().Where("Name").Eq("Peter").First();
 
-            int a = db.Store(g);
+        //    Role role = new Role() { Name = "Root" };
 
-            IQuery<EmsGroup> query = db.Get<EmsGroup>().Where("User").Eq(1);
+         //   EmsGroup g = new EmsGroup() { User = user, Role = role };
 
-            List<EmsGroup> list = query.ToList();
+         //   int a = db.Store(g); 
+
+            List<EmsGroup> list = db.Get<EmsGroup>().ToList();
 
             db.Close();
 
-            Assert.IsTrue(a > 0);
+            Assert.IsTrue(list.Count > 0);
         }
     }
 }

@@ -11,6 +11,7 @@ namespace System.Data.ODB
         private bool disposed = false;
 
         public int Level { get; private set; }
+        private int next = 0;
     
         public EntityReader(IDataReader reader, int depth)
         {
@@ -47,9 +48,7 @@ namespace System.Data.ODB
 
             while (this.sr.Read())
             {
-                int index = 0;
-
-                object b = this.getEntry(type, index);               
+                object b = this.getEntry(type, 0);               
                 
                 yield return (T)b;
             }
@@ -59,6 +58,9 @@ namespace System.Data.ODB
 
         private object getEntry(Type type, int index)
         {
+            if (index == 0)
+                this.next = 0;
+
             object instance = Activator.CreateInstance(type);  
 
             foreach (PropertyInfo pi in type.GetProperties())
@@ -73,12 +75,12 @@ namespace System.Data.ODB
                         {
                             this.Level--;
 
-                            index++;
-
-                            object b = this.getEntry(pi.PropertyType, index);
+                            this.next++;
+                        
+                            object b = this.getEntry(pi.PropertyType, this.next);
 
                             this.Level++;
-
+ 
                             if ((b as IEntity).Id != 0)
                                 pi.SetValue(instance, b, null);
                             else
@@ -92,17 +94,16 @@ namespace System.Data.ODB
                         object value = this.sr[colName] == DBNull.Value ? null : this.sr[colName];
 
                         pi.SetValue(instance, value, null);                        
-                    }
-                  
+                    }                  
                 }
 
-                //if (pi.Name == "IsPersisted")
-                //{
-                //    pi.SetValue(instance, true, null);
-                //}
+                if (pi.Name == "IsPersisted")
+                {
+                    pi.SetValue(instance, true, null);
+                }
             }
 
-            type.GetProperty("IsPersisted").SetValue(instance, true, null);
+            //type.GetProperty("IsPersisted").SetValue(instance, true, null);
 
             return instance;
         }

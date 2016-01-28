@@ -48,6 +48,8 @@ namespace System.Data.ODB
 
             while (this.sr.Read())
             {
+                this.next = 0;
+
                 object b = this.getEntry(type, 0);               
                 
                 yield return (T)b;
@@ -57,10 +59,7 @@ namespace System.Data.ODB
         }
 
         private object getEntry(Type type, int index)
-        {
-            if (index == 0)
-                this.next = 0;
-
+        { 
             object instance = Activator.CreateInstance(type);  
 
             foreach (PropertyInfo pi in type.GetProperties())
@@ -76,7 +75,7 @@ namespace System.Data.ODB
                             this.Level--;
 
                             this.next++;
-                        
+
                             object b = this.getEntry(pi.PropertyType, this.next);
 
                             this.Level++;

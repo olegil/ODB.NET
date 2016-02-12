@@ -380,11 +380,13 @@ namespace System.Data.ODB
         /// <summary>
         /// Delete all table data
         /// </summary>
-        public virtual int Clear<T>() where T : IEntity
+        public virtual bool Clear<T>() where T : IEntity
         {
             IQuery q = this.Query<T>().Delete();
 
-            return this.ExecuteNonQuery(q);
+            this.ExecuteNonQuery(q);
+
+            return true;
         }
 
         #endregion

@@ -32,8 +32,7 @@ namespace UnitTest
             db.Depth = 2;
 
             IQuery<User> q = db.Get<User>().Where("Name").Eq("Peter");
-
-
+            
             User user = q.First();
 
             db.Close();

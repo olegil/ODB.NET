@@ -5,7 +5,7 @@ using System.Data.ODB.SQLite;
 
 namespace UnitTest
 {   
-    public class User : EntityBase
+    public class User : OdbEntity
     {
         [Column]
         public string BID { get; set; }
@@ -17,7 +17,7 @@ namespace UnitTest
         public DateTime Birthday { get; set; }
     }
       
-    public class Address : EntityBase
+    public class Address : OdbEntity
     { 
         [Column]
         public string Flat { get; set; }
@@ -29,7 +29,7 @@ namespace UnitTest
         public string City { get; set; }
     }
 
-    public class Book : EntityBase
+    public class Book : OdbEntity
     {
         [Column]
         public string ISBN { get; set; }
@@ -44,7 +44,7 @@ namespace UnitTest
         public Publish Publish { get; set; }
     } 
 
-    public class Publish : EntityBase
+    public class Publish : OdbEntity
     {
         [Column]
         public string Name { get; set; }
@@ -53,7 +53,7 @@ namespace UnitTest
         public Address Address { get; set; }
     }
 
-    public class EmsGroup : EntityBase
+    public class EmsGroup : OdbEntity
     {
         [Column(IsForeignkey = true)]
         public User User { get; set; }
@@ -62,13 +62,13 @@ namespace UnitTest
         public Role Role { get; set; }
     }
 
-    public class Role : EntityBase
+    public class Role : OdbEntity
     {
         [Column]
         public string Name { get; set; }      
     }
 
-    public class MyRepository : Repository
+    public class MyRepository : OdbRepository
     {
         public QueryTable<User> Users { get; set; }
 

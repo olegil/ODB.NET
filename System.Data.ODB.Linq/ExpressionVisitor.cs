@@ -4,9 +4,9 @@ using System.Linq.Expressions;
 
 namespace System.Data.ODB.Linq
 {
-    public abstract class ExpressionVisitor
+    public abstract class ODBExpressionVisitor
     {
-        protected ExpressionVisitor()
+        protected ODBExpressionVisitor()
         { 
         }
                

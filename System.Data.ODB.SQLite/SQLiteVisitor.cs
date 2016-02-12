@@ -4,10 +4,11 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Reflection;
 using System.Data.SQLite;
+using System.Data.ODB.Linq;
 
-namespace System.Data.ODB.Linq
+namespace System.Data.ODB.SQLite
 {
-    public class SQLiteVisitor : ExpressionVisitor, IVisitor
+    public class SQLiteVisitor : ODBExpressionVisitor, IVisitor
     {
         private StringBuilder sb;
         private List<IDbDataParameter> ps;
@@ -324,7 +325,7 @@ namespace System.Data.ODB.Linq
             p.Value = b;
             //p.Size = attr.Size;
 
-            p.DbType = MappingHelper.TypeConvert(b);
+            p.DbType = TypeHelper.Convert(b);
 
             this.ps.Add(p);
 

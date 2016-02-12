@@ -51,7 +51,7 @@
   <ItemGroup>
     <ProjectReference Include="..\System.Data.ODB\System.Data.ODB.csproj">
       <Project>{229d7b4e-1718-4c93-9d69-ec68938a9731}</Project>
-      <Name>System.Data.ORM</Name>
+      <Name>System.Data.ODB</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

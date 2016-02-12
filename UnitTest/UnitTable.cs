@@ -30,11 +30,11 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            int a = db.Clear<User>();
+            bool a = db.Clear<User>();
 
             db.Close();
 
-            Assert.IsTrue(a > 0);
+            Assert.IsTrue(a);
         }
     }
 }

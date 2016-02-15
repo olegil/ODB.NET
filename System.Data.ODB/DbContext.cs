@@ -148,15 +148,15 @@ namespace System.Data.ODB
         /// </summary>
         public virtual IQuery<T> Get<T>() where T : IEntity
         { 
-            TableVisitor tsel = new TableVisitor(this.Depth);
+            TableVisitor tr = new TableVisitor(this.Depth);
 
             Type type = typeof(T);
 
-            tsel.Visit(type);
+            tr.Visit(type);
 
-            IQuery<T> q = this.Query<T>().Select(tsel.Colums);
+            IQuery<T> q = this.Query<T>().Select(tr.Colums);
             
-            foreach(KeyValuePair<string, string> t in tsel.Tables)
+            foreach(KeyValuePair<string, string> t in tr.Tables)
             {
                 if (t.Value == "")
                     q.From(t.Key);
@@ -174,23 +174,19 @@ namespace System.Data.ODB
         {
             using (IDataReader rdr = this.ExecuteReader(q))
             {
-                return this.Get<T>(rdr);               
-            }
-        } 
+                IList<T> list = new List<T>();
 
-        public virtual IList<T> Get<T>(IDataReader rdr) where T : IEntity
-        {           
-            IList<T> list = new List<T>();
+                using (EntityReader<T> edr = new EntityReader<T>(rdr, this.Depth))
+                {
+                    foreach (T t in edr)
+                    {
+                        list.Add(t);
+                    } 
+                }
 
-            EntityReader<T> edr = new EntityReader<T>(rdr,this.Depth);
- 
-            foreach (T t in edr)
-            {
-                list.Add(t);            
-            }
- 
-            return list;
-        }
+                return list;             
+            }            
+        }  
 
         /// <summary>
         /// Store object

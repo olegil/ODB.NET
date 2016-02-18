@@ -7,49 +7,48 @@ namespace System.Data.ODB.SQLite
 {
     public class SQLiteQuery<T> : OdbQuery<T>
         where T : IEntity
-    {
+    {      
         public SQLiteQuery(IDbContext db) : base(db)
-        {
+        {          
         }
   
-        public override string AddColumn(string name, string dbtype, ColumnAttribute colAttr)
+        public override string Define(string name, string dbtype, ColumnAttribute colAttr)
         {
-            string def = name + " " + dbtype;
+            string col = name + " " + dbtype;
 
             if (colAttr.IsPrimaryKey)
             {
-                def += " PRIMARY KEY";
+                col += " PRIMARY KEY";
             }
 
             if (colAttr.IsAuto)
             {
-                def += " AUTOINCREMENT";
+                col += " AUTOINCREMENT";
             }
 
             if (colAttr.IsNullable)
             {
-                def += " NULL";
+                col += " NULL";
             }
             else
             {
-                def += " NOT NULL";
+                col += " NOT NULL";
             }
-
-            return def;
+ 
+            return col;
         }
  
-        public override IDbDataParameter BindParam(string name, object b, ColumnAttribute attr)
+        public override void AddParam(string name, object b, ColumnAttribute attr)
         {
-            SQLiteParameter p = new SQLiteParameter();
+            SQLiteParameter p = new SQLiteParameter(name, b);
+        
+            p.DbType = TypeHelper.Convert(b);
 
-            p.ParameterName = "@" + name;
-            p.Value = b;
-            //p.Size = attr.Size;
-            p.DbType = TypeHelper.Convert(b);          
+            this.DbParams.Add(p);         
 
-            return p;
+            return;
         }
-
+ 
         public override IQuery<T> Skip(int start)
         {
             this._sb.Append(" LIMIT " + start.ToString());

@@ -56,6 +56,8 @@ namespace System.Data.ODB
             {
                 if (this.Connection.State == ConnectionState.Open)
                     this.Connection.Close();
+
+                this.Connection = null;
             }               
         }
  
@@ -208,8 +210,8 @@ namespace System.Data.ODB
             {
                 return -1;
             }
-             
-            List<string> fields = new List<string>();
+
+            List<string> cols = new List<string>();
             List<string> ps = new List<string>();
 
             TableMapping table = MappingHelper.Create(t);
@@ -219,18 +221,18 @@ namespace System.Data.ODB
             query.Table = table.Name;
 
             int n = 0;
-                      
-            IDbDataParameter pr;
-
+        
             Type type = t.GetType();
 
             foreach (ColumnMapping col in table.Columns)
             {
                 if (!col.Attribute.IsAuto)
-                { 
+                {
+                    string pa = "@p" + n;
+
                     if (!col.Attribute.IsForeignkey)
                     {
-                        pr = query.BindParam("p" + n, col.Value, col.Attribute);
+                        query.AddParam(pa, col.Value, col.Attribute);
                     }
                     else
                     { 
@@ -240,32 +242,29 @@ namespace System.Data.ODB
 
                             if (entry.IsPersisted)
                             {                                
-                                pr = query.BindParam("p" + n, entry.Id, col.Attribute);
+                                query.AddParam(pa, entry.Id, col.Attribute);
                             }
                             else
                             {
                                 long i = this.InsertReturnId(entry);
 
-                                pr = query.BindParam("p" + n, i, col.Attribute);
+                                query.AddParam(pa, i, col.Attribute);
                             }
                         }
                         else
                         {
-                            pr = query.BindParam("p" + n, null, col.Attribute);
+                            query.AddParam(pa, null, col.Attribute);
                         }
                     }
 
-                    fields.Add(col.Name);
-
-                    ps.Add(pr.ParameterName);
-
-                    query.Parameters.Add(pr);      
+                    cols.Add(col.Name);
+                    ps.Add(pa);
 
                     n++;
                 }                           
             }
 
-            query.Insert(fields.ToArray()).Values(ps.ToArray());         
+            query.Insert(cols.ToArray()).Values(ps.ToArray());         
 
             return this.ExecuteNonQuery(query); 
         }
@@ -289,23 +288,23 @@ namespace System.Data.ODB
             if (colKey == null)
                 throw new Exception("No key column.");
 
-            List<string> fields = new List<string>();
+            List<string> cols = new List<string>();
 
             IQuery<T> query = this.Query<T>();
 
             query.Table = table.Name;
            
             int n = 0;
-           
-            IDbDataParameter pr;
-
+          
             foreach (ColumnMapping col in table.Columns)
             {
                 if (!col.Attribute.IsPrimaryKey && !col.Attribute.IsAuto)
-                { 
+                {
+                    string pa = "@p" + n;
+
                     if (!col.Attribute.IsForeignkey) 
                     {
-                        pr = query.BindParam("p" + n, col.Value, col.Attribute);
+                        query.AddParam(pa, col.Value, col.Attribute);
                     }
                     else
                     {                    
@@ -313,7 +312,7 @@ namespace System.Data.ODB
                         {
                             this.Delete(col.Value as IEntity);
 
-                            pr = query.BindParam("p" + n, null, col.Attribute);
+                            query.AddParam(pa, null, col.Attribute);
                         }
                         else
                         {
@@ -323,26 +322,24 @@ namespace System.Data.ODB
                             {
                                 this.Update(entry);
 
-                                pr = query.BindParam("p" + n, entry.Id, col.Attribute);
+                                query.AddParam(pa, entry.Id, col.Attribute);
                             }
                             else
                             {
                                 long i = this.InsertReturnId(entry);
 
-                                pr = query.BindParam("p" + n, i, col.Attribute);
+                                query.AddParam(pa, i, col.Attribute);
                             }
                         }
                     }                   
  
-                    fields.Add(col.Name + " = " + pr.ParameterName);
-
-                    query.Parameters.Add(pr);
-
+                    cols.Add(string.Format("{0} = {1}", col.Name, pa));
+                     
                     n++;
                 } 
             }
           
-            query.Update().Set(fields.ToArray()).Where(colKey.Name).Eq(colKey.Value);
+            query.Update().Set(cols.ToArray()).Where(colKey.Name).Eq(colKey.Value);
 
             return this.ExecuteNonQuery(query);            
         }
@@ -370,7 +367,7 @@ namespace System.Data.ODB
             
             query.Delete().Where(colKey.Name).Eq(colKey.Value);
             
-            return this.ExecuteNonQuery(query.ToString(), query.Parameters.ToArray());          
+            return this.ExecuteNonQuery(query);          
         }
 
         /// <summary>
@@ -391,14 +388,14 @@ namespace System.Data.ODB
 
         public virtual DataSet ExecuteDataSet(IQuery query)
         {
-            return this.ExecuteDataSet(query.ToString(), query.Parameters.ToArray());
+            return this.ExecuteDataSet(query.ToString(), query.GetParams());
         }
 
         public abstract DataSet ExecuteDataSet(string sql, params IDbDataParameter[] commandParameters);
 
         public virtual IDataReader ExecuteReader(IQuery query)
         {
-            return this.ExecuteReader(query.ToString(), query.Parameters.ToArray());
+            return this.ExecuteReader(query.ToString(), query.GetParams());
         }
 
         public IDataReader ExecuteReader(string sql, params IDbDataParameter[] commandParameters)
@@ -426,7 +423,7 @@ namespace System.Data.ODB
 
         public T ExecuteScalar<T>(IQuery query)
         {
-            return this.ExecuteScalar<T>(query.ToString(), query.Parameters.ToArray());
+            return this.ExecuteScalar<T>(query.ToString(), query.GetParams());
         }
 
         public T ExecuteScalar<T>(string sql, params IDbDataParameter[] commandParameters)
@@ -455,7 +452,7 @@ namespace System.Data.ODB
 
         public virtual int ExecuteNonQuery(IQuery query)
         {
-            return this.ExecuteNonQuery(query.ToString(), query.Parameters.ToArray());
+            return this.ExecuteNonQuery(query.ToString(), query.GetParams());
         } 
 
         public int ExecuteNonQuery(string sql, params IDbDataParameter[] commandParameters)

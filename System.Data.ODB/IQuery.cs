@@ -9,17 +9,18 @@ namespace System.Data.ODB
         IQuery Values(string[] cols);              
         IQuery Append(string str);
 
-        IDbDataParameter BindParam(string name, object b, ColumnAttribute attr);
+        string Define(string name, string dbtype, ColumnAttribute colAttr);
+        void AddParam(string name, object b, ColumnAttribute attr);
 
-        List<IDbDataParameter> Parameters { get; set; }
-
+        IDbDataParameter[] GetParams();
+ 
         DataSet Result();
 
         string ToString();
     }
 
     public interface IQuery<T> : IQuery
-    {
+    { 
         string Table { get; set; }
 
         int Create();
@@ -60,6 +61,6 @@ namespace System.Data.ODB
 
         List<T> ToList();
 
-        long ToInt();
+        long ToInt();               
     }
 }

@@ -10,8 +10,8 @@ namespace System.Data.ODB
         protected StringBuilder _sb; 
 
         protected IDbContext _db;
-
-        public List<IDbDataParameter> Parameters { get; set; }
+               
+        public List<IDbDataParameter> DbParams { get; set; }
 
         public string Table { get; set; }
 
@@ -19,8 +19,9 @@ namespace System.Data.ODB
         {
             this._db = db;
 
-            this._sb = new StringBuilder();
-            this.Parameters = new List<IDbDataParameter>();
+            this._sb = new StringBuilder();           
+       
+            this.DbParams = new List<IDbDataParameter>();
  
             this.Table = typeof(T).Name;
         }
@@ -265,14 +266,12 @@ namespace System.Data.ODB
 
         public virtual IQuery<T> Bind(object b)
         {
-            string name = "p" + this.Parameters.Count; 
+            string pa = "@p" + this.DbParams.Count; 
 
-            IDbDataParameter p = this.BindParam(name, b, null);
+            this.AddParam(pa, b, null);
 
-            this._sb.Append(p.ParameterName);
-
-            this.Parameters.Add(p);
-
+            this._sb.Append(pa);
+                   
             return this;
         }
 
@@ -295,12 +294,10 @@ namespace System.Data.ODB
         }
 
         public virtual int Create(Type type)
-        {
-            List<string> fields = new List<string>();
-
+        { 
             string dbtype = "";
-            string col = "";
-             
+            List<string> cols = new List<string>();          
+
             foreach (PropertyInfo pi in type.GetProperties())
             {
                 ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
@@ -318,16 +315,12 @@ namespace System.Data.ODB
                         this.Create(pi.PropertyType);
                     }
 
-                    col = this.AddColumn(pi.Name, dbtype, colAttr);
-
-                    fields.Add(col);
+                    cols.Add(this.Define(pi.Name, dbtype, colAttr));                    
                 }
             }
 
-            return this.Create(type.Name, fields.ToArray());
-        }
-
-        public abstract string AddColumn(string name, string dbtype, ColumnAttribute colAttr);
+            return this.Create(type.Name, cols.ToArray());
+        } 
         
         public virtual int Drop()
         {
@@ -356,8 +349,15 @@ namespace System.Data.ODB
             return this.Drop(type.Name); 
         }
 
-        public abstract IDbDataParameter BindParam(string name, object b, ColumnAttribute attr);
-                 
+        public abstract string Define(string name, string dbtype, ColumnAttribute colAttr);
+
+        public abstract void AddParam(string name, object b, ColumnAttribute attr);
+
+        public IDbDataParameter[] GetParams()
+        {
+            return this.DbParams.ToArray();
+        }
+
         public override string ToString()
         {
             return this._sb.ToString();
@@ -369,7 +369,7 @@ namespace System.Data.ODB
 
         public DataSet Result()
         {
-            return this._db.ExecuteDataSet(this._sb.ToString(), this.Parameters.ToArray());
+            return this._db.ExecuteDataSet(this._sb.ToString(), this.DbParams.ToArray());
         }
  
         public List<T> ToList()
@@ -379,7 +379,7 @@ namespace System.Data.ODB
 
         public long ToInt()
         {
-            return this._db.ExecuteScalar<long>(this._sb.ToString(), this.Parameters.ToArray());
+            return this._db.ExecuteScalar<long>(this._sb.ToString(), this.DbParams.ToArray());
         }
     }
 }

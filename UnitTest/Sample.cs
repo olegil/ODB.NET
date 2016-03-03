@@ -68,6 +68,60 @@ namespace UnitTest
         public string Name { get; set; }      
     }
 
+    public class RegUser : OdbEntity
+    {
+        [Column]
+        public string gender { get; set; }
+
+        [Column]
+        public string title { get; set; }
+
+        [Column]
+        public string fname { get; set; }
+
+        [Column]
+        public string lname { get; set; }
+
+        [Column]
+        public string email { get; set; }
+
+        [Column]
+        public string company { get; set; }
+
+        [Column]
+        public string tel { get; set; }
+
+        [Column]
+        public string mobile { get; set; }
+
+        [Column]
+        public string relationship { get; set; }
+
+        [Column]
+        public string dietary { get; set; }
+
+        [Column]
+        public string others { get; set; }
+
+        [Column]
+        public string recommend { get; set; }
+
+        [Column]
+        public string newsletter { get; set; }
+
+        [Column]
+        public DateTime create_date { get; set; }
+
+        [Column]
+        public string privacy1 { get; set; }
+
+        [Column]
+        public string privacy2 { get; set; }
+
+        [Column]
+        public string privacy3 { get; set; }
+    }
+
     public class MyRepository : OdbRepository
     {
         public QueryTable<User> Users { get; set; }

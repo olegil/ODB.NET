@@ -25,7 +25,7 @@ namespace System.Data.ODB.SQLite
 
         public void Translate(Expression expression, int depth)
         {
-            this.sb.Clear();
+            this.sb.Length = 0;
             this.ps.Clear();
 
             this.Depth = depth;

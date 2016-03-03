@@ -284,13 +284,9 @@ namespace System.Data.ODB
 
         public virtual int Create(string table, string[] cols)
         {
-            this._sb.Clear();
+            string sql = "CREATE TABLE IF NOT EXISTS \"" + table + "\" (\r\n" + string.Join(",\r\n", cols) + "\r\n);";        
 
-            this._sb.Append("CREATE TABLE IF NOT EXISTS \"" + table + "\" (\r\n");
-            this._sb.Append(string.Join(",\r\n", cols));
-            this._sb.Append("\r\n);");
-
-            return this._db.ExecuteNonQuery(this._sb.ToString());
+            return this._db.ExecuteNonQuery(sql);
         }
 
         public virtual int Create(Type type)

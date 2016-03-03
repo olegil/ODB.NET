@@ -18,7 +18,7 @@ namespace UnitTest
 
             db.Remove<Book>();
 
-            int a = db.Create<Book>();
+            int a = db.Create<RegUser>();
 
             db.Close(); 
 

@@ -4,10 +4,10 @@ namespace System.Data.ODB
 {
     public class DataType
     {
-        public static readonly Type Interger = typeof(int);
-        public static readonly Type UInt = typeof(uint);
-        public static readonly Type Long = typeof(long);
-        public static readonly Type ULong = typeof(ulong);
+        public static readonly Type Int32 = typeof(int);
+        public static readonly Type UInt32 = typeof(uint);
+        public static readonly Type Int64 = typeof(long);
+        public static readonly Type UInt64 = typeof(ulong);
         public static readonly Type Byte = typeof(byte);
         public static readonly Type Bytes = typeof(byte[]);
         public static readonly Type SByte = typeof(sbyte);

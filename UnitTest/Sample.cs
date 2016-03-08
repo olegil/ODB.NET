@@ -68,6 +68,18 @@ namespace UnitTest
         public string Name { get; set; }      
     }
 
+    public class OrderItem : OdbEntity
+    {
+        [Column]
+        public int OrderId { get; set; }
+
+        [Column]
+        public long ItemId { get; set; }
+
+        [Column]
+        public string Name { get; set; }
+    }
+
     public class RegUser : OdbEntity
     {
         [Column]

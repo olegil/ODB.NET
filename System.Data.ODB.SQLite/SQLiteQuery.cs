@@ -85,38 +85,22 @@ namespace System.Data.ODB.SQLite
             {
                 return "VARCHAR(50)";
             }
-            else if (type == DataType.Byte)
+            else if (type == DataType.Byte || type == DataType.SByte)
             {
                 return "TINYINT";
-            }
-            else if (type == DataType.SByte)
+            }            
+            else if (type == DataType.Int32 || type == DataType.UInt32)
             {
-                return "TINYINT";
-            }
-            else if (type == DataType.Interger)
-            {
-                return "INTEGER";
-            }
-            else if (type == DataType.UInt)
-            {
-                return "INTEGER";
-            }
-            else if (type == DataType.Short)
+                return "INT";
+            }            
+            else if (type == DataType.Short || type == DataType.UShort)
             {
                 return "SMALLINT";
-            }
-            else if (type == DataType.UShort)
-            {
-                return "SMALLINT";
-            }
-            else if (type == DataType.Long)
+            }            
+            else if (type == DataType.Int64 || type == DataType.UInt64)
             {
                 return "INTEGER";
-            }
-            else if (type == DataType.ULong)
-            {
-                return "INTEGER";
-            }
+            }                   
             else if (type == DataType.Double)
             {
                 return "DOUBLE";

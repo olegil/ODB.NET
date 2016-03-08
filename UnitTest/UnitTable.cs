@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Text;
 using System.Collections.Generic;
 using System.Data;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,13 +16,13 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            db.Remove<Book>();
+            db.Remove<OrderItem>();
 
-            int a = db.Create<RegUser>();
+            int a = db.Create<OrderItem>();
 
             db.Close(); 
 
-            Assert.IsTrue(a > 0);
+            Assert.IsTrue( a > 0);
         }
 
         [TestMethod]

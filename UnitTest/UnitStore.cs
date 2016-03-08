@@ -37,17 +37,16 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            db.Depth = 3;
-
-            User user = db.Get<User>().Where("Name").Eq("Peter").First();
+            OrderItem item = db.Get<OrderItem>().First();
 
             int a = 0;
 
-            if (user != null)
+            if (item != null)
             {
-                user.BID = "5B4C7076-97F5-46F0-BE0B-18ACFE654472";
+                item.Name = "Pencil";
+                item.ItemId = 10023;
 
-                a = db.Store(user);
+                a = db.Store(item);
             }
 
             db.Close();
@@ -60,27 +59,13 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            db.Depth = 3;
+            OrderItem item = new OrderItem() { Name = "ABC", OrderId = 1 };
 
-            //  db.Clear<EmsGroup>();
-            //  db.Clear<User>();
-            //  db.Clear<Role>();
-
-            //  User user = new User() { Name = "Peter", BID = "342623472357", Birthday = DateTime.Now };
-
-         //   User user = db.Get<User>().Where("Name").Eq("Peter").First();
-
-        //    Role role = new Role() { Name = "Root" };
-
-         //   EmsGroup g = new EmsGroup() { User = user, Role = role };
-
-         //   int a = db.Store(g); 
-
-            List<EmsGroup> list = db.Get<EmsGroup>().ToList();
+            int a = db.Insert(item);      
 
             db.Close();
 
-            Assert.IsTrue(list.Count > 0);
+            Assert.IsTrue(a > 0);
         }
     }
 }

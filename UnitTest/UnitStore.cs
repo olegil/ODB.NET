@@ -59,7 +59,7 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            OrderItem item = new OrderItem() { Name = "ABC", OrderId = 1 };
+            OrderItem item = new OrderItem() { Name = "ABC", OrderId = 1, ItemId = 10235235, Price = 55.99m };
 
             int a = db.Insert(item);      
 

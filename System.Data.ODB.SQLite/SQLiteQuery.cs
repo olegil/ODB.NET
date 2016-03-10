@@ -83,24 +83,28 @@ namespace System.Data.ODB.SQLite
             }
             else if (type == DataType.Char)
             {
-                return "VARCHAR(50)";
+                return "CHAR(1)";
             }
-            else if (type == DataType.Byte || type == DataType.SByte)
+            else if (type == DataType.Byte)
             {
                 return "TINYINT";
-            }            
-            else if (type == DataType.Int32 || type == DataType.UInt32)
-            {
-                return "INT";
-            }            
-            else if (type == DataType.Short || type == DataType.UShort)
+            }
+            else if (type == DataType.Short || type == DataType.SByte)
             {
                 return "SMALLINT";
-            }            
-            else if (type == DataType.Int64 || type == DataType.UInt64)
+            }        
+            else if (type == DataType.Int32 || type == DataType.UShort)
+            {
+                return "INT";
+            }                         
+            else if (type == DataType.Int64 || type == DataType.UInt32)
             {
                 return "INTEGER";
-            }                   
+            }
+            else if (type == DataType.UInt64)
+            {
+                return "BIGINT";
+            }
             else if (type == DataType.Double)
             {
                 return "DOUBLE";
@@ -111,7 +115,7 @@ namespace System.Data.ODB.SQLite
             }
             else if (type == DataType.Decimal)
             {
-                return "NUMERIC";
+                return "NUMERIC(20,10)";
             }
             else if (type == DataType.Bool)
             {
@@ -127,8 +131,8 @@ namespace System.Data.ODB.SQLite
             }
             else if (type == DataType.Guid)
             {
-                return "VARCHAR(50)";
-            }
+                return "GUID";
+            }           
 
             return "TEXT";
         }

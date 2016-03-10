@@ -78,6 +78,9 @@ namespace UnitTest
 
         [Column]
         public string Name { get; set; }
+
+        [Column]
+        public decimal Price { get; set; }
     }
 
     public class RegUser : OdbEntity

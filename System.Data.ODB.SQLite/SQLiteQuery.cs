@@ -85,11 +85,11 @@ namespace System.Data.ODB.SQLite
             {
                 return "CHAR(1)";
             }
-            else if (type == DataType.Byte)
+            else if (type == DataType.SByte)
             {
                 return "TINYINT";
             }
-            else if (type == DataType.Short || type == DataType.SByte)
+            else if (type == DataType.Short || type == DataType.Byte)
             {
                 return "SMALLINT";
             }        

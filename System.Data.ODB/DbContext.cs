@@ -102,7 +102,7 @@ namespace System.Data.ODB
         }
 
         public abstract IQuery<T> Query<T>() where T : IEntity;
-               
+
         #endregion
 
         #region ORM 
@@ -110,19 +110,13 @@ namespace System.Data.ODB
         /// <summary>
         /// Create Table 
         /// </summary>
-        public virtual int Create<T>() where T : IEntity
-        { 
-            return this.Query<T>().Create();
-        }                
-
+        public abstract int Create<T>() where T : IEntity;
+        
         /// <summary>
         /// Drop Table 
         /// </summary>
-        public virtual int Remove<T>() where T : IEntity
-        { 
-            return this.Query<T>().Drop();
-        } 
-        
+        public abstract int Remove<T>() where T : IEntity;
+      
         public virtual IQuery<T> Count<T>(string str) where T : IEntity
         {
             IQuery<T> q = this.Query<T>().Count(str).From();
@@ -228,11 +222,11 @@ namespace System.Data.ODB
             {
                 if (!col.Attribute.IsAuto)
                 {
-                    string pa = "@p" + n;
+                    string pa = "";
 
                     if (!col.Attribute.IsForeignkey)
                     {
-                        query.AddParam(pa, col.Value, col.Attribute);
+                        pa = query.AddParameter(n, col.Value, col.Attribute);
                     }
                     else
                     { 
@@ -242,18 +236,18 @@ namespace System.Data.ODB
 
                             if (entry.IsPersisted)
                             {                                
-                                query.AddParam(pa, entry.Id, col.Attribute);
+                                pa = query.AddParameter(n, entry.Id, col.Attribute);
                             }
                             else
                             {
                                 long i = this.InsertReturnId(entry);
 
-                                query.AddParam(pa, i, col.Attribute);
+                                pa = query.AddParameter(n, i, col.Attribute);
                             }
                         }
                         else
                         {
-                            query.AddParam(pa, null, col.Attribute);
+                            pa = query.AddParameter(n, null, col.Attribute);
                         }
                     }
 
@@ -300,11 +294,11 @@ namespace System.Data.ODB
             {
                 if (!col.Attribute.IsPrimaryKey && !col.Attribute.IsAuto)
                 {
-                    string pa = "@p" + n;
+                    string pa = "";
 
                     if (!col.Attribute.IsForeignkey) 
                     {
-                        query.AddParam(pa, col.Value, col.Attribute);
+                        pa = query.AddParameter(n, col.Value, col.Attribute);
                     }
                     else
                     {                    
@@ -312,7 +306,7 @@ namespace System.Data.ODB
                         {
                             this.Delete(col.Value as IEntity);
 
-                            query.AddParam(pa, null, col.Attribute);
+                            pa = query.AddParameter(n, null, col.Attribute);
                         }
                         else
                         {
@@ -322,13 +316,13 @@ namespace System.Data.ODB
                             {
                                 this.Update(entry);
 
-                                query.AddParam(pa, entry.Id, col.Attribute);
+                                pa = query.AddParameter(n, entry.Id, col.Attribute);
                             }
                             else
                             {
                                 long i = this.InsertReturnId(entry);
 
-                                query.AddParam(pa, i, col.Attribute);
+                                pa = query.AddParameter(n, i, col.Attribute);
                             }
                         }
                     }                   
@@ -489,8 +483,8 @@ namespace System.Data.ODB
             }
 
             return;
-        }       
-
+        }
+ 
         #endregion
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Reflection;
 
 namespace System.Data.ODB.SQLite
 {
@@ -21,6 +23,165 @@ namespace System.Data.ODB.SQLite
                 return (this.Connection as SQLiteConnection).LastInsertRowId;
 
             return -1;
+        }
+
+        public override int Create<T>()
+        {
+            Type type = typeof(T);
+
+            return this.Create(type);
+        } 
+
+        public virtual int Create(Type type)
+        {
+            string dbtype = "";
+
+            List<string> cols = new List<string>();
+
+            foreach (PropertyInfo pi in type.GetProperties())
+            {
+                ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
+
+                if (colAttr != null)
+                {
+                    if (!colAttr.IsForeignkey)
+                    {
+                        dbtype = this.TypeMapping(pi.PropertyType);
+                    }
+                    else
+                    {
+                        dbtype = this.TypeMapping(typeof(long));
+
+                        this.Create(pi.PropertyType);
+                    }
+
+                    cols.Add(this.Define(pi.Name, dbtype, colAttr));
+                }
+            }
+
+            return this.Create(type.Name, cols.ToArray());
+        }
+
+        public virtual int Create(string table, string[] cols)
+        {
+            string sql = "CREATE TABLE IF NOT EXISTS \"" + table + "\" (\r\n" + string.Join(",\r\n", cols) + "\r\n);";
+
+            return this.ExecuteNonQuery(sql);
+        }
+
+        public virtual int Drop(string table)
+        {
+            return this.ExecuteNonQuery("DROP TABLE IF EXISTS " + table);
+        }
+
+        public virtual int Drop(Type type)
+        {
+            foreach (PropertyInfo pi in type.GetProperties())
+            {
+                ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
+
+                if (colAttr != null && colAttr.IsForeignkey)
+                {
+                    this.Drop(pi.PropertyType);
+                }
+            }
+
+            return this.Drop(type.Name);
+        }
+
+        public override int Remove<T>()
+        {
+            Type type = typeof(T);
+
+            return this.Drop(type);
+        }
+
+        public string Define(string name, string dbtype, ColumnAttribute colAttr)
+        {
+            string col = name + " " + dbtype;
+
+            if (colAttr.IsPrimaryKey)
+            {
+                col += " PRIMARY KEY";
+            }
+
+            if (colAttr.IsAuto)
+            {
+                col += " AUTOINCREMENT";
+            }
+
+            if (colAttr.IsNullable)
+            {
+                col += " NULL";
+            }
+            else
+            {
+                col += " NOT NULL";
+            }
+
+            return col;
+        }
+
+        public string TypeMapping(Type type)
+        {
+            if (type == DataType.String)
+            {
+                return "TEXT";
+            }
+            else if (type == DataType.Char)
+            {
+                return "CHAR(1)";
+            }
+            else if (type == DataType.SByte)
+            {
+                return "TINYINT";
+            }
+            else if (type == DataType.Short || type == DataType.Byte)
+            {
+                return "SMALLINT";
+            }
+            else if (type == DataType.Int32 || type == DataType.UShort)
+            {
+                return "INT";
+            }
+            else if (type == DataType.Int64 || type == DataType.UInt32)
+            {
+                return "INTEGER";
+            }
+            else if (type == DataType.UInt64)
+            {
+                return "BIGINT";
+            }
+            else if (type == DataType.Double)
+            {
+                return "DOUBLE";
+            }
+            else if (type == DataType.Float)
+            {
+                return "REAL";
+            }
+            else if (type == DataType.Decimal)
+            {
+                return "NUMERIC(20,10)";
+            }
+            else if (type == DataType.Bool)
+            {
+                return "BOOLEAN";
+            }
+            else if (type == DataType.DateTime)
+            {
+                return "DATETIME";
+            }
+            else if (type == DataType.Bytes)
+            {
+                return "BLOB";
+            }
+            else if (type == DataType.Guid)
+            {
+                return "GUID";
+            }
+
+            return "TEXT";
         }
 
         public override DataSet ExecuteDataSet(string sql, params IDbDataParameter[] commandParameters)
@@ -55,6 +216,6 @@ namespace System.Data.ODB.SQLite
 
             //return the dataset
             return ds;
-        } 
+        }       
     }
 }

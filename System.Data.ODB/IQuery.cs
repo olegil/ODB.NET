@@ -8,9 +8,8 @@ namespace System.Data.ODB
         IQuery Insert(string[] cols);
         IQuery Values(string[] cols);              
         IQuery Append(string str);
-
-        string Define(string name, string dbtype, ColumnAttribute colAttr);
-        void AddParam(string name, object b, ColumnAttribute attr);
+               
+        string AddParameter(int index, object b, ColumnAttribute attr);
 
         IDbDataParameter[] GetParams();
  
@@ -21,10 +20,7 @@ namespace System.Data.ODB
 
     public interface IQuery<T> : IQuery
     { 
-        string Table { get; set; }
-
-        int Create();
-        int Drop();
+        string Table { get; set; } 
 
         IQuery<T> Delete();
         IQuery<T> Update();

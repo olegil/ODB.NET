@@ -266,88 +266,16 @@ namespace System.Data.ODB
 
         public virtual IQuery<T> Bind(object b)
         {
-            string pa = "@p" + this.DbParams.Count; 
+            int index = this.DbParams.Count;
 
-            this.AddParam(pa, b, null);
+            string p = this.AddParameter(index, b, null);
 
-            this._sb.Append(pa);
+            this._sb.Append(p);
                    
             return this;
-        }
-
-        public int Create()
-        {
-            Type type = typeof(T);
-
-            return this.Create(type);
-        }
-
-        public virtual int Create(string table, string[] cols)
-        {
-            string sql = "CREATE TABLE IF NOT EXISTS \"" + table + "\" (\r\n" + string.Join(",\r\n", cols) + "\r\n);";        
-
-            return this._db.ExecuteNonQuery(sql);
-        }
-
-        public virtual int Create(Type type)
-        { 
-            string dbtype = "";
-            List<string> cols = new List<string>();          
-
-            foreach (PropertyInfo pi in type.GetProperties())
-            {
-                ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
-
-                if (colAttr != null)
-                {
-                    if (!colAttr.IsForeignkey)
-                    {
-                        dbtype = this.TypeMapping(pi.PropertyType);
-                    }
-                    else
-                    {
-                        dbtype = this.TypeMapping(typeof(long));
-
-                        this.Create(pi.PropertyType);
-                    }
-
-                    cols.Add(this.Define(pi.Name, dbtype, colAttr));                    
-                }
-            }
-
-            return this.Create(type.Name, cols.ToArray());
-        } 
-        
-        public virtual int Drop()
-        {
-            Type type = typeof(T);
-
-            return this.Drop(type);
-        }
-
-        public virtual int Drop(string table)
-        {
-            return this._db.ExecuteNonQuery("DROP TABLE IF EXISTS " + table);
-        }
-
-        public virtual int Drop(Type type)
-        { 
-            foreach (PropertyInfo pi in type.GetProperties())
-            {
-                ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
-
-                if (colAttr != null && colAttr.IsForeignkey)
-                {
-                    this.Drop(pi.PropertyType);
-                }
-            }
-
-            return this.Drop(type.Name); 
-        }
-
-        public abstract string Define(string name, string dbtype, ColumnAttribute colAttr);
-
-        public abstract void AddParam(string name, object b, ColumnAttribute attr);
+        }          
+      
+        public abstract string AddParameter(int index, object b, ColumnAttribute attr);
 
         public IDbDataParameter[] GetParams()
         {
@@ -357,9 +285,7 @@ namespace System.Data.ODB
         public override string ToString()
         {
             return this._sb.ToString();
-        }
-
-        public abstract string TypeMapping(Type type);
+        } 
 
         public abstract T First();        
 

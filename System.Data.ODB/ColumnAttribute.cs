@@ -13,7 +13,7 @@ namespace System.Data.ODB
         public bool IsNullable { get; set; }      
               
         public ColumnAttribute()
-        {  
+        { 
         }
     }
 }

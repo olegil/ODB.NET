@@ -13,7 +13,7 @@ namespace System.Data.ODB.SQLite
         private StringBuilder sb;
         private List<IDbDataParameter> ps;
         private bool _limit = false;     
-        private int _length = 0;
+        private int _index = 0;
 
         public int Depth { get; private set; }
 
@@ -29,7 +29,7 @@ namespace System.Data.ODB.SQLite
             this.ps.Clear();
 
             this.Depth = depth;
-            this._length = 0;
+            this._index = 0;
             this._limit = false;
 
             this.Visit(expression); 
@@ -269,11 +269,11 @@ namespace System.Data.ODB.SQLite
             }
             else
             {
-                string name = "@p" + this._length++;
+                string name = this.Bind(this._index, c.Value);
 
                 this.sb.Append(name);
 
-                this.BindParam(name, c.Value);                               
+                this._index++;                    
             }
 
             return c;
@@ -317,8 +317,10 @@ namespace System.Data.ODB.SQLite
             return m;           
         }
 
-        private IDbDataParameter BindParam(string name, object b)
+        private string Bind(int index, object b)
         {
+            string name = "@p" + index;
+
             SQLiteParameter p = new SQLiteParameter();
 
             p.ParameterName = name;
@@ -329,7 +331,7 @@ namespace System.Data.ODB.SQLite
 
             this.ps.Add(p);
 
-            return p;
+            return name;
         } 
 
         public override string ToString()

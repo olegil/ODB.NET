@@ -28,7 +28,8 @@ namespace System.Data.ODB
         
         public virtual IQuery Insert(string[] cols)
         {
-            this._sb.Append("INSERT INTO " + this.Table);            
+            this._sb.Append("INSERT INTO ");
+            this._sb.Append(this.Table);            
             this._sb.Append(" (");
             this._sb.Append(string.Join(", ", cols));
             this._sb.Append(")");                
@@ -70,7 +71,8 @@ namespace System.Data.ODB
 
         public virtual IQuery<T> Select(string[] cols)
         {
-            this._sb.Append("SELECT " + string.Join(",", cols));
+            this._sb.Append("SELECT ");
+            this._sb.Append(string.Join(",", cols));
         
             return this;
         }
@@ -146,21 +148,23 @@ namespace System.Data.ODB
 
         public virtual IQuery<T> Equal(string str)
         {
-            this._sb.Append(" = " + str);
+            this._sb.Append(" = ");
+            this._sb.Append(str);
 
             return this;
         }
 
         public virtual IQuery<T> As(string str)
         {
-            this._sb.Append(" AS " + str);
-
+            this._sb.Append(" AS ");
+            this._sb.Append(str);
             return this;
         }
 
         public virtual IQuery<T> On(string str)
         {
-            this._sb.Append(" ON " + str);
+            this._sb.Append(" ON ");
+            this._sb.Append(str);
 
             return this;
         }

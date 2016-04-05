@@ -16,9 +16,9 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
 
-            db.Remove<OrderItem>();
+            db.Remove<Book>();
 
-            int a = db.Create<OrderItem>();
+            int a = db.Create<Book>();
 
             db.Close(); 
 

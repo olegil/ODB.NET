@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace System.Data.ODB.SQLite
+namespace System.Data.ODB
 {
     public class TypeHelper
     {

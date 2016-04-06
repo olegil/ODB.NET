@@ -21,6 +21,7 @@ namespace System.Data.ODB
     public interface IQuery<T> : IQuery
     { 
         string Table { get; set; } 
+        string Alias { get; set; }
 
         IQuery<T> Delete();
         IQuery<T> Update();

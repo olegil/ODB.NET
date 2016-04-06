@@ -21,7 +21,11 @@ namespace System.Data.ODB.MSSQL
         public override long InsertReturnId<T>(T t)
         {
             if (this.Insert(t) > 0)
-                return 1;
+            {
+                string table = MappingHelper.GetTableName(t.GetType());
+
+                return this.ExecuteScalar<long>(string.Format("SELECT Id FROM {0} WHERE Id = SCOPE_IDENTITY();", table), null);
+            } 
 
             return -1;
         }
@@ -103,8 +107,8 @@ namespace System.Data.ODB.MSSQL
         {
             string col = "[" + name + "] " + dbtype;
 
-            if (colAttr.Size > 0)
-                col += "(" + colAttr.Size + ")";
+            if (colAttr.Length > 0)
+                col += "(" + colAttr.Length + ")";
             else
                 col += "(MAX)";
 

@@ -4,32 +4,18 @@ namespace System.Data.ODB
 {
     public class MappingHelper
     {
-        public static TableMapping Create<T>(T t) where T : IEntity
+        public static string GetTableName(Type type)
         {
-            Type type = t.GetType();
-
-            TableMapping table = new TableMapping();
-
-            table.Name = type.Name;
-
-            foreach (PropertyInfo pi in type.GetProperties())
+            object[] tableAttributes = type.GetCustomAttributes(typeof(TableAttribute), false);
+ 
+            if (tableAttributes.Length > 0)
             {
-                ColumnAttribute attr = GetColumnAttribute(pi);
+                TableAttribute attribute = tableAttributes[0] as TableAttribute;
 
-                if (attr != null)
-                {
-                    ColumnMapping col = new ColumnMapping(pi.Name, pi.GetValue(t, null), attr);
-
-                    table.Columns.Add(col);
-
-                    if (attr.IsPrimaryKey)
-                    {
-                        table.PrimaryKey = col;
-                    }
-                }
+                return attribute.Name;
             }
 
-            return table;
+            return type.Name;
         }
 
         public static ColumnAttribute GetColumnAttribute(PropertyInfo pi)
@@ -41,7 +27,7 @@ namespace System.Data.ODB
                 return objAttrs[0] as ColumnAttribute;
             }
 
-            return null;
+            return new ColumnAttribute() { Name = "", IsAuto = false, IsForeignkey = false, IsPrimaryKey = false, IsNullable = true, NotMapped = false, Length = 0 };
         }       
     }
 }

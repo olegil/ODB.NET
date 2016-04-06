@@ -9,6 +9,7 @@ namespace System.Data.ODB
         public long Id { get; set; }
 
         //Object state
+        [Column(NotMapped = true)]
         public bool IsPersisted { get; protected set; }       
     }
 }

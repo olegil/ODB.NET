@@ -10,7 +10,7 @@ namespace UnitTest
         [TestMethod]
         public void TestAdd()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
+            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
             db.Clear<User>();
            
@@ -26,7 +26,7 @@ namespace UnitTest
         [TestMethod]
         public void TestUpdate()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
+            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
             User user = db.Get<User>().First();
 
@@ -47,7 +47,7 @@ namespace UnitTest
         [TestMethod]
         public void TestDelete()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
+            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
                      
             User user = db.Get<User>().First();
 

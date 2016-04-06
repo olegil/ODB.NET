@@ -14,6 +14,7 @@ namespace System.Data.ODB
         public List<IDbDataParameter> DbParams { get; set; }
 
         public string Table { get; set; }
+        public string Alias { get; set; }
 
         public OdbQuery(IDbContext db)
         {
@@ -24,6 +25,8 @@ namespace System.Data.ODB
             this.DbParams = new List<IDbDataParameter>();
  
             this.Table = typeof(T).Name;
+
+            this.Alias = "";
         }
         
         public virtual IQuery Insert(string[] cols)
@@ -73,7 +76,7 @@ namespace System.Data.ODB
         {
             this._sb.Append("SELECT ");
             this._sb.Append(string.Join(",", cols));
-        
+             
             return this;
         }
 
@@ -124,6 +127,10 @@ namespace System.Data.ODB
             if (!string.IsNullOrEmpty(str))
             {
                 this._sb.Append(" WHERE ");
+
+                if (!string.IsNullOrEmpty(this.Alias))
+                    this._sb.Append(this.Alias + ".");
+
                 this._sb.Append(str);
             }
 

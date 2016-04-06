@@ -64,12 +64,21 @@ namespace System.Data.ODB
 
             foreach (PropertyInfo pi in type.GetProperties())
             {
-                ColumnAttribute attr = MappingHelper.GetColumnAttribute(pi);
+                ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
 
-                if (attr != null)
+                if (!colAttr.NotMapped)
                 {
-                    if (attr.IsForeignkey)
+                    if (!colAttr.IsForeignkey)
                     {
+                        string colName = string.IsNullOrEmpty(colAttr.Name) ? pi.Name : colAttr.Name;
+                        string col = "T" + index + "." + colName;
+
+                        object value = this.sr[col] == DBNull.Value ? null : this.sr[col];
+
+                        pi.SetValue(instance, value, null);
+                    }
+                    else
+                    {  
                         if (this.Level > 1)
                         {
                             this.Level--;
@@ -85,17 +94,9 @@ namespace System.Data.ODB
                             else
                                 pi.SetValue(instance, null, null);
                         }
-                    }
-                    else 
-                    { 
-                        string colName = "T" + index + "." + pi.Name; 
-
-                        object value = this.sr[colName] == DBNull.Value ? null : this.sr[colName];
-
-                        pi.SetValue(instance, value, null);                        
-                    }                  
-                }
-
+                    }                                    
+                }                  
+               
                 if (pi.Name == "IsPersisted")
                 {
                     pi.SetValue(instance, true, null);

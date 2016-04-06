@@ -11,7 +11,7 @@ namespace UnitTest
         [TestMethod]
         public void TestBatch()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
+            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
             db.Create<User>();
 

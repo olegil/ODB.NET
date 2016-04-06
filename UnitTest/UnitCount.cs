@@ -14,7 +14,7 @@ namespace UnitTest
         [TestMethod]
         public void TestCount()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
+            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
             Book book = new Book() {  ISBN = "ANDSAGSDAH", Release = DateTime.Now, User = new User() { BID = "", Name = "Chan Peter" } };
 

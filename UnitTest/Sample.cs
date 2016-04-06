@@ -6,47 +6,39 @@ using System.Data.ODB.SQLite;
 namespace UnitTest
 {   
     public class User : OdbEntity
-    {
-        [Column]
-        public string BID { get; set; }
-
-        [Column]
-        public string Name { get; set; }
-
-        [Column]
+    { 
+        public string BID { get; set; }         
+        public string Name { get; set; }         
         public DateTime Birthday { get; set; }
     }
       
     public class Address : OdbEntity
-    { 
-        [Column]
-        public string Flat { get; set; }
-
-        [Column]
-        public string Street { get; set; }
-
-        [Column]
+    {  
+        public string Flat { get; set; } 
+        public string Street { get; set; } 
         public string City { get; set; }
     }
 
+    [Table("ChineseBook")]
     public class Book : OdbEntity
-    {
-        [Column]
+    {       
+        [Column(Name = "BNO")]
         public string ISBN { get; set; }
 
-        [Column]
         public DateTime Release { get; set; }        
 
-        [Column(IsForeignkey = true, IsNullable = true)]
+        [Column(IsForeignkey = true, IsNullable = false)]
         public User User { get; set; }
 
-        [Column(IsForeignkey = true, IsNullable = true)]
+        [Column(IsForeignkey = true, IsNullable = false)]
         public Publish Publish { get; set; }
+
+        [Column(NotMapped = true)]
+        public string Remark { get; set; }
     } 
 
     public class Publish : OdbEntity
-    {
-        [Column]
+    { 
         public string Name { get; set; }
 
         [Column(IsForeignkey = true, IsNullable = true)]
@@ -68,82 +60,34 @@ namespace UnitTest
         public string Name { get; set; }      
     }
 
+    public class Order : OdbEntity
+    {
+        [Column(IsForeignkey = true)]
+        public User User { get; set; }
+
+        public DateTime Date { get; set; }
+    }
+
     public class OrderItem : OdbEntity
     {
-        [Column]
-        public int OrderId { get; set; }
-
-        [Column]
-        public long ItemId { get; set; }
-
-        [Column]
+        [Column(IsForeignkey = true)]
+        public Order Order { get; set; }
+        
         public string Name { get; set; }
+       
+        public int Quantity { get; set; }
 
-        [Column]
+        [Column(NotMapped = true)]
         public decimal Price { get; set; }
     }
-
-    public class RegUser : OdbEntity
-    {
-        [Column]
-        public string gender { get; set; }
-
-        [Column]
-        public string title { get; set; }
-
-        [Column]
-        public string fname { get; set; }
-
-        [Column]
-        public string lname { get; set; }
-
-        [Column]
-        public string email { get; set; }
-
-        [Column]
-        public string company { get; set; }
-
-        [Column]
-        public string tel { get; set; }
-
-        [Column]
-        public string mobile { get; set; }
-
-        [Column]
-        public string relationship { get; set; }
-
-        [Column]
-        public string dietary { get; set; }
-
-        [Column]
-        public string others { get; set; }
-
-        [Column]
-        public string recommend { get; set; }
-
-        [Column]
-        public string newsletter { get; set; }
-
-        [Column]
-        public DateTime create_date { get; set; }
-
-        [Column]
-        public string privacy1 { get; set; }
-
-        [Column]
-        public string privacy2 { get; set; }
-
-        [Column]
-        public string privacy3 { get; set; }
-    }
-
+     
     public class MyRepository : OdbRepository
     {
         public QueryTable<User> Users { get; set; }
 
         public MyRepository()
         {           
-            this.Db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
+            this.Db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
             QueryProvider provider = new SQLiteProvider(this.Db);
 

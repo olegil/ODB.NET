@@ -41,25 +41,32 @@ namespace System.Data.ODB.SQLite
             foreach (PropertyInfo pi in type.GetProperties())
             {
                 ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
-
-                if (colAttr != null)
-                {
+ 
+                if (!colAttr.NotMapped)
+                { 
                     if (!colAttr.IsForeignkey)
                     {
                         dbtype = this.TypeMapping(pi.PropertyType);
                     }
                     else
                     {
+                        if (string.IsNullOrEmpty(colAttr.Name))
+                            colAttr.Name = pi.Name + "Id";
+
                         dbtype = this.TypeMapping(typeof(long));
 
                         this.Create(pi.PropertyType);
                     }
 
-                    cols.Add(this.Define(pi.Name, dbtype, colAttr));
-                }
+                    string colName = string.IsNullOrEmpty(colAttr.Name) ? pi.Name : colAttr.Name;
+
+                    cols.Add(this.Define(colName, dbtype, colAttr));
+                }                
             }
 
-            return this.Create(type.Name, cols.ToArray());
+            string table = MappingHelper.GetTableName(type);
+
+            return this.Create(table, cols.ToArray());
         }
 
         public virtual int Create(string table, string[] cols)
@@ -71,7 +78,7 @@ namespace System.Data.ODB.SQLite
 
         public virtual int Drop(string table)
         {
-            return this.ExecuteNonQuery("DROP TABLE IF EXISTS " + table);
+            return this.ExecuteNonQuery("DROP TABLE IF EXISTS \"" + table + "\";");
         }
 
         public virtual int Drop(Type type)
@@ -86,7 +93,9 @@ namespace System.Data.ODB.SQLite
                 }
             }
 
-            return this.Drop(type.Name);
+            string table = MappingHelper.GetTableName(type);
+
+            return this.Drop(table);
         }
 
         public override int Remove<T>()
@@ -97,7 +106,7 @@ namespace System.Data.ODB.SQLite
         }
 
         public string Define(string name, string dbtype, ColumnAttribute colAttr)
-        {
+        { 
             string col = name + " " + dbtype;
 
             if (colAttr.IsPrimaryKey)

@@ -14,7 +14,7 @@ namespace UnitTest
         [TestMethod]
         public void TestTable()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
+            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
             db.Remove<Book>();
 
@@ -28,7 +28,7 @@ namespace UnitTest
         [TestMethod]
         public void TestClear()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
+            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
             bool a = db.Clear<User>();
 

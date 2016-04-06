@@ -30,29 +30,41 @@ namespace System.Data.ODB
         public virtual void Visit(Type type, int index = 0)
         {
             if (index == 0)
-                this.Tables.Add(type.Name + " AS T" + index, "");
+                this.Tables.Add("[" + MappingHelper.GetTableName(type) + "] AS T" + index, "");
 
             foreach (PropertyInfo pi in type.GetProperties())
             {
                 ColumnAttribute attr = MappingHelper.GetColumnAttribute(pi);
-
-                if (attr != null)
+ 
+                if (!attr.NotMapped)
                 {
-                    string col = "T" + index + "." + pi.Name;
+                    string colName = string.IsNullOrEmpty(attr.Name) ? pi.Name : attr.Name;
 
-                    this._cols.Add(col + " AS [" + col + "]");
+                    string col = "T" + index + "." + colName;
 
-                    if (attr.IsForeignkey && this.Level > 1)
+                    if (!attr.IsForeignkey)
                     {
-                        this.Level--;
+                        this._cols.Add(col + " AS [" + col + "]");
+                    }
+                    else  
+                    {
+                        if (this.Level > 1)
+                        {
+                            if (string.IsNullOrEmpty(attr.Name))
+                            {
+                                col += "Id";
+                            }
 
-                        int next = this.Tables.Count;
+                            this.Level--;
 
-                        this.Tables.Add(pi.PropertyType.Name + " AS T" + next, col  + " = T" + next + ".Id");
+                            int next = this.Tables.Count;
 
-                        this.Visit(pi.PropertyType, next);
+                            this.Tables.Add("[" + MappingHelper.GetTableName(pi.PropertyType) + "] AS T" + next, col + " = T" + next + ".Id");
 
-                        this.Level++;                         
+                            this.Visit(pi.PropertyType, next);
+
+                            this.Level++;
+                        }                     
                     }                    
                 }
             }

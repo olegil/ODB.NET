@@ -13,7 +13,7 @@ namespace UnitTest
         [TestMethod]
         public void TestInsertId()
         {            
-            SQLiteContext db = new SQLiteContext(string.Format(Command.connectionString, Command.Dbname));
+            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
             Publish pub = new Publish() { Name = "Bloger", Address = new Address() { Street = "Queen Road", Flat = "Westland" } };
 

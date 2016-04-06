@@ -151,8 +151,10 @@ namespace System.Data.ODB
             tr.Visit(type);
 
             IQuery<T> q = this.Query<T>().Select(tr.Colums);
-            
-            foreach(KeyValuePair<string, string> t in tr.Tables)
+
+            q.Alias = "T0";
+
+            foreach (KeyValuePair<string, string> t in tr.Tables)
             {
                 if (t.Value == "")
                     q.From(t.Key);
@@ -160,6 +162,8 @@ namespace System.Data.ODB
                     q.LeftJoin(t.Key).On(t.Value);
             }
 
+            
+ 
             return q;
         }
  
@@ -205,54 +209,60 @@ namespace System.Data.ODB
                 return -1;
             }
 
+            IQuery<T> query = this.Query<T>();
+
+            int n = 0;
+
             List<string> cols = new List<string>();
             List<string> ps = new List<string>();
 
-            TableMapping table = MappingHelper.Create(t);
-          
-            IQuery<T> query = this.Query<T>();
+            TableMapping table = new TableMapping(t);
 
-            query.Table = table.Name;
-
-            int n = 0;
-        
+            query.Table = "[" + table.Name + "]";
+            
             Type type = t.GetType();
 
-            foreach (ColumnMapping col in table.Columns)
+            foreach (ColumnMapping col in table.GetColumns())
             {
                 if (!col.Attribute.IsAuto)
                 {
-                    string pa = "";
+                    object b = null;
 
                     if (!col.Attribute.IsForeignkey)
                     {
-                        pa = query.AddParameter(n, col.Value, col.Attribute);
+                        b = col.Value; 
                     }
                     else
-                    { 
-                        if (col.Value != null)
+                    {
+                        if (this.Depth > 1)
                         {
-                            IEntity entry = col.Value as IEntity;
-
-                            if (entry.IsPersisted)
-                            {                                
-                                pa = query.AddParameter(n, entry.Id, col.Attribute);
-                            }
-                            else
+                            if (col.Value != null)
                             {
-                                long i = this.InsertReturnId(entry);
+                                IEntity entry = col.Value as IEntity;
 
-                                pa = query.AddParameter(n, i, col.Attribute);
+                                this.Depth--;
+
+                                if (entry.IsPersisted)
+                                {
+                                    this.Update(entry);
+
+                                    b = entry.Id;
+                                }
+                                else
+                                { 
+                                    b = this.InsertReturnId(entry);                                    
+                                }
+
+                                this.Depth++;
                             }
-                        }
-                        else
-                        {
-                            pa = query.AddParameter(n, null, col.Attribute);
-                        }
+                        }             
                     }
 
                     cols.Add(col.Name);
-                    ps.Add(pa);
+
+                    string pr = query.AddParameter(n, b, col.Attribute);
+
+                    ps.Add(pr);
 
                     n++;
                 }                           
@@ -275,64 +285,78 @@ namespace System.Data.ODB
                 return -1;
             }
 
-            TableMapping table = MappingHelper.Create(t);
-
-            ColumnMapping colKey = table.PrimaryKey;
-
-            if (colKey == null)
-                throw new Exception("No key column.");
-
+            TableMapping table = new TableMapping(t);
+                         
             List<string> cols = new List<string>();
 
             IQuery<T> query = this.Query<T>();
 
-            query.Table = table.Name;
+            query.Table = "[" + table.Name + "]";
            
             int n = 0;
-          
-            foreach (ColumnMapping col in table.Columns)
+
+            ColumnMapping colKey = null;
+
+            foreach (ColumnMapping col in table.GetColumns())
             {
                 if (!col.Attribute.IsPrimaryKey && !col.Attribute.IsAuto)
                 {
-                    string pa = "";
+                    object b = null;
 
                     if (!col.Attribute.IsForeignkey) 
                     {
-                        pa = query.AddParameter(n, col.Value, col.Attribute);
+                        b = col.Value;  
                     }
                     else
-                    {                    
-                        if (col.Value == null)
+                    {
+                        if (this.Depth > 1)
                         {
-                            this.Delete(col.Value as IEntity);
-
-                            pa = query.AddParameter(n, null, col.Attribute);
-                        }
-                        else
-                        {
-                            IEntity entry = col.Value as IEntity;
-
-                            if (entry.IsPersisted)
+                            if (col.Value == null)
                             {
-                                this.Update(entry);
-
-                                pa = query.AddParameter(n, entry.Id, col.Attribute);
+                                this.Delete(col.Value as IEntity);
                             }
                             else
                             {
-                                long i = this.InsertReturnId(entry);
+                                IEntity entry = col.Value as IEntity;
 
-                                pa = query.AddParameter(n, i, col.Attribute);
+                                this.Depth--;
+
+                                if (entry.IsPersisted)
+                                {
+                                    this.Update(entry);
+
+                                    b = entry.Id;
+                                }
+                                else
+                                {
+                                    b = this.InsertReturnId(entry);
+                                }
+
+                                this.Depth++;
                             }
                         }
-                    }                   
- 
-                    cols.Add(string.Format("{0} = {1}", col.Name, pa));
-                     
-                    n++;
+                    }
+
+                    if (b != null)
+                    {
+                        string pr = query.AddParameter(n, b, col.Attribute);
+
+                        cols.Add(string.Format("{0} = {1}", col.Name, pr));
+
+                        n++;
+                    }
                 } 
+                else
+                {
+                    colKey = col;
+                }
             }
-          
+
+            if (colKey == null)
+            {
+                throw new Exception("No key column.");
+            }
+
             query.Update().Set(cols.ToArray()).Where(colKey.Name).Eq(colKey.Value);
 
             return this.ExecuteNonQuery(query);            
@@ -346,9 +370,17 @@ namespace System.Data.ODB
             if (t == null || !t.IsPersisted)
                 return -1;
 
-            TableMapping table = MappingHelper.Create(t);
+            TableMapping table = new TableMapping(t);
 
-            ColumnMapping colKey = table.PrimaryKey;
+            ColumnMapping colKey = null;
+          
+            foreach (ColumnMapping col in table.GetColumns())
+            {
+                if (col.Attribute.IsPrimaryKey)
+                {
+                    colKey = col;
+                }
+            } 
 
             if (colKey == null)
             {

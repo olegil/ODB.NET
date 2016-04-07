@@ -51,15 +51,13 @@ namespace System.Data.ODB
             this.Db.RollBack();
         } 
 
-        public virtual int Add(IEntity t)
+        public virtual int Store(IEntity t)
         {
-            return this.Db.Insert(t);
-        }
-
-        public virtual int Update(IEntity t)
-        {
-            return this.Db.Update(t);
-        }        
+            if (!t.IsPersisted)
+                return this.Db.Insert(t);
+            else
+                return this.Db.Update(t);
+        } 
 
         public virtual int Delete(IEntity t)
         {

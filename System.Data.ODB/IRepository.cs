@@ -6,8 +6,7 @@ namespace System.Data.ODB
 {
     interface IRepository
     {
-        int Add(IEntity t);
-        int Update(IEntity t);
+        int Store(IEntity t);     
         int Delete(IEntity t);
     }
 }

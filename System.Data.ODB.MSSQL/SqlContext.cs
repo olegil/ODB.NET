@@ -17,19 +17,7 @@ namespace System.Data.ODB.MSSQL
         {
             return new SqlQuery<T>(this);
         }
-               
-        public override long InsertReturnId<T>(T t)
-        {
-            if (this.Insert(t) > 0)
-            {
-                string table = MappingHelper.GetTableName(t.GetType());
-
-                return this.ExecuteScalar<long>(string.Format("SELECT Id FROM {0} WHERE Id = SCOPE_IDENTITY();", table), null);
-            } 
-
-            return -1;
-        }
-
+                
         public override int Create<T>()
         {
             Type type = typeof(T);
@@ -68,19 +56,7 @@ namespace System.Data.ODB.MSSQL
 
             return this.Create(type.Name, cols.ToArray());
         }
-
-        public virtual int Create(string table, string[] cols)
-        {
-            string sql = "CREATE TABLE IF NOT EXISTS \"" + table + "\" (\r\n" + string.Join(",\r\n", cols) + "\r\n);";
-
-            return this.ExecuteNonQuery(sql);
-        }
-
-        public virtual int Drop(string table)
-        {
-            return this.ExecuteNonQuery("DROP TABLE IF EXISTS " + table);
-        }
-
+ 
         public virtual int Drop(Type type)
         {
             foreach (PropertyInfo pi in type.GetProperties())
@@ -191,12 +167,17 @@ namespace System.Data.ODB.MSSQL
             return "TEXT";
         }
 
+        public override IOdbCommand CreateCommand()
+        {
+            return new SqlOdbCommand(this);
+        }
+
         public override DataSet ExecuteDataSet(string sql, params IDbDataParameter[] commandParameters)
         {
             //create a command and prepare it for execution
             IDbCommand cmd = this.Connection.CreateCommand();
 
-            this.SetCommand(cmd, sql, commandParameters);
+            SetCommand(cmd, this.Connection, this.OdbTransaction, sql, commandParameters);
 
             //create the DataAdapter & DataSet 
             SqlDataAdapter da = new SqlDataAdapter(cmd as SqlCommand);
@@ -223,6 +204,6 @@ namespace System.Data.ODB.MSSQL
 
             //return the dataset
             return ds;
-        }       
+        } 
     }
 }

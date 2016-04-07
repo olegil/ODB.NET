@@ -7,7 +7,7 @@ namespace System.Data.ODB
     { 
         IQuery Insert(string[] cols);
         IQuery Values(string[] cols);              
-        IQuery Append(string str);
+        IQuery AddString(string str);
                
         string AddParameter(int index, object b, ColumnAttribute attr);
 
@@ -27,7 +27,7 @@ namespace System.Data.ODB
         IQuery<T> Update();
         IQuery<T> Select(string[] cols);
         IQuery<T> From();
-        IQuery<T> From(string table);
+        IQuery<T> From(string table, string alias = "");
         IQuery<T> Where(string str);
         IQuery<T> And(string str);
         IQuery<T> Or(string str);

@@ -38,6 +38,8 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IOdbCommand.cs" />
+    <Compile Include="OdbCommand.cs" />
     <Compile Include="TableVisitor.cs" />
     <Compile Include="OdbEntity.cs" />
     <Compile Include="ColumnAttribute.cs" />
@@ -54,7 +56,6 @@
     <Compile Include="OdbRepository.cs" />
     <Compile Include="EntityReader.cs" />
     <Compile Include="TableAttribute.cs" />
-    <Compile Include="TableMapping.cs" />
     <Compile Include="TypeHelper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

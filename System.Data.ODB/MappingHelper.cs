@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Collections.Generic;
 
 namespace System.Data.ODB
 {
@@ -28,6 +29,28 @@ namespace System.Data.ODB
             }
 
             return new ColumnAttribute() { Name = "", IsAuto = false, IsForeignkey = false, IsPrimaryKey = false, IsNullable = true, NotMapped = false, Length = 0 };
-        }       
+        }
+
+        public static IEnumerable<ColumnMapping> GetColumnMapping(IEntity t)
+        {
+            PropertyInfo[] propes = t.GetType().GetProperties();
+
+            for (int i = 0; i < propes.Length; i++)
+            {
+                ColumnAttribute attr = MappingHelper.GetColumnAttribute(propes[i]);
+
+                if (!attr.NotMapped)
+                {
+                    string colName = string.IsNullOrEmpty(attr.Name) ? propes[i].Name : attr.Name;
+
+                    if (attr.IsForeignkey && string.IsNullOrEmpty(attr.Name))
+                    {
+                        colName = propes[i].Name + "Id";
+                    }
+
+                    yield return new ColumnMapping(colName, propes[i].GetValue(t, null), attr);
+                }
+            }
+        }
     }
 }

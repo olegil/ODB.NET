@@ -15,15 +15,7 @@ namespace System.Data.ODB.SQLite
         public override IQuery<T> Query<T>()
         {
             return new SQLiteQuery<T>(this);
-        }
-               
-        public override long InsertReturnId<T>(T t)
-        {
-            if (this.Insert(t) > 0)
-                return (this.Connection as SQLiteConnection).LastInsertRowId;
-
-            return -1;
-        }
+        } 
 
         public override int Create<T>()
         {
@@ -68,19 +60,7 @@ namespace System.Data.ODB.SQLite
 
             return this.Create(table, cols.ToArray());
         }
-
-        public virtual int Create(string table, string[] cols)
-        {
-            string sql = "CREATE TABLE IF NOT EXISTS \"" + table + "\" (\r\n" + string.Join(",\r\n", cols) + "\r\n);";
-
-            return this.ExecuteNonQuery(sql);
-        }
-
-        public virtual int Drop(string table)
-        {
-            return this.ExecuteNonQuery("DROP TABLE IF EXISTS \"" + table + "\";");
-        }
-
+         
         public virtual int Drop(Type type)
         {
             foreach (PropertyInfo pi in type.GetProperties())
@@ -107,7 +87,7 @@ namespace System.Data.ODB.SQLite
 
         public string Define(string name, string dbtype, ColumnAttribute colAttr)
         { 
-            string col = name + " " + dbtype;
+            string col = "[" + name + "] " + dbtype;
 
             if (colAttr.IsPrimaryKey)
             {
@@ -198,7 +178,7 @@ namespace System.Data.ODB.SQLite
             //create a command and prepare it for execution
             IDbCommand cmd = this.Connection.CreateCommand();
 
-            this.SetCommand(cmd, sql, commandParameters);
+            SetCommand(cmd, this.Connection, this.OdbTransaction, sql, commandParameters);
 
             //create the DataAdapter & DataSet 
             SQLiteDataAdapter da = new SQLiteDataAdapter(cmd as SQLiteCommand);
@@ -225,6 +205,11 @@ namespace System.Data.ODB.SQLite
 
             //return the dataset
             return ds;
-        }       
+        }
+
+        public override IOdbCommand CreateCommand()
+        {
+            return new SQLiteODbCommand(this); 
+        }
     }
 }

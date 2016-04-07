@@ -18,11 +18,9 @@ namespace UnitTest
         public string Street { get; set; } 
         public string City { get; set; }
     }
-
-    [Table("ChineseBook")]
+       
     public class Book : OdbEntity
-    {       
-        [Column(Name = "BNO")]
+    {        
         public string ISBN { get; set; }
 
         public DateTime Release { get; set; }        

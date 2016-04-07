@@ -9,8 +9,7 @@ namespace System.Data.ODB
     {
         protected StringBuilder _sb; 
 
-        protected IDbContext _db;
-               
+        protected IDbContext _db;               
         public List<IDbDataParameter> DbParams { get; set; }
 
         public string Table { get; set; }
@@ -18,22 +17,51 @@ namespace System.Data.ODB
 
         public OdbQuery(IDbContext db)
         {
-            this._db = db;
+            this._sb = new StringBuilder();
 
-            this._sb = new StringBuilder();           
-       
+            this._db = db;
             this.DbParams = new List<IDbDataParameter>();
  
             this.Table = typeof(T).Name;
-
             this.Alias = "";
         }
-        
+
+        public virtual IQuery<T> Select(string[] cols)
+        {
+            this._sb.Append("SELECT ");
+            this._sb.Append(string.Join(",", cols));
+
+            return this;
+        }
+
+        public virtual IQuery<T> From()
+        {
+            return From(this.Table);
+        }
+
+        public virtual IQuery<T> From(string table, string alias = "")
+        {
+            this._sb.Append(" FROM ");
+
+            this._sb.Append(Enclosed(table));
+
+            if (!string.IsNullOrEmpty(alias))
+            {
+                this.Alias = alias;
+
+                return this.As(alias);
+            }
+
+            return this;
+        }
+
         public virtual IQuery Insert(string[] cols)
         {
             this._sb.Append("INSERT INTO ");
-            this._sb.Append(this.Table);            
-            this._sb.Append(" (");
+
+            this._sb.Append(Enclosed(this.Table));
+
+            this._sb.Append(" ("); 
             this._sb.Append(string.Join(", ", cols));
             this._sb.Append(")");                
 
@@ -44,7 +72,7 @@ namespace System.Data.ODB
         {
             this._sb.Append(" VALUES (");
             this._sb.Append(string.Join(", ", cols));
-            this._sb.Append(");");
+            this._sb.Append(")");
 
             return this;
         }
@@ -52,7 +80,7 @@ namespace System.Data.ODB
         public virtual IQuery<T> Update()
         {
             this._sb.Append("UPDATE ");
-            this._sb.Append(this.Table);
+            this._sb.Append(Enclosed(this.Table));
 
             return this;
         }
@@ -71,48 +99,27 @@ namespace System.Data.ODB
 
             return this.From();
         }
-
-        public virtual IQuery<T> Select(string[] cols)
-        {
-            this._sb.Append("SELECT ");
-            this._sb.Append(string.Join(",", cols));
-             
-            return this;
-        }
-
-        public virtual IQuery<T> From()
-        {
-            return From(this.Table);
-        } 
-
-        public virtual IQuery<T> From(string table)
-        {
-            this._sb.Append(" FROM ");
-            this._sb.Append(table);
-
-            return this;
-        }
-
+         
         public virtual IQuery<T> Join<T1>() where T1 : IEntity
         {
             Type type = typeof(T1);
  
-            return this.Join(type.Name);
+            return this.Join(MappingHelper.GetTableName(type));
         }
 
         public virtual IQuery<T> Join(string table)
         {
             this._sb.Append(" JOIN ");
-            this._sb.Append(table);
+            this._sb.Append(Enclosed(table));
 
-            return this;
+            return this; 
         }
 
         public virtual IQuery<T> LeftJoin<T1>() where T1 : IEntity
         {
             Type type = typeof(T1);
 
-            return this.LeftJoin(type.Name);
+            return this.LeftJoin(MappingHelper.GetTableName(type));
         }
 
         public virtual IQuery<T> LeftJoin(string table)
@@ -123,40 +130,31 @@ namespace System.Data.ODB
         }
 
         public virtual IQuery<T> Where(string str)
-        {
-            if (!string.IsNullOrEmpty(str))
-            {
-                this._sb.Append(" WHERE ");
+        { 
+            this._sb.Append(" WHERE ");
 
-                if (!string.IsNullOrEmpty(this.Alias))
-                    this._sb.Append(this.Alias + ".");
-
-                this._sb.Append(str);
-            }
-
-            return this;
+            return this.AddAlias(str);
         }
 
         public virtual IQuery<T> And(string str)
         {
             this._sb.Append(" AND ");
-            this._sb.Append(str);
 
-            return this;
+            return this.AddAlias(str);
         }
 
         public virtual IQuery<T> Or(string str)
         {
             this._sb.Append(" OR ");
-            this._sb.Append(str);
 
-            return this;
+            return this.AddAlias(str);
         }
 
         public virtual IQuery<T> Equal(string str)
         {
-            this._sb.Append(" = ");
+            this._sb.Append(" = '");
             this._sb.Append(str);
+            this._sb.Append("'");
 
             return this;
         }
@@ -164,7 +162,8 @@ namespace System.Data.ODB
         public virtual IQuery<T> As(string str)
         {
             this._sb.Append(" AS ");
-            this._sb.Append(str);
+            this._sb.Append(Enclosed(str));
+
             return this;
         }
 
@@ -176,20 +175,10 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery Append(string str)
-        {
-            this._sb.Append(str);
-
-            return this;
-        }
-
         public virtual IQuery<T> OrderBy(string str)
         {
-            if (!string.IsNullOrEmpty(str))
-            {
-                this._sb.Append(" ORDER BY ");
-                this._sb.Append(str);
-            }
+            this._sb.Append(" ORDER BY ");
+            this._sb.Append(Enclosed(str));
 
             return this;
         }
@@ -273,7 +262,7 @@ namespace System.Data.ODB
             this._sb.Append(" LIKE ");
 
             return this.Bind("%" + str + "%");
-        }
+        } 
 
         public virtual IQuery<T> Bind(object b)
         {
@@ -284,8 +273,27 @@ namespace System.Data.ODB
             this._sb.Append(p);
                    
             return this;
-        }          
-      
+        }
+
+        public virtual IQuery<T> AddAlias(string str)
+        {
+            if (!string.IsNullOrEmpty(this.Alias))
+            {
+                this._sb.Append(Enclosed(this.Alias) + ".");
+            }
+
+            this._sb.Append(Enclosed(str));
+
+            return this;
+        }
+
+        public IQuery AddString(string str)
+        {
+            this._sb.Append(str);
+
+            return this;
+        }
+
         public abstract string AddParameter(int index, object b, ColumnAttribute attr);
 
         public IDbDataParameter[] GetParams()
@@ -296,8 +304,8 @@ namespace System.Data.ODB
         public override string ToString()
         {
             return this._sb.ToString();
-        } 
-
+        }
+ 
         public abstract T First();        
 
         public DataSet Result()
@@ -314,5 +322,15 @@ namespace System.Data.ODB
         {
             return this._db.ExecuteScalar<long>(this._sb.ToString(), this.DbParams.ToArray());
         }
+
+        public static string Enclosed(string str)
+        {
+            if (str.IndexOf('[') == -1)
+            {
+                return "[" + str + "]";
+            }
+
+            return str;
+        } 
     }
 }

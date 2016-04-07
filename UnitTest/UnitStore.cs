@@ -14,7 +14,11 @@ namespace UnitTest
         public void TestStore()
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
-  
+
+            db.Depth = 2;
+
+            db.Create<Book>();
+
             Publish pub = new Publish() { Name = "Bloger", Address = new Address() { Flat = "64", Street = "ABC", City = "Hong Kong" } };
 
             Book book = new Book()
@@ -22,10 +26,10 @@ namespace UnitTest
                 ISBN = "JTSEWAGEASg-3457242",
                 Release = DateTime.Now,
                 Publish = pub,
-                User = new User() { Name = "Peter", BID = "439D5284-7A10-464B-9935-B8B7A49D309A" }
+                User = new User() { Name = "Peter", BID = "9935-B8B7A49D309A" }
             };      
 
-            int a = db.Store(book);
+            int a = db.Insert(book);
 
             db.Close();
 
@@ -37,7 +41,7 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
-            db.Depth = 1;
+            db.Depth = 2;
 
             IQuery<User>  q1 = db.Get<User>().Where("Name").Eq("Peter");
 
@@ -51,7 +55,7 @@ namespace UnitTest
             {
                 order.User.Name = "Ken";
 
-                a = db.Store(order);
+                a = db.Insert(order);
             }
 
             db.Close();

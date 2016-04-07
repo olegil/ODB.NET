@@ -11,10 +11,19 @@ namespace System.Data.ODB
 
         int Remove<T>() where T : IEntity;
 
-        int Store(IEntity t);
+        int Delete<T>(T t) where T : IEntity;
+
+        int Insert(IEntity t);
+
+        int Update(IEntity t);
+
+        IQuery<T> Query<T>() where T : IEntity;
 
         IList<T> Get<T>(IQuery query) where T : IEntity;
-  
+
+        IDbConnection Connection { get; set; }
+        IOdbCommand CreateCommand();
+
         DataSet ExecuteDataSet(string sql, params IDbDataParameter[] commandParameters);
  
         IDataReader ExecuteReader(string sql, params IDbDataParameter[] commandParameters);

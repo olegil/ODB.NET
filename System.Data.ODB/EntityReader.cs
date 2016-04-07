@@ -11,8 +11,7 @@ namespace System.Data.ODB
         private bool disposed = false;
 
         public int Level { get; private set; }
-        private int next = 0;
-    
+      
         public EntityReader(IDataReader reader, int depth)
         {
             this.sr = reader;
@@ -48,8 +47,6 @@ namespace System.Data.ODB
 
             while (this.sr.Read())
             {
-                this.next = 0;
-
                 object b = this.getEntry(type, 0);               
                 
                 yield return (T)b;
@@ -83,9 +80,9 @@ namespace System.Data.ODB
                         {
                             this.Level--;
 
-                            this.next++;
+                            int next = index + 1;
 
-                            object b = this.getEntry(pi.PropertyType, this.next);
+                            object b = this.getEntry(pi.PropertyType, next);
 
                             this.Level++;
  

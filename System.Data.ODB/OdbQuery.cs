@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace System.Data.ODB
 {
-    public abstract class OdbQuery<T> : IQuery<T> 
+    public abstract class OdbQuery<T> : IQuery<T>
         where T : IEntity
     {
         protected StringBuilder _sb; 
@@ -21,8 +21,9 @@ namespace System.Data.ODB
 
             this._db = db;
             this.DbParams = new List<IDbDataParameter>();
- 
-            this.Table = typeof(T).Name;
+
+            this.Table = MappingHelper.GetTableName(typeof(T));
+
             this.Alias = "";
         }
 
@@ -55,20 +56,20 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery Insert(string[] cols)
+        public virtual IQuery<T> Insert(string[] cols)
         {
             this._sb.Append("INSERT INTO ");
 
             this._sb.Append(Enclosed(this.Table));
 
-            this._sb.Append(" ("); 
+            this._sb.Append(" (");    
             this._sb.Append(string.Join(", ", cols));
             this._sb.Append(")");                
 
             return this;
         }
 
-        public virtual IQuery Values(string[] cols)
+        public virtual IQuery<T> Values(string[] cols)
         {
             this._sb.Append(" VALUES (");
             this._sb.Append(string.Join(", ", cols));
@@ -317,12 +318,7 @@ namespace System.Data.ODB
         {
             return this._db.Get<T>(this) as List<T>;
         }         
-
-        public long ToInt()
-        {
-            return this._db.ExecuteScalar<long>(this._sb.ToString(), this.DbParams.ToArray());
-        }
-
+        
         public static string Enclosed(string str)
         {
             if (str.IndexOf('[') == -1)

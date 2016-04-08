@@ -43,9 +43,9 @@ namespace UnitTest
 
             db.Depth = 2;
 
-            IQuery<User>  q1 = db.Get<User>().Where("Name").Eq("Peter");
+            IQuery<User> q1 = db.Query<User>().Where("Name").Eq("Peter");
 
-            IQuery<Order> q = db.Get<Order>().Where("Id").Eq(2);
+            IQuery<Order> q = db.Query<Order>().Where("Id").Eq(2);
 
             Order order = q.First();
 

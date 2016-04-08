@@ -64,7 +64,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SQLiteODbCommand.cs" />
+    <Compile Include="OdbLiteCommand.cs" />
     <Compile Include="SQLiteProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SQLiteVisitor.cs" />

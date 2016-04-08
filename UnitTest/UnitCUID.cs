@@ -28,7 +28,7 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
-            User user = db.Get<User>().First();
+            User user = db.Query<User>().First();
 
             int ret = 0;
 
@@ -49,7 +49,7 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
                      
-            User user = db.Get<User>().First();
+            User user = db.Query<User>().First();
 
             int a = 0;
 

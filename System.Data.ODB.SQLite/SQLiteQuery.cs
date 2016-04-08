@@ -9,7 +9,7 @@ namespace System.Data.ODB.SQLite
         where T : IEntity
     {      
         public SQLiteQuery(IDbContext db) : base(db)
-        {          
+        { 
         }
 
         public override string AddParameter(int index, object b, ColumnAttribute attr)

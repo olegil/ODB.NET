@@ -4,25 +4,22 @@ using System.Collections.Generic;
 namespace System.Data.ODB
 {
     public interface IQuery
-    { 
-        IQuery Insert(string[] cols);
-        IQuery Values(string[] cols);              
+    {
         IQuery AddString(string str);
-               
         string AddParameter(int index, object b, ColumnAttribute attr);
-
-        IDbDataParameter[] GetParams();
- 
+        IDbDataParameter[] GetParams(); 
         DataSet Result();
 
         string ToString();
     }
 
-    public interface IQuery<T> : IQuery
+    public interface IQuery<T> : IQuery 
     { 
         string Table { get; set; } 
         string Alias { get; set; }
 
+        IQuery<T> Insert(string[] cols);
+        IQuery<T> Values(string[] cols);       
         IQuery<T> Delete();
         IQuery<T> Update();
         IQuery<T> Select(string[] cols);
@@ -56,8 +53,6 @@ namespace System.Data.ODB
 
         T First();
 
-        List<T> ToList();
-
-        long ToInt();               
+        List<T> ToList();       
     }
 }

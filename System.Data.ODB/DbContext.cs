@@ -59,9 +59,7 @@ namespace System.Data.ODB
 
                 this.Connection = null;
             }               
-        }
-
-        public abstract IQuery<T> Query<T>() where T : IEntity;
+        } 
 
         #region Transaction
 
@@ -107,53 +105,17 @@ namespace System.Data.ODB
 
         #region ORM 
 
-        /// <summary>
-        /// Create Table 
-        /// </summary>
-        /// 
-        public abstract int Create<T>() where T : IEntity;
-
-        public virtual int Create(string table, string[] cols)
+        public abstract IQuery<T> CreateQuery<T>() where T : IEntity;
+       
+        public IQuery<T> Query<T>() where T : IEntity
         {
-            string sql = "CREATE TABLE IF NOT EXISTS \"" + table + "\" (\r\n" + string.Join(",\r\n", cols) + "\r\n);";
-
-            return this.ExecuteNonQuery(sql);
-        }
-
-        /// <summary>
-        /// Drop Table 
-        /// </summary>
-        public abstract int Remove<T>() where T : IEntity;
-         
-        public virtual int Drop(string table)
-        {
-            return this.ExecuteNonQuery("DROP TABLE IF EXISTS \"" + table + "\"");
-        }
-              
-        public virtual IQuery<T> Count<T>(string str) where T : IEntity
-        {
-            IQuery<T> q = this.Query<T>().Count(str).From();
-
-            return q;
-        }
-
-        public virtual IQuery<T> Count<T>() where T : IEntity
-        {
-            return this.Count<T>("*");
-        } 
-
-        /// <summary>
-        /// Select from Table
-        /// </summary>
-        public virtual IQuery<T> Get<T>() where T : IEntity
-        { 
             TableVisitor tr = new TableVisitor(this.Depth);
 
             Type type = typeof(T);
 
             tr.Visit(type);
 
-            IQuery<T> q = this.Query<T>().Select(tr.Colums);
+            IQuery<T> q = this.CreateQuery<T>().Select(tr.Colums);
 
             q.Alias = "T0";
 
@@ -163,14 +125,42 @@ namespace System.Data.ODB
                     q.From(tc.Key);
                 else
                     q.LeftJoin(tc.Key).On(tc.Value);
-            } 
- 
+            }
+
             return q;
         }
- 
+
+        /// <summary>
+        /// Create Table 
+        /// </summary>
+        /// 
+        public int Create<T>() where T : IEntity
+        {
+            ICommand cmd = this.CreateCommand();
+
+            return cmd.ExecuteCreate<T>();
+        }
+         
+        /// <summary>
+        /// Drop Table 
+        /// </summary>
+        public virtual int Remove<T>() where T : IEntity
+        {
+            ICommand cmd = this.CreateCommand();
+
+            return cmd.ExecuteDrop<T>();
+        }
+                  
         /// <summary>
         /// Get query result
         /// </summary>
+        public virtual IList<T> Get<T>() where T : IEntity
+        {  
+            IQuery<T> q = this.Query<T>();
+  
+            return this.Get<T>(q);
+        }
+  
         public virtual IList<T> Get<T>(IQuery q) where T : IEntity
         {
             using (IDataReader rdr = this.ExecuteReader(q))
@@ -187,48 +177,58 @@ namespace System.Data.ODB
 
                 return list;             
             }
-        }  
+        }
+
+        public virtual int Count<T>(string str) where T : IEntity
+        {
+            IQuery<T> q = this.CreateQuery<T>().Count(str).From();
+
+            return this.ExecuteScalar<int>(q);
+        }
+
+        public virtual int Count<T>() where T : IEntity
+        {
+            return this.Count<T>("Id");
+        }
 
         /// <summary>
         /// Store object
         /// </summary>
         public int Insert(IEntity t)
         {
-            IOdbCommand cmd = this.CreateCommand();
+            ICommand cmd = this.CreateCommand();
 
-            return cmd.Insert(t); 
+            return cmd.ExecuteInsert(t); 
         }
 
         public int Update(IEntity t)
         {
-            IOdbCommand cmd = this.CreateCommand();
+            ICommand cmd = this.CreateCommand();
 
-            return cmd.Update(t);
+            return cmd.ExecuteUpdate(t);
         }
     
         /// <summary>
-        /// Delete all table data
+        /// Delete data
         /// </summary>
-        public virtual bool Clear<T>() where T : IEntity
-        {
-            IQuery q = this.Query<T>().Delete();
-
-            this.ExecuteNonQuery(q);
-
-            return true;
-        }
-
         public int Delete<T>(T t) where T : IEntity
         {
-            IOdbCommand cmd = this.CreateCommand();
+            ICommand cmd = this.CreateCommand();
 
-            return cmd.Delete(t);
+            return cmd.ExecuteDelete(t);
         }
+
+        public virtual void Clear<T>() where T : IEntity
+        { 
+            IQuery query = this.CreateQuery<T>().Delete();
+
+            this.ExecuteNonQuery(query.ToString(), null);
+        } 
 
         #endregion
 
         #region Data Access   
-        public abstract IOdbCommand CreateCommand();
+        public abstract ICommand CreateCommand();
 
         public abstract DataSet ExecuteDataSet(string sql, params IDbDataParameter[] cmdParms);
 
@@ -289,11 +289,6 @@ namespace System.Data.ODB
             }           
         }
 
-        public virtual int ExecuteNonQuery(IQuery query)
-        {
-            return this.ExecuteNonQuery(query.ToString(), query.GetParams());
-        } 
-
         public int ExecuteNonQuery(string sql, params IDbDataParameter[] cmdParms)
         {
             //create a command
@@ -330,7 +325,6 @@ namespace System.Data.ODB
 
             return;
         } 
-
         #endregion
     }
 }

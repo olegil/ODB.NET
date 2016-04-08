@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace System.Data.ODB
 {
-    public abstract class OdbCommand : IOdbCommand
+    public abstract class OdbCommand : ICommand     
     {
         protected IDbContext Db;
         private int level;
@@ -17,10 +18,46 @@ namespace System.Data.ODB
             this.level = db.Depth;
         }
 
+        public abstract int ExecuteCreate<T>() where T : IEntity;
+
+        public virtual int Create(string table, string[] cols)
+        {
+            string sql = "CREATE TABLE IF NOT EXISTS \"" + table + "\" (\r\n" + string.Join(",\r\n", cols) + "\r\n);";
+
+            return this.Db.ExecuteNonQuery(sql);
+        }
+
+        public virtual int ExecuteDrop<T>() where T : IEntity
+        { 
+            return this.ExecuteDrop(typeof(T));
+        }
+
+        public virtual int ExecuteDrop(Type type)
+        {
+            foreach (PropertyInfo pi in type.GetProperties())
+            {
+                ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
+
+                if (colAttr != null && colAttr.IsForeignkey)
+                {
+                    this.ExecuteDrop(pi.PropertyType);
+                }
+            }
+
+            string table = MappingHelper.GetTableName(type);
+
+            return this.Drop(table);
+        }
+
+        public virtual int Drop(string table)
+        {
+            return this.Db.ExecuteNonQuery("DROP TABLE IF EXISTS \"" + table + "\"");
+        } 
+
         /// <summary>
         /// Insert object
         /// </summary>
-        public virtual int Insert<T>(T t) where T : IEntity
+        public virtual int ExecuteInsert<T>(T t) where T : IEntity
         {
             if (t == null || t.IsPersisted)
             {
@@ -29,15 +66,15 @@ namespace System.Data.ODB
 
             Type type = t.GetType();
 
-            IQuery<T> query = this.Db.Query<T>();
+            IQuery<T> query = this.Db.CreateQuery<T>();
+
+            query.Table = MappingHelper.GetTableName(type); 
 
             int n = 0;
 
             List<string> cols = new List<string>();
             List<string> ps = new List<string>();
-
-            query.Table = "[" + MappingHelper.GetTableName(type) + "]";
-
+ 
             foreach (ColumnMapping col in MappingHelper.GetColumnMapping(t))
             {
                 if (!col.Attribute.IsAuto)
@@ -60,21 +97,21 @@ namespace System.Data.ODB
 
                                 if (entry.IsPersisted)
                                 {
-                                    this.Update(entry);
+                                    this.ExecuteUpdate(entry);
 
                                     b = entry.Id;
                                 }
                                 else
                                 {
-                                    b = this.InsertReturnId(entry);
+                                    b = this.ExecuteInsertReturnId(entry);
                                 }
 
                                 this.level++;
                             }
                         }
                     }
-
-                    cols.Add(col.Name);
+                    
+                    cols.Add("[" + col.Name + "]");
 
                     string pr = query.AddParameter(n, b, col.Attribute);
 
@@ -86,15 +123,15 @@ namespace System.Data.ODB
 
             query.Insert(cols.ToArray()).Values(ps.ToArray());
 
-            return this.ExecuteNonQuery(query);
+            return this.Execute(query);
         }
  
-        public abstract int InsertReturnId<T>(T t) where T : IEntity;
+        public abstract int ExecuteInsertReturnId<T>(T t) where T : IEntity;
 
         /// <summary>
         /// Update object
         /// </summary>
-        public virtual int Update<T>(T t) where T : IEntity
+        public virtual int ExecuteUpdate<T>(T t) where T : IEntity
         {
             if (t == null || !t.IsPersisted)
             {
@@ -103,9 +140,9 @@ namespace System.Data.ODB
 
             List<string> cols = new List<string>();
 
-            IQuery<T> query = this.Db.Query<T>();
+            IQuery<T> query = this.Db.CreateQuery<T>();
 
-            query.Table = "[" + MappingHelper.GetTableName(t.GetType()) + "]";
+            query.Table = MappingHelper.GetTableName(t.GetType());
 
             int n = 0;
 
@@ -127,7 +164,7 @@ namespace System.Data.ODB
                         {
                             if (col.Value == null)
                             {
-                                this.Delete(col.Value as IEntity);
+                                this.ExecuteDelete(col.Value as IEntity);
                             }
                             else
                             {
@@ -137,13 +174,13 @@ namespace System.Data.ODB
 
                                 if (entry.IsPersisted)
                                 {
-                                    this.Update(entry);
+                                    this.ExecuteUpdate(entry);
 
                                     b = entry.Id;
                                 }
                                 else
                                 {
-                                    b = this.InsertReturnId(entry);
+                                    b = this.ExecuteInsertReturnId(entry);
                                 }
 
                                 this.level++;
@@ -173,20 +210,20 @@ namespace System.Data.ODB
 
             query.Update().Set(cols.ToArray()).Where(colKey.Name).Eq(colKey.Value);
 
-            return this.ExecuteNonQuery(query);
+            return this.Execute(query);
         }
 
         /// <summary>
         /// Delete object
         /// </summary>
-        public virtual int Delete<T>(T t) where T : IEntity
+        public virtual int ExecuteDelete<T>(T t) where T : IEntity
         {
             if (t == null || !t.IsPersisted)
                 return -1;
 
-            IQuery<T> query = this.Db.Query<T>();
+            IQuery<T> query = this.Db.CreateQuery<T>();
 
-            query.Table = "[" + MappingHelper.GetTableName(t.GetType()) + "]";
+            query.Table = MappingHelper.GetTableName(t.GetType());
 
             ColumnMapping colKey = null;
 
@@ -205,10 +242,10 @@ namespace System.Data.ODB
 
             query.Delete().Where(colKey.Name).Eq(colKey.Value);
 
-            return this.ExecuteNonQuery(query);
+            return this.Execute(query);
         }
 
-        private int ExecuteNonQuery(IQuery query)
+        private int Execute(IQuery query)
         {
             return this.Db.ExecuteNonQuery(query.ToString(), query.GetParams());
         }        

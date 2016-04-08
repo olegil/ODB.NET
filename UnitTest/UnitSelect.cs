@@ -17,7 +17,7 @@ namespace UnitTest
 
             db.Depth = 2;
                        
-            IQuery<Book> q = db.Get<Book>();
+            IQuery<Book> q = db.Query<Book>();
 
             List<Book> list = q.ToList();
 
@@ -33,7 +33,7 @@ namespace UnitTest
 
             db.Depth = 2;
 
-            IQuery<User> q = db.Get<User>().Where("Name").Eq("Peter");
+            IQuery<User> q = db.Query<User>().Where("Name").Eq("Peter");
             
             User user = q.First();
 
@@ -49,7 +49,7 @@ namespace UnitTest
 
             db.Depth = 2;
 
-            IQuery<User> q = db.Get<User>();
+            IQuery<User> q = db.Query<User>();
 
             User user = q.First();
 
@@ -61,7 +61,7 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
-            User user = db.Get<User>().First();
+            User user = db.Query<User>().First();
              
             Assert.IsTrue(user != null);
         }

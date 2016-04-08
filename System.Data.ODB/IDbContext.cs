@@ -17,12 +17,14 @@ namespace System.Data.ODB
 
         int Update(IEntity t);
 
+        IQuery<T> CreateQuery<T>() where T : IEntity;
+
         IQuery<T> Query<T>() where T : IEntity;
 
         IList<T> Get<T>(IQuery query) where T : IEntity;
 
         IDbConnection Connection { get; set; }
-        IOdbCommand CreateCommand();
+        ICommand CreateCommand();
 
         DataSet ExecuteDataSet(string sql, params IDbDataParameter[] commandParameters);
  

@@ -74,8 +74,8 @@ namespace System.Data.ODB
             {
                 return DbType.Guid;
             }
-
-            return DbType.String;
+            
+            return DbType.Int32;
         }
 
         public static string Enclosed(string str)

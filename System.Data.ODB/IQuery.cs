@@ -6,7 +6,7 @@ namespace System.Data.ODB
     public interface IQuery
     {
         IQuery AddString(string str);
-        string AddParameter(int index, object b, ColumnAttribute attr);
+        string AddParameter(int index, object b);
         IDbDataParameter[] GetParams(); 
         DataSet Result();
         T1 Single<T1>();

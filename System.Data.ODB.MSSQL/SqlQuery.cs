@@ -14,14 +14,14 @@ namespace System.Data.ODB.MSSQL
         {
         }
 
-        public override string AddParameter(int index, object b, ColumnAttribute attr)
+        public override string AddParameter(int index, object b)
         {
             string name = "@p" + index;
 
             SqlParameter p = new SqlParameter(name, b);
 
             p.DbType = TypeHelper.Convert(b);
-
+             
             this.DbParams.Add(p);
 
             return name;

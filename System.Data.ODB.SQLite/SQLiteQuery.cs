@@ -12,13 +12,13 @@ namespace System.Data.ODB.SQLite
         { 
         }
 
-        public override string AddParameter(int index, object b, ColumnAttribute attr)
+        public override string AddParameter(int index, object b)
         {
             string name = "@p" + index;
 
             SQLiteParameter p = new SQLiteParameter(name, b);
-
-            p.DbType = TypeHelper.Convert(b);
+ 
+            p.DbType = TypeHelper.Convert(b); 
 
             this.DbParams.Add(p);
 

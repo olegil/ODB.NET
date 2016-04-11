@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Data.ODB;
 using System.Data.ODB.SQLite;
+using System.Data.ODB.MSSQL;
 using System.Diagnostics;
 
 namespace UnitTest
@@ -13,23 +14,28 @@ namespace UnitTest
         [TestMethod]
         public void TestStore()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
+            SqlContext db = new SqlContext(Command.MssqlConnStr);
 
             db.Depth = 2;
 
             db.Create<Book>();
 
             Publish pub = new Publish() { Name = "Bloger", Address = new Address() { Flat = "64", Street = "ABC", City = "Hong Kong" } };
+            User user = new User() { Name = "Peter", BID = null, Birthday = DateTime.Now };
 
             Book book = new Book()
             {
                 ISBN = "JTSEWAGEASg-3457242",
                 Release = DateTime.Now,
                 Publish = pub,
-                User = new User() { Name = "Peter", BID = "9935-B8B7A49D309A" }
+                User = user
             };      
 
-            int a = db.Insert(book);
+            int a = db.Insert(user);
+
+            IQuery<Order> q = db.Query<Order>().Where("Id").Eq(1);
+
+            List<Order> oo = q.ToList();
 
             db.Close();
 

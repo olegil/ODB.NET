@@ -13,7 +13,7 @@ namespace System.Data.ODB
         public bool IsAuto { get; set; }
         public bool IsNullable { get; set; }      
         public bool NotMapped { get; set; }
-              
+       
         public ColumnAttribute()
         {             
         }

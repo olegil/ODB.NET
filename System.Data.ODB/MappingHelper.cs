@@ -27,7 +27,7 @@ namespace System.Data.ODB
             {
                 return objAttrs[0] as ColumnAttribute;
             }
-
+            
             return new ColumnAttribute() { Name = "", IsAuto = false, IsForeignkey = false, IsPrimaryKey = false, IsNullable = true, NotMapped = false, Length = 0 };
         }
 

@@ -269,7 +269,7 @@ namespace System.Data.ODB
         {
             int index = this.DbParams.Count;
 
-            string p = this.AddParameter(index, b, null);
+            string p = this.AddParameter(index, b);
 
             this._sql.Append(p);
                    
@@ -295,7 +295,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public abstract string AddParameter(int index, object b, ColumnAttribute attr);
+        public abstract string AddParameter(int index, object b);
 
         public IDbDataParameter[] GetParams()
         {

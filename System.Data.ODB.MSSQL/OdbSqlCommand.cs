@@ -18,14 +18,14 @@ namespace System.Data.ODB.MSSQL
 
         public override void Create(string table, string[] cols)
         {
-            string sql = "CREATE TABLE [" + table + "] (\r\n" + string.Join(",\r\n", cols) + "\r\n);";
+            string sql = "IF OBJECT_ID('[" + table + "]', 'U') IS NULL CREATE TABLE [" + table + "] (\r\n" + string.Join(",\r\n", cols) + "\r\n);";
 
             this.Db.ExecuteNonQuery(sql);
         }
  
         public override void Drop(string table)
         {
-            string _dropSql = "IF OBJECT_ID('[{0}]', 'U') IS NOT NULL DROP TABLE [{1}]";
+            string _dropSql = "IF OBJECT_ID('[{0}]', 'U') IS NOT NULL DROP TABLE [{1}];";
 
             this.Db.ExecuteNonQuery(string.Format(_dropSql, table, table));
         }

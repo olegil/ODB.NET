@@ -115,28 +115,34 @@ namespace System.Data.ODB
             {
                 if (!col.Attribute.IsAuto)
                 {
-                    object b = null;
+                    object b = DBNull.Value;
 
                     if (!col.Attribute.IsForeignkey)
                     {
-                        b = col.Value;
+                        if (col.Value != null)
+                            b = col.Value;
+                        else
+                            b = DBNull.Value;
                     }
                     else
-                    {
-                        if (this.level > 1 && col.Value != null)
+                    { 
+                        if (this.level > 1 )
                         {
-                            IEntity entry = col.Value as IEntity;
+                            if (col.Value != null)
+                            {
+                                IEntity entry = col.Value as IEntity;
 
-                            this.level--;
-                                                            
-                            //return id
-                            b = this.ExecuteNonQuery(entry);
- 
-                            this.level++;                           
+                                this.level--;
+
+                                //return id
+                                b = this.ExecuteNonQuery(entry);
+
+                                this.level++;
+                            }                     
                         }
                     }
 
-                    string pr = query.AddParameter(n++, b, col.Attribute);
+                    string pr = query.AddParameter(n++, b);
 
                     ps.Add(pr);
 

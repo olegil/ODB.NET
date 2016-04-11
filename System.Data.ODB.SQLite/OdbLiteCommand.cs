@@ -9,63 +9,30 @@ namespace System.Data.ODB.SQLite
         public OdbLiteCommand(IDbContext db) : base(db)
         {
         }
-
-        public override int ExecuteCreate<T>()
+         
+        public override void Create(string table, string[] cols)
         {
-            Type type = typeof(T);
+            string sql = "CREATE TABLE IF NOT EXISTS [" + table + "] (\r\n" + string.Join(",\r\n", cols) + "\r\n);";
 
-            return this.Create(type);
+            this.Db.ExecuteNonQuery(sql);
         }
 
-        public virtual int Create(Type type)
-        { 
-            string dbtype = "";
-
-            List<string> cols = new List<string>();
-
-            foreach (PropertyInfo pi in type.GetProperties())
-            {
-                ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
-
-                if (!colAttr.NotMapped)
-                {
-                    if (!colAttr.IsForeignkey)
-                    {
-                        dbtype = this.TypeMapping(pi.PropertyType);
-                    }
-                    else
-                    {
-                        if (string.IsNullOrEmpty(colAttr.Name))
-                            colAttr.Name = pi.Name + "Id";
-
-                        dbtype = this.TypeMapping(typeof(long));
-
-                        this.Create(pi.PropertyType);
-                    }
-
-                    string colName = string.IsNullOrEmpty(colAttr.Name) ? pi.Name : colAttr.Name;
-
-                    cols.Add(this.Define(colName, dbtype, colAttr));
-                }
-            }
-
-            string table = MappingHelper.GetTableName(type);
-
-            return this.Create(table, cols.ToArray());
-        }
-
-        public override int ExecuteInsertReturnId<T>(T t)
+        public override void Drop(string table)
         {
-            if (this.ExecuteInsert(t) > 0)
-                return (int)(this.Db.Connection as SQLiteConnection).LastInsertRowId;
-
-            return -1;
+            this.Db.ExecuteNonQuery("DROP TABLE IF EXISTS [" + table + "]");
         }
 
-        private string Define(string name, string dbtype, ColumnAttribute colAttr)
+        public override int ExecuteInsert(IQuery query)
+        {
+            this.Execute(query);
+
+            return (int)(this.Db.Connection as SQLiteConnection).LastInsertRowId; 
+        }
+ 
+        public override string Define(string name, string dbtype, ColumnAttribute colAttr)
         {
             string col = "[" + name + "] " + dbtype;
-
+             
             if (colAttr.IsPrimaryKey)
             {
                 col += " PRIMARY KEY";
@@ -88,7 +55,7 @@ namespace System.Data.ODB.SQLite
             return col;
         }
 
-        private string TypeMapping(Type type)
+        public override string TypeMapping(Type type)
         {
             if (type == DataType.String)
             {
@@ -148,6 +115,6 @@ namespace System.Data.ODB.SQLite
             }
 
             return "TEXT";
-        }
+        }        
     }
 }

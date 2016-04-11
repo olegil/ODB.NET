@@ -9,7 +9,7 @@ namespace System.Data.ODB
         string AddParameter(int index, object b, ColumnAttribute attr);
         IDbDataParameter[] GetParams(); 
         DataSet Result();
-
+        T1 Single<T1>();
         string ToString();
     }
 

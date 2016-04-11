@@ -15,7 +15,14 @@ namespace System.Data.ODB.SQLite
         public override IQuery<T> CreateQuery<T>()
         {
             return new SQLiteQuery<T>(this);
-        }  
+        }
+
+        public override IQuery<T> CreateQuery<T>(string sql)
+        {
+            IQuery query = new SQLiteQuery<T>(this);
+
+            return (IQuery<T>)query.AddString(sql);
+        }
 
         public override DataSet ExecuteDataSet(string sql, params IDbDataParameter[] commandParameters)
         {
@@ -54,6 +61,6 @@ namespace System.Data.ODB.SQLite
         public override ICommand CreateCommand()
         {
             return new OdbLiteCommand(this); 
-        }
+        } 
     }
 }

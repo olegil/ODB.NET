@@ -77,5 +77,15 @@ namespace System.Data.ODB
 
             return DbType.String;
         }
+
+        public static string Enclosed(string str)
+        {
+            if (str.IndexOf('[') == -1)
+            {
+                return "[" + str + "]";
+            }
+
+            return str;
+        }
     }
 }

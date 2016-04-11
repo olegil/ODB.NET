@@ -9,67 +9,58 @@ namespace System.Data.ODB.MSSQL
         {
         }
 
-        public override int ExecuteCreate<T>()
+        public override void ExecuteCreate<T>()
         {
-            throw new NotImplementedException();
+            Type type = typeof(T);
+
+            this.Create(type);             
         }
 
-        public virtual int Create(Type type)
+        public override void Create(string table, string[] cols)
         {
-            string dbtype = "";
+            string sql = "CREATE TABLE [" + table + "] (\r\n" + string.Join(",\r\n", cols) + "\r\n);";
 
-            List<string> cols = new List<string>();
+            this.Db.ExecuteNonQuery(sql);
+        }
+ 
+        public override void Drop(string table)
+        {
+            string _dropSql = "IF OBJECT_ID('[{0}]', 'U') IS NOT NULL DROP TABLE [{1}]";
 
-            foreach (PropertyInfo pi in type.GetProperties())
-            {
-                ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
-
-                if (colAttr != null)
-                {
-                    if (!colAttr.IsForeignkey)
-                    {
-                        dbtype = this.TypeMapping(pi.PropertyType);
-                    }
-                    else
-                    {
-                        dbtype = this.TypeMapping(typeof(long));
-
-                        this.Create(pi.PropertyType);
-                    }
-
-                    cols.Add(this.Define(pi.Name, dbtype, colAttr));
-                }
-            }
-
-            cols.Add(string.Format("CONSTRAINT [PK_dbo.{0}] PRIMARY KEY (Id)", type.Name));
-
-            return this.Create(type.Name, cols.ToArray());
+            this.Db.ExecuteNonQuery(string.Format(_dropSql, table, table));
         }
 
-        public override int ExecuteInsertReturnId<T>(T t)
+        public override int ExecuteInsert(IQuery query)
         {
-            if (this.ExecuteInsert(t) > 0)
-            {
-                string table = MappingHelper.GetTableName(t.GetType());
+            string sql = query.ToString();
 
-                return this.Db.ExecuteScalar<int>(string.Format("SELECT Id FROM {0} WHERE Id = SCOPE_IDENTITY();", table), null);
-            }
+            int i = sql.IndexOf("VALUES") - 1;
 
-            return -1;
-        }
+            sql = sql.Insert(i, " OUTPUT INSERTED.Id ");
 
-        private string Define(string name, string dbtype, ColumnAttribute colAttr)
+            return (int)this.Db.ExecuteScalar<long>(sql, query.GetParams());
+        } 
+
+        public override string Define(string name, string dbtype, ColumnAttribute colAttr)
         {
             string col = "[" + name + "] " + dbtype;
 
-            if (colAttr.Length > 0)
-                col += "(" + colAttr.Length + ")";
-            else
-                col += "(MAX)";
+            if (dbtype == "NVARCHAR")
+            {
+                if (colAttr.Length > 0)
+                    col += "(" + colAttr.Length + ")";
+                else
+                    col += "(MAX)";
+            }
 
             if (colAttr.IsAuto)
             {
                 col += " IDENTITY(1,1)";
+            }
+
+            if (colAttr.IsPrimaryKey)
+            {
+                col += " PRIMARY KEY";
             }
 
             if (colAttr.IsNullable)
@@ -84,7 +75,7 @@ namespace System.Data.ODB.MSSQL
             return col;
         }
 
-        private string TypeMapping(Type type)
+        public override string TypeMapping(Type type)
         {
             if (type == DataType.String)
             {

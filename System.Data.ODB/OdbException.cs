@@ -8,7 +8,7 @@ namespace System.Data.ODB
 {
     public class OdbException : Exception
     {
-        protected OdbException(string message) : base(message)
+        public OdbException(string message) : base(message)
         {             
         }         
     }

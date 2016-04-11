@@ -7,17 +7,19 @@ namespace System.Data.ODB
     {
         int Depth { get; set; }
 
-        int Create<T>() where T : IEntity;
+        void Create<T>() where T : IEntity;
 
-        int Remove<T>() where T : IEntity;
-
-        int Delete<T>(T t) where T : IEntity;
+        void Remove<T>() where T : IEntity;
 
         int Insert(IEntity t);
 
         int Update(IEntity t);
 
+        int Delete(IEntity t);
+
         IQuery<T> CreateQuery<T>() where T : IEntity;
+
+        IQuery<T> CreateQuery<T>(string sql) where T : IEntity;
 
         IQuery<T> Query<T>() where T : IEntity;
 

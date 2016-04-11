@@ -43,9 +43,13 @@ namespace UnitTest
 
             db.Depth = 2;
 
+            Order oo = new Order() { User = new User() { Name = "Peter", BID = "534262346", Birthday = DateTime.Now }, Date = DateTime.Now };
+
+            db.Insert(oo);
+
             IQuery<User> q1 = db.Query<User>().Where("Name").Eq("Peter");
 
-            IQuery<Order> q = db.Query<Order>().Where("Id").Eq(2);
+            IQuery<Order> q = db.Query<Order>().Where("Id").Eq(1);
 
             Order order = q.First();
 
@@ -55,7 +59,7 @@ namespace UnitTest
             {
                 order.User.Name = "Ken";
 
-                a = db.Insert(order);
+                a = db.Update(order);
             }
 
             db.Close();

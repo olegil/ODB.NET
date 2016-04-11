@@ -27,14 +27,14 @@ namespace System.Data.ODB.SQLite
  
         public override IQuery<T> Skip(int start)
         {
-            this._sb.Append(" LIMIT " + start.ToString());
+            this._sql.Append(" LIMIT " + start.ToString());
 
             return this;
         }
 
         public override IQuery<T> Take(int count)
         {
-            this._sb.Append(" , " + count.ToString());
+            this._sql.Append(" , " + count.ToString());
 
             return this;
         }

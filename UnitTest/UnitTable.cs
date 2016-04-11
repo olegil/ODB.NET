@@ -1,9 +1,11 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using System.Collections.Generic;
 using System.Data;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Data.ODB;
 using System.Data.ODB.SQLite;
+using System.Data.ODB.MSSQL;
 using System.Diagnostics;
 
 namespace UnitTest
@@ -14,11 +16,16 @@ namespace UnitTest
         [TestMethod]
         public void TestTable()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
+            SqlContext db = new SqlContext(Command.MssqlConnStr);
 
-            db.Remove<Book>();
+            db.Depth = 2;
 
-            int a = db.Create<Book>();
+            db.Remove<Order>();
+            db.Create<Order>();
+
+            Order oo = new Order() { User = new User() { Name = "Peter", BID = "534262346", Birthday = DateTime.Now }, Date = DateTime.Now };
+
+            int a = db.Insert(oo);
 
             db.Close(); 
 
@@ -30,7 +37,9 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
-            db.Clear<User>();
+            db.Remove<Order>();
+
+            db.Create<Order>();
 
             db.Close();
 

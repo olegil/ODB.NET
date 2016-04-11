@@ -52,17 +52,15 @@ namespace System.Data.ODB
                         { 
                             this.Level--;
 
-                            int next = index + 1;
+                            int next = this.Tables.Count;
 
                             string fkId = string.IsNullOrEmpty(attr.Name) ? "Id" : "";
  
                             string constraint = Enclosed("T" + index) + "." + Enclosed(colName + fkId);
-
-                            string fkName = TableMapping(pi.PropertyType, next);
-                              
+                             
                             string joinKey = Enclosed("T" + next) + "." + Enclosed("Id");
 
-                            this.Tables.Add(fkName, constraint + " = " + joinKey);
+                            this.Tables.Add(TableMapping(pi.PropertyType, next), constraint + " = " + joinKey);
 
                             this.Visit(pi.PropertyType, next);
 

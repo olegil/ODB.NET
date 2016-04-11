@@ -106,7 +106,9 @@ namespace System.Data.ODB
         #region ORM 
 
         public abstract IQuery<T> CreateQuery<T>() where T : IEntity;
-       
+
+        public abstract IQuery<T> CreateQuery<T>(string sql) where T : IEntity;       
+
         public IQuery<T> Query<T>() where T : IEntity
         {
             TableVisitor tr = new TableVisitor(this.Depth);
@@ -134,21 +136,21 @@ namespace System.Data.ODB
         /// Create Table 
         /// </summary>
         /// 
-        public int Create<T>() where T : IEntity
+        public void Create<T>() where T : IEntity
         {
             ICommand cmd = this.CreateCommand();
 
-            return cmd.ExecuteCreate<T>();
+            cmd.ExecuteCreate<T>();
         }
          
         /// <summary>
         /// Drop Table 
         /// </summary>
-        public virtual int Remove<T>() where T : IEntity
+        public virtual void Remove<T>() where T : IEntity
         {
             ICommand cmd = this.CreateCommand();
 
-            return cmd.ExecuteDrop<T>();
+            cmd.ExecuteDrop<T>();
         }
                   
         /// <summary>
@@ -192,22 +194,35 @@ namespace System.Data.ODB
         }
 
         /// <summary>
-        /// Store object
+        /// Insert object
         /// </summary>
         public int Insert(IEntity t)
         {
-            ICommand cmd = this.CreateCommand();
+            if (!t.IsPersisted)
+            {
+                ICommand cmd = this.CreateCommand();
 
-            return cmd.ExecuteInsert(t); 
+                return cmd.ExecuteNonQuery(t);
+            }
+
+            return -1;
         }
 
+        /// <summary>
+        /// Update object
+        /// </summary>
         public int Update(IEntity t)
         {
-            ICommand cmd = this.CreateCommand();
+            if (t.IsPersisted)
+            {
+                ICommand cmd = this.CreateCommand();
 
-            return cmd.ExecuteUpdate(t);
+                return cmd.ExecuteNonQuery(t);
+            }
+
+            return -1;
         }
-    
+        
         /// <summary>
         /// Delete data
         /// </summary>
@@ -275,17 +290,17 @@ namespace System.Data.ODB
             //execute the command & return the results
             try
             {
-                T retval = (T)cmd.ExecuteScalar();
+                object retval = cmd.ExecuteScalar();
 
                 cmd.Parameters.Clear();
 
-                return retval;
+                return (T)retval;
             }
-            catch
+            catch(Exception ex)
             {
                 this.Connection.Close();
 
-                throw;
+                throw ex;
             }           
         }
 
@@ -324,7 +339,13 @@ namespace System.Data.ODB
             }
 
             return;
+        }
+
+        public int Delete(IEntity t)
+        {
+            throw new NotImplementedException();
         } 
+
         #endregion
     }
 }

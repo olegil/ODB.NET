@@ -52,11 +52,11 @@ namespace System.Data.ODB
         } 
 
         public virtual int Store(IEntity t)
-        {
-            if (!t.IsPersisted)
+        { 
+            if (t != null)
                 return this.Db.Insert(t);
-            else
-                return this.Db.Update(t);
+
+            return -1; 
         } 
 
         public virtual int Delete(IEntity t)

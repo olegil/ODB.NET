@@ -29,33 +29,33 @@ namespace System.Data.ODB.SQLite
             return (int)(this.Db.Connection as SQLiteConnection).LastInsertRowId; 
         }
  
-        public override string Define(string name, string dbtype, ColumnAttribute colAttr)
+        public override string SqlDefine(ColumnMapping col)
         {
-            string col = "[" + name + "] " + dbtype;
+            string sql = "[" + col.Name + "] " + this.SqlMapping(col.Prop.PropertyType);
              
-            if (colAttr.IsPrimaryKey)
+            if (col.Attribute.IsPrimaryKey)
             {
-                col += " PRIMARY KEY";
+                sql += " PRIMARY KEY";
             }
 
-            if (colAttr.IsAuto)
+            if (col.Attribute.IsAuto)
             {
-                col += " AUTOINCREMENT";
+                sql += " AUTOINCREMENT";
             }
 
-            if (colAttr.IsNullable)
+            if (col.Attribute.IsNullable)
             {
-                col += " NULL";
+                sql += " NULL";
             }
             else
             {
-                col += " NOT NULL";
+                sql += " NOT NULL";
             }
 
-            return col;
+            return sql;
         }
 
-        public override string TypeMapping(Type type)
+        public override string SqlMapping(Type type)
         {
             if (type == DataType.String)
             {
@@ -103,7 +103,7 @@ namespace System.Data.ODB.SQLite
             }
             else if (type == DataType.DateTime)
             {
-                return "DATETIME";
+                return "TIMESTAMP";
             }
             else if (type == DataType.Bytes)
             {
@@ -112,6 +112,10 @@ namespace System.Data.ODB.SQLite
             else if (type == DataType.Guid)
             {
                 return "GUID";
+            }
+            else if (DataType.OdbEntity.IsAssignableFrom(type))
+            {
+                return "INTEGER";
             }
 
             return "TEXT";

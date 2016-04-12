@@ -2,90 +2,84 @@
 
 namespace System.Data.ODB
 {
-    public class TypeHelper
+    public class SqlType
     {
-        public static DbType Convert(object obj)
+        public static DbType Convert(Type t)
         {
-            if (obj is string)
+            if (t == DataType.String)
             {
                 return DbType.String;
             }
-            else if (obj is char)
+            else if (t == DataType.Char)
             {
                 return DbType.StringFixedLength;
             }
-            else if (obj is byte)
+            else if (t == DataType.Byte) 
             {
                 return DbType.Byte;
             }
-            else if (obj is byte[])
+            else if (t == DataType.Bytes) 
             {
                 return DbType.Binary;
             }
-            else if (obj is sbyte)
+            else if (t == DataType.SByte) 
             {
                 return DbType.SByte;
             }
-            else if (obj is int)
+            else if (t == DataType.Int32) 
             {
                 return DbType.Int32;
             }
-            else if (obj is uint)
+            else if (t == DataType.UInt32) 
             {
                 return DbType.UInt32;
             }
-            else if (obj is short)
+            else if (t == DataType.Short) 
             {
                 return DbType.Int16;
             }
-            else if (obj is ushort)
+            else if (t == DataType.UShort) 
             {
                 return DbType.UInt16;
             }
-            else if (obj is long)
+            else if (t == DataType.Int64) 
             {
                 return DbType.Int64;
             }
-            else if (obj is ulong)
+            else if (t == DataType.UInt64) 
             {
                 return DbType.UInt64;
             }
-            else if (obj is double)
+            else if (t == DataType.Double) 
             {
                 return DbType.Double;
             }
-            else if (obj is float)
+            else if (t == DataType.Float)  
             {
                 return DbType.Single;
             }
-            else if (obj is decimal)
+            else if (t == DataType.Decimal) 
             {
                 return DbType.Decimal;
             }
-            else if (obj is bool)
+            else if (t == DataType.Bool) 
             {
                 return DbType.Boolean;
             }
-            else if (obj is DateTime)
+            else if (t == DataType.DateTime) 
             {
                 return DbType.DateTime;
             }
-            else if (obj is Guid)
+            else if (t == DataType.Guid) 
             {
                 return DbType.Guid;
             }
-            
-            return DbType.Int32;
-        }
-
-        public static string Enclosed(string str)
-        {
-            if (str.IndexOf('[') == -1)
+            else if (DataType.OdbEntity.IsAssignableFrom(t))
             {
-                return "[" + str + "]";
+                return DbType.Int32;
             }
-
-            return str;
-        }
+            
+            return DbType.String;
+        } 
     }
 }

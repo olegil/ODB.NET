@@ -61,7 +61,13 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
-            User user = db.Query<User>().First();
+            db.Clear<User>();
+
+            User user = new User() { Name = "Peter", BID = "2315-34436-346", Birthday = DateTime.Now };
+
+            db.Insert(user);
+
+            user = db.Query<User>().First();
              
             Assert.IsTrue(user != null);
         }

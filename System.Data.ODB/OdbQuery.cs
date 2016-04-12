@@ -44,7 +44,7 @@ namespace System.Data.ODB
         {
             this._sql.Append(" FROM ");
 
-            this._sql.Append(TypeHelper.Enclosed(table));
+            this._sql.Append(Enclosed(table));
 
             if (!string.IsNullOrEmpty(alias))
             {
@@ -60,7 +60,7 @@ namespace System.Data.ODB
         {
             this._sql.Append("INSERT INTO ");
 
-            this._sql.Append(TypeHelper.Enclosed(this.Table));
+            this._sql.Append(Enclosed(this.Table));
 
             this._sql.Append(" (");    
             this._sql.Append(string.Join(", ", cols));
@@ -81,7 +81,7 @@ namespace System.Data.ODB
         public virtual IQuery<T> Update()
         {
             this._sql.Append("UPDATE ");
-            this._sql.Append(TypeHelper.Enclosed(this.Table));
+            this._sql.Append(Enclosed(this.Table));
 
             return this;
         }
@@ -111,7 +111,7 @@ namespace System.Data.ODB
         public virtual IQuery<T> Join(string table)
         {
             this._sql.Append(" JOIN ");
-            this._sql.Append(TypeHelper.Enclosed(table));
+            this._sql.Append(Enclosed(table));
 
             return this; 
         }
@@ -163,7 +163,7 @@ namespace System.Data.ODB
         public virtual IQuery<T> As(string str)
         {
             this._sql.Append(" AS ");
-            this._sql.Append(TypeHelper.Enclosed(str));
+            this._sql.Append(Enclosed(str));
 
             return this;
         }
@@ -179,7 +179,7 @@ namespace System.Data.ODB
         public virtual IQuery<T> OrderBy(string str)
         {
             this._sql.Append(" ORDER BY ");
-            this._sql.Append(TypeHelper.Enclosed(str));
+            this._sql.Append(Enclosed(str));
 
             return this;
         }
@@ -280,10 +280,10 @@ namespace System.Data.ODB
         {
             if (!string.IsNullOrEmpty(this.Alias))
             {
-                this._sql.Append(TypeHelper.Enclosed(this.Alias) + ".");
+                this._sql.Append(Enclosed(this.Alias) + ".");
             }
 
-            this._sql.Append(TypeHelper.Enclosed(str));
+            this._sql.Append(Enclosed(str));
 
             return this;
         }
@@ -296,6 +296,7 @@ namespace System.Data.ODB
         }
 
         public abstract string AddParameter(int index, object b);
+        public abstract string AddParameter(int index, object b, DbType dtype);
 
         public IDbDataParameter[] GetParams()
         {
@@ -322,6 +323,16 @@ namespace System.Data.ODB
         public T1 Single<T1>()
         {
             return this._db.ExecuteScalar<T1>(this._sql.ToString(), this.DbParams.ToArray());
-        } 
+        }
+
+        public string Enclosed(string str)
+        {
+            if (str.IndexOf('[') == -1)
+            {
+                return "[" + str + "]";
+            }
+
+            return str;
+        }
     }
 }

@@ -17,9 +17,7 @@ namespace UnitTest
             SqlContext db = new SqlContext(Command.MssqlConnStr);
 
             db.Depth = 2;
-
-            db.Create<Book>();
-
+ 
             Publish pub = new Publish() { Name = "Bloger", Address = new Address() { Flat = "64", Street = "ABC", City = "Hong Kong" } };
             User user = new User() { Name = "Peter", BID = null, Birthday = DateTime.Now };
 
@@ -31,11 +29,9 @@ namespace UnitTest
                 User = user
             };      
 
-            int a = db.Insert(user);
+            int a = db.Insert(user);             
 
-            IQuery<Order> q = db.Query<Order>().Where("Id").Eq(1);
-
-            List<Order> oo = q.ToList();
+            List<User> l = db.Query<User>().ToList();
 
             db.Close();
 
@@ -49,7 +45,9 @@ namespace UnitTest
 
             db.Depth = 2;
 
-            Order oo = new Order() { User = new User() { Name = "Peter", BID = "534262346", Birthday = DateTime.Now }, Date = DateTime.Now };
+            User user = new User() { Name = "Peter", BID = null, Birthday = DateTime.Now };
+
+            Order oo = new Order() { User = user, Date = DateTime.Now };
 
             db.Insert(oo);
 

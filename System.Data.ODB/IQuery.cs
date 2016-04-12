@@ -7,9 +7,12 @@ namespace System.Data.ODB
     {
         IQuery AddString(string str);
         string AddParameter(int index, object b);
+        string AddParameter(int index, object b, DbType dtype);
         IDbDataParameter[] GetParams(); 
         DataSet Result();
         T1 Single<T1>();
+
+        string Enclosed(string str);
         string ToString();
     }
 

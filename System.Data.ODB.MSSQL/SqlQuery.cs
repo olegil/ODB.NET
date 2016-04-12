@@ -16,12 +16,17 @@ namespace System.Data.ODB.MSSQL
 
         public override string AddParameter(int index, object b)
         {
+            return this.AddParameter(index, b, SqlType.Convert(b.GetType()));           
+        }
+
+        public override string AddParameter(int index, object b, DbType dtype)
+        {
             string name = "@p" + index;
 
             SqlParameter p = new SqlParameter(name, b);
 
-            p.DbType = TypeHelper.Convert(b);
-             
+            p.DbType = dtype; 
+
             this.DbParams.Add(p);
 
             return name;

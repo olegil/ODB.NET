@@ -14,17 +14,22 @@ namespace System.Data.ODB.SQLite
 
         public override string AddParameter(int index, object b)
         {
+            return this.AddParameter(index, b, SqlType.Convert(b.GetType()));
+        }
+
+        public override string AddParameter(int index, object b, DbType dtype)
+        {
             string name = "@p" + index;
 
             SQLiteParameter p = new SQLiteParameter(name, b);
- 
-            p.DbType = TypeHelper.Convert(b); 
+
+            p.DbType = dtype;  
 
             this.DbParams.Add(p);
 
             return name;
-        } 
- 
+        }
+
         public override IQuery<T> Skip(int start)
         {
             this._sql.Append(" LIMIT " + start.ToString());

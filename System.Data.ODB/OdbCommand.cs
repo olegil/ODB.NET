@@ -27,35 +27,17 @@ namespace System.Data.ODB
         }
 
         public virtual void Create(Type type)
-        {
-            string dbtype = "";
-
+        { 
             List<string> cols = new List<string>();
 
-            foreach (PropertyInfo pi in type.GetProperties())
-            {
-                ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
-
-                if (!colAttr.NotMapped)
-                {
-                    if (!colAttr.IsForeignkey)
-                    {
-                        dbtype = this.TypeMapping(pi.PropertyType);
-                    }
-                    else
-                    {
-                        if (string.IsNullOrEmpty(colAttr.Name))
-                            colAttr.Name = pi.Name + "Id";
-
-                        dbtype = this.TypeMapping(typeof(long));
-
-                        this.Create(pi.PropertyType);
-                    }
-
-                    string colName = string.IsNullOrEmpty(colAttr.Name) ? pi.Name : colAttr.Name;
-
-                    cols.Add(this.Define(colName, dbtype, colAttr));
+            foreach (ColumnMapping col in MappingHelper.GetColumnMapping(type))
+            {   
+                if (col.Attribute.IsForeignkey)
+                {   
+                    this.Create(col.Prop.PropertyType);
                 }
+ 
+                cols.Add(this.SqlDefine(col));                 
             }
 
             string table = MappingHelper.GetTableName(type);
@@ -111,26 +93,25 @@ namespace System.Data.ODB
 
             ColumnMapping ColPk = null;
              
-            foreach (ColumnMapping col in MappingHelper.GetColumnMapping(t))
+            //begin foreach
+            foreach (ColumnMapping col in MappingHelper.GetColumnMapping(type))
             {
                 if (!col.Attribute.IsAuto)
                 {
-                    object b = DBNull.Value;
+                    object b = col.GetValue(t);
 
                     if (!col.Attribute.IsForeignkey)
                     {
-                        if (col.Value != null)
-                            b = col.Value;
-                        else
+                        if (b == null)                           
                             b = DBNull.Value;
                     }
                     else
                     { 
                         if (this.level > 1 )
                         {
-                            if (col.Value != null)
+                            if (b != null)
                             {
-                                IEntity entry = col.Value as IEntity;
+                                IEntity entry = b as IEntity;
 
                                 this.level--;
 
@@ -142,11 +123,11 @@ namespace System.Data.ODB
                         }
                     }
 
-                    string pr = query.AddParameter(n++, b);
+                    string pr = query.AddParameter(n++, b, col.GetDbType());
 
                     ps.Add(pr);
 
-                    cols.Add(TypeHelper.Enclosed(col.Name)); 
+                    cols.Add(query.Enclosed(col.Name)); 
                 }
 
                 if (col.Attribute.IsPrimaryKey)
@@ -154,6 +135,7 @@ namespace System.Data.ODB
                     ColPk = col;
                 }
             }
+            //end
 
             if (ColPk == null)
             {
@@ -167,7 +149,7 @@ namespace System.Data.ODB
                     cols[i] = cols[i] + "=" + ps[i];
                 } 
             
-                query.Update().Set(cols.ToArray()).Where(ColPk.Name).Eq(ColPk.Value);
+                query.Update().Set(cols.ToArray()).Where(ColPk.Name).Eq(ColPk.GetValue(t));
 
                 this.ExecuteUpdate(query);
 
@@ -204,11 +186,13 @@ namespace System.Data.ODB
 
             IQuery<T> query = this.Db.CreateQuery<T>();
 
-            query.Table = MappingHelper.GetTableName(t.GetType());
+            Type type = t.GetType();
+
+            query.Table = MappingHelper.GetTableName(type);
 
             ColumnMapping colKey = null;
 
-            foreach (ColumnMapping col in MappingHelper.GetColumnMapping(t))
+            foreach (ColumnMapping col in MappingHelper.GetColumnMapping(type))
             {
                 if (col.Attribute.IsPrimaryKey)
                 {
@@ -221,14 +205,14 @@ namespace System.Data.ODB
                 throw new Exception("No key column.");
             }
 
-            query.Delete().Where(colKey.Name).Eq(colKey.Value);
+            query.Delete().Where(colKey.Name).Eq(colKey.GetValue(t));
 
             return this.Execute(query);
         }
                       
-        public abstract string TypeMapping(Type type);
+        public abstract string SqlMapping(Type type);
 
-        public abstract string Define(string name, string dbtype, ColumnAttribute colAttr);
+        public abstract string SqlDefine(ColumnMapping col);
 
         protected int Execute(IQuery query)
         {

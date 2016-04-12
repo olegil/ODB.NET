@@ -327,7 +327,7 @@ namespace System.Data.ODB.SQLite
             p.Value = b;
             //p.Size = attr.Size;
 
-            p.DbType = TypeHelper.Convert(b);
+            p.DbType = SqlType.Convert(b.GetType());
 
             this.ps.Add(p);
 

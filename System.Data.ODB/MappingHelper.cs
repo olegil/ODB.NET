@@ -28,27 +28,35 @@ namespace System.Data.ODB
                 return objAttrs[0] as ColumnAttribute;
             }
             
-            return new ColumnAttribute() { Name = "", IsAuto = false, IsForeignkey = false, IsPrimaryKey = false, IsNullable = true, NotMapped = false, Length = 0 };
+            return new ColumnAttribute() {
+                            Name = "",
+                            IsAuto = false,
+                            IsForeignkey = false,
+                            IsPrimaryKey = false,
+                            IsNullable = true,
+                            NotMapped = false,
+                            Length = 0
+            };
         }
 
-        public static IEnumerable<ColumnMapping> GetColumnMapping(IEntity t)
+        public static IEnumerable<ColumnMapping> GetColumnMapping(Type type)
         {
-            PropertyInfo[] propes = t.GetType().GetProperties();
+            PropertyInfo[] propes = type.GetProperties();
 
             for (int i = 0; i < propes.Length; i++)
             {
-                ColumnAttribute attr = MappingHelper.GetColumnAttribute(propes[i]);
+                ColumnAttribute colAttr = GetColumnAttribute(propes[i]);
 
-                if (!attr.NotMapped)
+                if (!colAttr.NotMapped)
                 {
-                    string colName = string.IsNullOrEmpty(attr.Name) ? propes[i].Name : attr.Name;
+                    string name = string.IsNullOrEmpty(colAttr.Name) ? propes[i].Name : colAttr.Name;
 
-                    if (attr.IsForeignkey && string.IsNullOrEmpty(attr.Name))
+                    if (colAttr.IsForeignkey && string.IsNullOrEmpty(colAttr.Name))
                     {
-                        colName = propes[i].Name + "Id";
+                        name = propes[i].Name + "Id";
                     }
 
-                    yield return new ColumnMapping(colName, propes[i].GetValue(t, null), attr);
+                    yield return new ColumnMapping(name, propes[i], colAttr);
                 }
             }
         }

@@ -25,9 +25,9 @@ namespace System.Data.ODB.MSSQL
  
         public override void Drop(string table)
         {
-            string _dropSql = "IF OBJECT_ID('[{0}]', 'U') IS NOT NULL DROP TABLE [{1}];";
+            string sql = "IF OBJECT_ID('[{0}]', 'U') IS NOT NULL DROP TABLE [{1}];";
 
-            this.Db.ExecuteNonQuery(string.Format(_dropSql, table, table));
+            this.Db.ExecuteNonQuery(string.Format(sql, table, table));
         }
 
         public override int ExecuteInsert(IQuery query)
@@ -41,41 +41,42 @@ namespace System.Data.ODB.MSSQL
             return (int)this.Db.ExecuteScalar<long>(sql, query.GetParams());
         } 
 
-        public override string Define(string name, string dbtype, ColumnAttribute colAttr)
+        public override string SqlDefine(ColumnMapping col)
         {
-            string col = "[" + name + "] " + dbtype;
+            string dbtype = this.SqlMapping(col.Prop.PropertyType);
+            string sql = "[" + col.Name + "] " + dbtype;
 
             if (dbtype == "NVARCHAR")
             {
-                if (colAttr.Length > 0)
-                    col += "(" + colAttr.Length + ")";
+                if (col.Attribute.Length > 0)
+                    sql += "(" + col.Attribute.Length + ")";
                 else
-                    col += "(MAX)";
+                    sql += "(MAX)";
             }
 
-            if (colAttr.IsAuto)
+            if (col.Attribute.IsAuto)
             {
-                col += " IDENTITY(1,1)";
+                sql += " IDENTITY(1,1)";
             }
 
-            if (colAttr.IsPrimaryKey)
+            if (col.Attribute.IsPrimaryKey)
             {
-                col += " PRIMARY KEY";
+                sql += " PRIMARY KEY";
             }
 
-            if (colAttr.IsNullable)
+            if (col.Attribute.IsNullable)
             {
-                col += " NULL";
+                sql += " NULL";
             }
             else
             {
-                col += " NOT NULL";
+                sql += " NOT NULL";
             }
 
-            return col;
+            return sql;
         }
 
-        public override string TypeMapping(Type type)
+        public override string SqlMapping(Type type)
         {
             if (type == DataType.String)
             {
@@ -133,8 +134,12 @@ namespace System.Data.ODB.MSSQL
             {
                 return "GUID";
             }
+            else if (DataType.OdbEntity.IsAssignableFrom(type))
+            {
+                return "INT";
+            }
 
-            return "TEXT";
+            return "NVARCHAR";
         }
     }
 }

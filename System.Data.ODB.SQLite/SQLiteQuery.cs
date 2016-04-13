@@ -12,24 +12,15 @@ namespace System.Data.ODB.SQLite
         { 
         }
 
-        public override string AddParameter(int index, object b)
+        public override IDbDataParameter Bind(string name, object b, DbType dtype)
         {
-            return this.AddParameter(index, b, SqlType.Convert(b.GetType()));
-        }
-
-        public override string AddParameter(int index, object b, DbType dtype)
-        {
-            string name = "@p" + index;
-
             SQLiteParameter p = new SQLiteParameter(name, b);
 
-            p.DbType = dtype;  
+            p.DbType = dtype;
 
-            this.DbParams.Add(p);
-
-            return name;
-        }
-
+            return p;
+        } 
+         
         public override IQuery<T> Skip(int start)
         {
             this._sql.Append(" LIMIT " + start.ToString());
@@ -54,6 +45,6 @@ namespace System.Data.ODB.SQLite
                 return list[0];
 
             return default(T);
-        }          
+        }
     }
 }

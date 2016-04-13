@@ -249,7 +249,7 @@ namespace System.Data.ODB
 
         public virtual IDataReader ExecuteReader(IQuery query)
         {
-            return this.ExecuteReader(query.ToString(), query.GetParams());
+            return this.ExecuteReader(query.ToString(), query.Parameters.ToArray());
         }
 
         public IDataReader ExecuteReader(string sql, params IDbDataParameter[] cmdParms)
@@ -277,7 +277,7 @@ namespace System.Data.ODB
 
         public T ExecuteScalar<T>(IQuery query)
         {
-            return this.ExecuteScalar<T>(query.ToString(), query.GetParams());
+            return this.ExecuteScalar<T>(query.ToString(), query.Parameters.ToArray());
         }
 
         public T ExecuteScalar<T>(string sql, params IDbDataParameter[] cmdParms)

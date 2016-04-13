@@ -17,6 +17,11 @@ namespace System.Data.ODB.SQLite
             this.Db.ExecuteNonQuery(sql);
         }
 
+        public override IDbDataParameter CreateParameter()
+        {             
+            return new SQLiteParameter();
+        }
+
         public override void Drop(string table)
         {
             this.Db.ExecuteNonQuery("DROP TABLE IF EXISTS [" + table + "]");
@@ -31,7 +36,7 @@ namespace System.Data.ODB.SQLite
  
         public override string SqlDefine(ColumnMapping col)
         {
-            string sql = "[" + col.Name + "] " + this.SqlMapping(col.Prop.PropertyType);
+            string sql = "[" + col.Name + "] " + this.TypeMapping(col.GetDbType());
              
             if (col.Attribute.IsPrimaryKey)
             {
@@ -55,69 +60,61 @@ namespace System.Data.ODB.SQLite
             return sql;
         }
 
-        public override string SqlMapping(Type type)
+        public override string TypeMapping(DbType type)
         {
-            if (type == DataType.String)
+            if (type == DbType.String)
             {
                 return "TEXT";
             }
-            else if (type == DataType.Char)
+            else if (type == DbType.StringFixedLength)
             {
                 return "CHAR(1)";
             }
-            else if (type == DataType.SByte)
+            else if (type == DbType.SByte)
             {
                 return "TINYINT";
             }
-            else if (type == DataType.Short || type == DataType.Byte)
+            else if (type == DbType.Int16 || type == DbType.Byte)
             {
                 return "SMALLINT";
             }
-            else if (type == DataType.Int32 || type == DataType.UShort)
+            else if (type == DbType.Int32 || type == DbType.UInt16)
             {
                 return "INT";
             }
-            else if (type == DataType.Int64 || type == DataType.UInt32)
+            else if (type == DbType.Int64 || type == DbType.UInt32)
             {
                 return "INTEGER";
-            }
-            else if (type == DataType.UInt64)
-            {
-                return "BIGINT";
-            }
-            else if (type == DataType.Double)
-            {
-                return "DOUBLE";
-            }
-            else if (type == DataType.Float)
+            }         
+            else if (type == DbType.Double)
             {
                 return "REAL";
             }
-            else if (type == DataType.Decimal)
+            else if (type == DbType.Single)
+            {
+                return "FLOAT";
+            }
+            else if (type == DbType.Decimal)
             {
                 return "NUMERIC(20,10)";
             }
-            else if (type == DataType.Bool)
+            else if (type == DbType.Boolean)
             {
                 return "BOOLEAN";
             }
-            else if (type == DataType.DateTime)
+            else if (type == DbType.DateTime)
             {
                 return "TIMESTAMP";
             }
-            else if (type == DataType.Bytes)
+            else if (type == DbType.Binary)
             {
                 return "BLOB";
             }
-            else if (type == DataType.Guid)
+            else if (type == DbType.Guid)
             {
                 return "GUID";
             }
-            else if (DataType.OdbEntity.IsAssignableFrom(type))
-            {
-                return "INTEGER";
-            }
-
+         
             return "TEXT";
         }        
     }

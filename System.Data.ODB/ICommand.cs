@@ -11,6 +11,8 @@ namespace System.Data.ODB
         void ExecuteCreate<T>() where T : IEntity;
         void ExecuteDrop<T>() where T : IEntity;
         int ExecuteNonQuery<T>(T t) where T : IEntity;         
-        int ExecuteDelete<T>(T t) where T : IEntity;   
+        int ExecuteDelete<T>(T t) where T : IEntity;
+
+        IDbDataParameter CreateParameter();
     }
 }

@@ -21,7 +21,7 @@ namespace System.Data.ODB.SQLite
         {
             IQuery query = new SQLiteQuery<T>(this);
 
-            return (IQuery<T>)query.AddString(sql);
+            return (IQuery<T>)query.Append(sql);
         }
 
         public override DataSet ExecuteDataSet(string sql, params IDbDataParameter[] commandParameters)

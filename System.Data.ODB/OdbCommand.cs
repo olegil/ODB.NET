@@ -31,10 +31,10 @@ namespace System.Data.ODB
             List<string> cols = new List<string>();
 
             foreach (ColumnMapping col in MappingHelper.GetColumnMapping(type))
-            {   
+            { 
                 if (col.Attribute.IsForeignkey)
                 {   
-                    this.Create(col.Prop.PropertyType);
+                    this.Create(col.GetColumnType());
                 }
  
                 cols.Add(this.SqlDefine(col));                 
@@ -57,15 +57,13 @@ namespace System.Data.ODB
 
         public virtual void ExecuteDrop(Type type)
         {
-            foreach (PropertyInfo pi in type.GetProperties())
+            foreach (ColumnMapping col in MappingHelper.GetColumnMapping(type))
             {
-                ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
-
-                if (colAttr != null && colAttr.IsForeignkey)
+                if (col.Attribute.IsForeignkey)
                 {
-                    this.ExecuteDrop(pi.PropertyType);
-                }
-            }
+                    this.ExecuteDrop(col.GetColumnType());
+                } 
+            } 
 
             string table = MappingHelper.GetTableName(type);
 
@@ -123,11 +121,20 @@ namespace System.Data.ODB
                         }
                     }
 
-                    string pr = query.AddParameter(n++, b, col.GetDbType());
+                    string name = "@p" + n;
 
-                    ps.Add(pr);
+                    IDbDataParameter p = this.CreateParameter();
 
-                    cols.Add(query.Enclosed(col.Name)); 
+                    p.ParameterName = name;
+                    p.Value = b;
+                    p.DbType = col.GetDbType();
+
+                    query.Parameters.Add(p);
+
+                    ps.Add(name);
+                    cols.Add("[" + col.Name + "]");
+
+                    n++;
                 }
 
                 if (col.Attribute.IsPrimaryKey)
@@ -163,19 +170,13 @@ namespace System.Data.ODB
             } 
         }
 
-        /// <summary>
-        /// Insert object (return id)
-        /// </summary>
         public abstract int ExecuteInsert(IQuery query);
-
-        /// <summary>
-        /// Update object
-        /// </summary>
-        public virtual void ExecuteUpdate(IQuery query)
+        
+        public virtual int ExecuteUpdate(IQuery query)
         {
-            this.Execute(query);
-        } 
-                
+            return this.Execute(query);
+        }
+
         /// <summary>
         /// Delete object
         /// </summary>
@@ -209,14 +210,16 @@ namespace System.Data.ODB
 
             return this.Execute(query);
         }
-                      
-        public abstract string SqlMapping(Type type);
+
+        public abstract IDbDataParameter CreateParameter();
+
+        public abstract string TypeMapping(DbType dtype);
 
         public abstract string SqlDefine(ColumnMapping col);
 
         protected int Execute(IQuery query)
         {
-            return this.Db.ExecuteNonQuery(query.ToString(), query.GetParams());
-        } 
+            return this.Db.ExecuteNonQuery(query.ToString(), query.Parameters.ToArray());
+        }
     }
 }

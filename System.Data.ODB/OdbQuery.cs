@@ -9,18 +9,19 @@ namespace System.Data.ODB
     {
         protected StringBuilder _sql; 
 
-        protected IDbContext _db;               
-        public List<IDbDataParameter> DbParams { get; set; }
+        protected IDbContext _db;
+
+        public List<IDbDataParameter> Parameters { get; set; }
 
         public string Table { get; set; }
         public string Alias { get; set; }
-
+         
         public OdbQuery(IDbContext db)
         {
             this._sql = new StringBuilder();
 
             this._db = db;
-            this.DbParams = new List<IDbDataParameter>();
+            this.Parameters = new List<IDbDataParameter>();
 
             this.Table = MappingHelper.GetTableName(typeof(T));
 
@@ -213,42 +214,42 @@ namespace System.Data.ODB
         {
             this._sql.Append(" = ");
             
-            return this.Bind(val);
+            return this.Add(val);
         }
 
         public virtual IQuery<T> NotEq(object val)
         {
             this._sql.Append(" <> ");     
 
-            return this.Bind(val);
+            return this.Add(val);
         }
 
         public virtual IQuery<T> Gt(object val)
         {
             this._sql.Append(" > ");
 
-            return this.Bind(val);
+            return this.Add(val);
         }
 
         public virtual IQuery<T> Lt(object val)
         {
             this._sql.Append(" < ");
 
-            return this.Bind(val);
+            return this.Add(val);
         }
 
         public virtual IQuery<T> Gte(object val)
         {
             this._sql.Append(" >= ");
 
-            return this.Bind(val);
+            return this.Add(val);
         }
 
         public virtual IQuery<T> Lte(object val)
         {
             this._sql.Append(" <= ");
 
-            return this.Bind(val);
+            return this.Add(val);
         }
 
         public virtual IQuery<T> Not(string str)
@@ -262,19 +263,23 @@ namespace System.Data.ODB
         {
             this._sql.Append(" LIKE ");
 
-            return this.Bind("%" + str + "%");
-        } 
+            return this.Add("%" + str + "%");
+        }
 
-        public virtual IQuery<T> Bind(object b)
+        public virtual IQuery<T> Add(object b)
         {
-            int index = this.DbParams.Count;
+            string name = "@p" + this.Parameters.Count;
 
-            string p = this.AddParameter(index, b);
+            IDbDataParameter param = this.Bind(name, b, SqlType.Convert(b.GetType()));
 
-            this._sql.Append(p);
-                   
+            this.Parameters.Add(param);
+
+            this._sql.Append(name);
+
             return this;
         }
+
+        public abstract IDbDataParameter Bind(string name, object b, DbType dtype);        
 
         public virtual IQuery<T> AddAlias(string str)
         {
@@ -288,31 +293,18 @@ namespace System.Data.ODB
             return this;
         }
 
-        public IQuery AddString(string str)
+        public IQuery Append(string str)
         {
             this._sql.Append(str);
 
             return this;
         }
-
-        public abstract string AddParameter(int index, object b);
-        public abstract string AddParameter(int index, object b, DbType dtype);
-
-        public IDbDataParameter[] GetParams()
-        {
-            return this.DbParams.ToArray();
-        }
-
-        public override string ToString()
-        {
-            return this._sql.ToString();
-        }
- 
+  
         public abstract T First();        
 
         public DataSet Result()
         {
-            return this._db.ExecuteDataSet(this._sql.ToString(), this.DbParams.ToArray());
+            return this._db.ExecuteDataSet(this._sql.ToString(), this.Parameters.ToArray());
         }
  
         public List<T> ToList()
@@ -322,10 +314,10 @@ namespace System.Data.ODB
           
         public T1 Single<T1>()
         {
-            return this._db.ExecuteScalar<T1>(this._sql.ToString(), this.DbParams.ToArray());
+            return this._db.ExecuteScalar<T1>(this._sql.ToString(), this.Parameters.ToArray());
         }
 
-        public string Enclosed(string str)
+        private string Enclosed(string str)
         {
             if (str.IndexOf('[') == -1)
             {
@@ -334,5 +326,10 @@ namespace System.Data.ODB
 
             return str;
         }
+
+        public override string ToString()
+        {
+            return this._sql.ToString();
+        } 
     }
 }

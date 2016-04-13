@@ -16,6 +16,7 @@ namespace UnitTest
         [TestMethod]
         public void TestTable()
         {
+            // SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
             SqlContext db = new SqlContext(Command.MssqlConnStr);
 
             db.Depth = 2;
@@ -23,9 +24,9 @@ namespace UnitTest
             db.Remove<Order>();
             db.Create<Order>();
 
-            Order oo = new Order() { User = new User() { Name = "Peter", BID = "534262346", Birthday = DateTime.Now }, Date = DateTime.Now };
+            Order order = new Order() { PackageID = "3452347-57452357", User = new User() { Name = "Peter", BID = 523.46f, IsPermit = false, Birthday = DateTime.Now }, Date = DateTime.Now };
 
-            int a = db.Insert(oo);
+            int a = db.Insert(order);
 
             db.Close(); 
 
@@ -37,10 +38,8 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
-            db.Remove<Order>();
-
-            db.Create<Order>();
-
+            db.Clear<Order>();
+                      
             db.Close();
 
             int a = 0;

@@ -5,8 +5,8 @@ namespace System.Data.ODB
     public class SqlType
     {
         public static DbType Convert(Type t)
-        {
-            if (t == DataType.String)
+        { 
+            if (t == DataType.Text)
             {
                 return DbType.String;
             }
@@ -54,7 +54,7 @@ namespace System.Data.ODB
             {
                 return DbType.Double;
             }
-            else if (t == DataType.Float)  
+            else if (t == DataType.Single)  
             {
                 return DbType.Single;
             }
@@ -76,7 +76,7 @@ namespace System.Data.ODB
             }
             else if (DataType.OdbEntity.IsAssignableFrom(t))
             {
-                return DbType.Int32;
+                return DbType.Int64;
             }
             
             return DbType.String;

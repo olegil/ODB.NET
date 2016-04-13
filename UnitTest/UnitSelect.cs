@@ -17,12 +17,10 @@ namespace UnitTest
 
             db.Depth = 2;
                        
-            IQuery<Book> q = db.Query<Book>();
+            IQuery<Order>  q = db.Query<Order>();
 
-            List<Book> list = q.ToList();
-
-            string sql = q.ToString();
-
+            List<Order> list = q.ToList();
+  
             Assert.IsTrue(list.Count > 0);
         }
 
@@ -33,9 +31,13 @@ namespace UnitTest
 
             db.Depth = 2;
 
+            User user = new User() { Name = "Peter", BID = 345f, Birthday = DateTime.Now };
+
+            db.Insert(user);
+
             IQuery<User> q = db.Query<User>().Where("Name").Eq("Peter");
             
-            User user = q.First();
+            User user2 = q.First();
 
             db.Close();
 
@@ -48,10 +50,8 @@ namespace UnitTest
             SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
             db.Depth = 2;
-
-            IQuery<User> q = db.Query<User>();
-
-            User user = q.First();
+  
+            User user = db.Query<User>().First();
 
             Assert.IsTrue(user != null);
         }
@@ -63,7 +63,7 @@ namespace UnitTest
 
             db.Clear<User>();
 
-            User user = new User() { Name = "Peter", BID = "2315-34436-346", Birthday = DateTime.Now };
+            User user = new User() { Name = "Stephen", BID = 345f, Birthday = DateTime.Now };
 
             db.Insert(user);
 

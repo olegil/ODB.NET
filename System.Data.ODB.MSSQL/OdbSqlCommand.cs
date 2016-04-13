@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
+using System.Data.SqlClient;
 
 namespace System.Data.ODB.MSSQL
 {
@@ -38,12 +39,12 @@ namespace System.Data.ODB.MSSQL
 
             sql = sql.Insert(i, " OUTPUT INSERTED.Id ");
 
-            return (int)this.Db.ExecuteScalar<long>(sql, query.GetParams());
+            return (int)this.Db.ExecuteScalar<long>(sql, query.Parameters.ToArray());
         } 
 
         public override string SqlDefine(ColumnMapping col)
         {
-            string dbtype = this.SqlMapping(col.Prop.PropertyType);
+            string dbtype = this.TypeMapping(col.GetDbType());
             string sql = "[" + col.Name + "] " + dbtype;
 
             if (dbtype == "NVARCHAR")
@@ -76,70 +77,67 @@ namespace System.Data.ODB.MSSQL
             return sql;
         }
 
-        public override string SqlMapping(Type type)
+        public override string TypeMapping(DbType type)
         {
-            if (type == DataType.String)
+            if (type == DbType.String)
             {
                 return "NVARCHAR";
             }
-            else if (type == DataType.Char)
+            else if (type == DbType.StringFixedLength)
             {
                 return "CHAR(1)";
             }
-            else if (type == DataType.SByte)
+            else if (type == DbType.SByte)
             {
                 return "TINYINT";
             }
-            else if (type == DataType.Short || type == DataType.Byte)
+            else if (type == DbType.Int16 || type == DbType.Byte)
             {
                 return "SMALLINT";
             }
-            else if (type == DataType.Int32 || type == DataType.UShort)
+            else if (type == DbType.Int32 || type == DbType.UInt16)
             {
                 return "INT";
             }
-            else if (type == DataType.Int64 || type == DataType.UInt32)
+            else if (type == DbType.Int64 || type == DbType.UInt32)
             {
                 return "BIGINT";
-            }
-            else if (type == DataType.UInt64)
+            }           
+            else if (type == DbType.Double)
             {
-                return "BIGINT";
+                return "FLOAT";
             }
-            else if (type == DataType.Double)
-            {
-                return "DOUBLE";
-            }
-            else if (type == DataType.Float)
+            else if (type == DbType.Single)
             {
                 return "REAL";
             }
-            else if (type == DataType.Decimal)
+            else if (type == DbType.Decimal)
             {
                 return "NUMERIC(20,10)";
             }
-            else if (type == DataType.Bool)
+            else if (type == DbType.Boolean)
             {
                 return "BIT";
             }
-            else if (type == DataType.DateTime)
+            else if (type == DbType.DateTime)
             {
                 return "DATETIME";
             }
-            else if (type == DataType.Bytes)
+            else if (type == DbType.Binary)
             {
-                return "BLOB";
+                return "BINARY";
             }
-            else if (type == DataType.Guid)
+            else if (type == DbType.Guid)
             {
                 return "GUID";
-            }
-            else if (DataType.OdbEntity.IsAssignableFrom(type))
-            {
-                return "INT";
-            }
+            } 
 
             return "NVARCHAR";
+        }
+
+        public override IDbDataParameter CreateParameter()
+        {
+            return new SqlParameter();
         }
     }
 }

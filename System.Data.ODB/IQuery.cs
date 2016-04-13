@@ -5,14 +5,12 @@ namespace System.Data.ODB
 {
     public interface IQuery
     {
-        IQuery AddString(string str);
-        string AddParameter(int index, object b);
-        string AddParameter(int index, object b, DbType dtype);
-        IDbDataParameter[] GetParams(); 
+        IQuery Append(string str); 
+        List<IDbDataParameter> Parameters { get; set; }
+         
         DataSet Result();
-        T1 Single<T1>();
+        T1 Single<T1>(); 
 
-        string Enclosed(string str);
         string ToString();
     }
 
@@ -53,7 +51,7 @@ namespace System.Data.ODB
         IQuery<T> Equal(string str);
         IQuery<T> SortAsc();
         IQuery<T> SortDesc();
-
+ 
         T First();
 
         List<T> ToList();       

@@ -16,11 +16,11 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
-            Book book = new Book() {  ISBN = "ANDSAGSDAH", Release = DateTime.Now, User = new User() { BID = "", Name = "Chan Peter" } };
+            User user = new User() { BID = 2345F, Name = "Chan Peter" };
 
-            db.Insert(book);
+            db.Insert(user);
 
-            int n = db.Count<Book>(); 
+            int n = db.Count<User>(); 
  
             db.Close();
 

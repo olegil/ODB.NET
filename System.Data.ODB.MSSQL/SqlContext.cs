@@ -22,7 +22,7 @@ namespace System.Data.ODB.MSSQL
         {
             IQuery query = new SqlQuery<T>(this);
 
-            return (IQuery<T>)query.AddString(sql);
+            return (IQuery<T>)query.Append(sql);
         }
 
         public override ICommand CreateCommand()

@@ -17,7 +17,7 @@ namespace UnitTest
 
             Publish pub = new Publish() { Name = "Bloger", Address = new Address() { Street = "Queen Road", Flat = "Westland" } };
 
-            long i = db.Insert(pub);
+            int i = db.Insert(pub);
 
             Assert.IsTrue(i != 0);
         }

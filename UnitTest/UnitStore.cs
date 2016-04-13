@@ -14,12 +14,12 @@ namespace UnitTest
         [TestMethod]
         public void TestStore()
         {
-            SqlContext db = new SqlContext(Command.MssqlConnStr);
+            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
             db.Depth = 2;
  
             Publish pub = new Publish() { Name = "Bloger", Address = new Address() { Flat = "64", Street = "ABC", City = "Hong Kong" } };
-            User user = new User() { Name = "Peter", BID = null, Birthday = DateTime.Now };
+            User user = new User() { Name = "Peter", BID = 235f, Birthday = DateTime.Now };
 
             Book book = new Book()
             {
@@ -43,15 +43,17 @@ namespace UnitTest
         {
             SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
+           // SqlContext db = new SqlContext(Command.MssqlConnStr);
+
             db.Depth = 2;
 
-            User user = new User() { Name = "Peter", BID = null, Birthday = DateTime.Now };
+            User user = new User() { Name = "Peter", BID = 345f, IsPermit = true, Birthday = DateTime.Now };
 
             Order oo = new Order() { User = user, Date = DateTime.Now };
 
-            db.Insert(oo);
+           // db.Insert(oo);
 
-            IQuery<User> q1 = db.Query<User>().Where("Name").Eq("Peter");
+         //   IQuery<User> q1 = db.Query<User>().Where("Name").Eq("Peter");
 
             IQuery<Order> q = db.Query<Order>().Where("Id").Eq(1);
 
@@ -82,7 +84,7 @@ namespace UnitTest
             db.Create<Order>();
             db.Create<User>();
 
-            Order order = new Order() { User = new User() { Name = "Peter", BID = "7277-7257257" }, Date = DateTime.Now };
+            Order order = new Order() { User = new User() { Name = "Peter", BID = 234f }, Date = DateTime.Now };
 
             OrderItem item = new OrderItem() { Name = "Ruler", Order = order, Quantity = 3 };
 

@@ -12,24 +12,15 @@ namespace System.Data.ODB.MSSQL
     {
         public SqlQuery(IDbContext db) : base(db)
         {
-        }
+        } 
 
-        public override string AddParameter(int index, object b)
+        public override IDbDataParameter Bind(string name, object b, DbType dtype)
         {
-            return this.AddParameter(index, b, SqlType.Convert(b.GetType()));           
-        }
-
-        public override string AddParameter(int index, object b, DbType dtype)
-        {
-            string name = "@p" + index;
-
             SqlParameter p = new SqlParameter(name, b);
 
-            p.DbType = dtype; 
+            p.DbType = dtype;
 
-            this.DbParams.Add(p);
-
-            return name;
+            return p;
         }
 
         public override T First()
@@ -45,6 +36,6 @@ namespace System.Data.ODB.MSSQL
         public override IQuery<T> Take(int count)
         {
             throw new NotImplementedException();
-        }
+        }   
     }
 }

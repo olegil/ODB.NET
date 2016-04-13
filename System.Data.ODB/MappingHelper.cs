@@ -56,7 +56,7 @@ namespace System.Data.ODB
                         name = propes[i].Name + "Id";
                     }
 
-                    yield return new ColumnMapping(name, propes[i], colAttr);
+                    yield return new ColumnMapping(name,  propes[i], colAttr);
                 }
             }
         }

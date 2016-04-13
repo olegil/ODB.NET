@@ -7,24 +7,29 @@ namespace System.Data.ODB
     public class ColumnMapping
     {
         public string Name { get; set; }
-        public PropertyInfo Prop { get; set; }      
-        public ColumnAttribute Attribute { get; private set; }     
-  
+        public PropertyInfo Property { get; set; }
+        public ColumnAttribute Attribute { get; set; }
+        
         public ColumnMapping(string name, PropertyInfo prop, ColumnAttribute attr)
-        {            
+        {
             this.Name = name;
-            this.Prop = prop;           
+            this.Property = prop;
             this.Attribute = attr;
-        }          
+        }    
+
+        public Type GetColumnType()
+        {
+            return this.Property.PropertyType;
+        }
 
         public DbType GetDbType()
-        { 
-            return SqlType.Convert(this.Prop.PropertyType);
+        {
+            return SqlType.Convert(this.Property.PropertyType);
         }
 
         public object GetValue(IEntity t)
         {
-            return this.Prop.GetValue(t, null);
+            return this.Property.GetValue(t, null);
         }
     }
 }

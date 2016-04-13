@@ -7,7 +7,9 @@ namespace UnitTest
 {   
     public class User : OdbEntity
     { 
-        public string BID { get; set; }         
+        public float BID { get; set; }         
+        public bool IsPermit { get; set; }
+        public int Age { get; set; }
         public string Name { get; set; }         
         public DateTime Birthday { get; set; }
     }
@@ -62,6 +64,8 @@ namespace UnitTest
     {
         [Column(IsForeignkey = true)]
         public User User { get; set; }
+
+        public string PackageID { get; set; }
 
         public DateTime Date { get; set; }
     }

@@ -14,7 +14,7 @@ namespace UnitTest
 
             db.Clear<User>();
            
-            User user = new User() { Name = "Stephen", BID = "3B5A2DA0-9A4D-4093-9702-51DB611F7B33" };
+            User user = new User() { Name = "Stephen", BID = 123F };
                     
             int a = db.Insert(user);
  

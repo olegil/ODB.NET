@@ -7,7 +7,7 @@ namespace UnitTest
 {   
     public class User : OdbEntity
     { 
-        public float BID { get; set; }         
+        public double BID { get; set; }         
         public bool IsPermit { get; set; }
         public int Age { get; set; }
         public string Name { get; set; }         
@@ -66,6 +66,12 @@ namespace UnitTest
         public User User { get; set; }
 
         public string PackageID { get; set; }
+
+        [Column(Length = 512)]
+        public string Remark { get; set; }
+         
+        [Column(NotMapped = true)]
+        public decimal Total { get; set; }
 
         public DateTime Date { get; set; }
     }

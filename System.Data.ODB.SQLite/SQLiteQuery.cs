@@ -8,7 +8,7 @@ namespace System.Data.ODB.SQLite
     public class SQLiteQuery<T> : OdbQuery<T>
         where T : IEntity
     {      
-        public SQLiteQuery(IDbContext db) : base(db)
+        public SQLiteQuery()  
         { 
         }
 
@@ -23,14 +23,19 @@ namespace System.Data.ODB.SQLite
          
         public override IQuery<T> Skip(int start)
         {
-            this._sql.Append(" LIMIT " + start.ToString());
-
+            this._limit = start.ToString();
+         
             return this;
         }
 
         public override IQuery<T> Take(int count)
         {
-            this._sql.Append(" , " + count.ToString());
+            if (!string.IsNullOrEmpty(this._limit))
+            {
+                this._limit += " , ";
+            }
+
+            this._limit += count.ToString();
 
             return this;
         }
@@ -39,12 +44,34 @@ namespace System.Data.ODB.SQLite
         {
             this.Skip(0).Take(1);
 
-            IList<T> list = this._db.Get<T>(this);
+            IList<T> list = this.Db.Get<T>(this);
 
             if (list.Count > 0)
                 return list[0];
 
             return default(T);
+        }
+         
+        public override string ToString()
+        {
+            string sql = this._sb.ToString();
+
+            if (!string.IsNullOrEmpty(this._where))
+            {
+                sql += " WHERE " + this._where;
+            }
+
+            if (!string.IsNullOrEmpty(this._order))
+            {
+                sql += " ORDER BY " + this._order;
+            }
+
+            if (!string.IsNullOrEmpty(this._limit))
+            {
+                sql += " LIMIT " + this._limit;
+            } 
+
+            return sql;
         }
     }
 }

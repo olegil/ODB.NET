@@ -4,6 +4,7 @@ using System.Data;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Data.ODB;
 using System.Data.ODB.SQLite;
+using System.Data.ODB.MSSQL;
 
 namespace UnitTest
 {
@@ -57,19 +58,17 @@ namespace UnitTest
         }
 
         [TestMethod]
-        public void TestQuery()
+        public void TestLike()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
+            //SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
-            db.Clear<User>();
+            SqlContext db = new SqlContext(Command.MssqlConnStr);
 
-            User user = new User() { Name = "Stephen", BID = 345f, Birthday = DateTime.Now };
+            IQuery<User> q = db.Query<User>().Where("Name").Like("hen");
 
-            db.Insert(user);
-
-            user = db.Query<User>().First();
+            List<User> list = q.ToList();
              
-            Assert.IsTrue(user != null);
+            Assert.IsTrue(list.Count > 0);
         }
     }
 }

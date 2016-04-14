@@ -10,7 +10,10 @@ namespace System.Data.ODB.MSSQL
     public class SqlQuery<T> : OdbQuery<T>
         where T : IEntity
     {
-        public SqlQuery(IDbContext db) : base(db)
+        private int _skip = 0;
+        private int _take = 0;
+
+        public SqlQuery()
         {
         } 
 
@@ -25,17 +28,60 @@ namespace System.Data.ODB.MSSQL
 
         public override T First()
         {
-            throw new NotImplementedException();
+            this.Take(1);
+            
+            IList<T> list = this.Db.Get<T>(this);
+
+            if (list.Count > 0)
+                return list[0];
+
+            return default(T);
         }
 
         public override IQuery<T> Skip(int start)
-        {
-            throw new NotImplementedException();
+        { 
+            if (string.IsNullOrEmpty(this._order))
+            {
+                this.OrderBy("Id").SortAsc();
+            }
+
+            this._skip = start;
+             
+            return this;
         }
 
         public override IQuery<T> Take(int count)
         {
-            throw new NotImplementedException();
-        }   
+            this._take = count;
+             
+            return this;
+        }
+
+        public override string ToString()
+        {
+            string sql = this._sb.ToString();
+
+            if (!string.IsNullOrEmpty(this._where))
+            {
+                sql += " WHERE " + this._where;
+            }
+
+            if (this._skip == 0 && !string.IsNullOrEmpty(this._order))
+            {
+                sql += " ORDER BY " + this._order;
+            }
+
+            if (this._skip > 0)
+            {
+                sql = "SELECT * FROM (" + sql.Insert(7, "ROW_NUMBER() OVER(ORDER BY " + this._order + ") AS [ROWNO],") + ") as P WHERE P.[ROWNO] > " + this._skip;
+            }
+
+            if (this._take > 0)
+            {
+                return sql.Insert(7, "TOP(" + this._take + ") ");
+            }
+
+            return sql; 
+        }
     }
 }

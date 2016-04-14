@@ -47,25 +47,27 @@ namespace System.Data.ODB.MSSQL
             string dbtype = this.TypeMapping(col.GetDbType());
             string sql = "[" + col.Name + "] " + dbtype;
 
+            ColumnAttribute attr = col.Attribute;
+
             if (dbtype == "NVARCHAR")
             {
-                if (col.Attribute.Length > 0)
-                    sql += "(" + col.Attribute.Length + ")";
+                if (attr.Length > 0)
+                    sql += "(" + attr.Length + ")";
                 else
                     sql += "(MAX)";
             }
 
-            if (col.Attribute.IsAuto)
+            if (attr.IsAuto)
             {
                 sql += " IDENTITY(1,1)";
             }
 
-            if (col.Attribute.IsPrimaryKey)
+            if (attr.IsPrimaryKey)
             {
                 sql += " PRIMARY KEY";
             }
 
-            if (col.Attribute.IsNullable)
+            if (attr.IsNullable && !attr.IsForeignkey)
             {
                 sql += " NULL";
             }

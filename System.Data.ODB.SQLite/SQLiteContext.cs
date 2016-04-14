@@ -14,14 +14,17 @@ namespace System.Data.ODB.SQLite
 
         public override IQuery<T> CreateQuery<T>()
         {
-            return new SQLiteQuery<T>(this);
+            return this.CreateQuery<T>("");
         }
 
         public override IQuery<T> CreateQuery<T>(string sql)
         {
-            IQuery query = new SQLiteQuery<T>(this);
+            SQLiteQuery<T> q = new SQLiteQuery<T>();
 
-            return (IQuery<T>)query.Append(sql);
+            q.Db = this;
+            q.Append(sql);
+
+            return q;
         }
 
         public override DataSet ExecuteDataSet(string sql, params IDbDataParameter[] commandParameters)

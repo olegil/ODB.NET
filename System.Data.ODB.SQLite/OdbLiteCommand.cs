@@ -36,19 +36,22 @@ namespace System.Data.ODB.SQLite
  
         public override string SqlDefine(ColumnMapping col)
         {
-            string sql = "[" + col.Name + "] " + this.TypeMapping(col.GetDbType());
-             
-            if (col.Attribute.IsPrimaryKey)
+            string dbtype = this.TypeMapping(col.GetDbType());
+            string sql = "[" + col.Name + "] " + dbtype;
+
+            ColumnAttribute attr = col.Attribute;
+
+            if (attr.IsPrimaryKey)
             {
                 sql += " PRIMARY KEY";
             }
 
-            if (col.Attribute.IsAuto)
+            if (attr.IsAuto)
             {
                 sql += " AUTOINCREMENT";
             }
 
-            if (col.Attribute.IsNullable)
+            if (attr.IsNullable && !attr.IsForeignkey)
             {
                 sql += " NULL";
             }

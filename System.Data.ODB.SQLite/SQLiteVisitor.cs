@@ -7,32 +7,34 @@ using System.Data.SQLite;
 using System.Data.ODB.Linq;
 
 namespace System.Data.ODB.SQLite
-{
+{ 
+
     public class SQLiteVisitor : ODBExpressionVisitor, IVisitor
     {
-        private StringBuilder sb;
-        private List<IDbDataParameter> ps;
-        private bool _limit = false;     
+        private StringBuilder _sb;
+        private List<IDbDataParameter> _parmas;
+        private string _limit = "";       
         private int _index = 0;
+
+        private string _alias = "T0";
 
         public int Depth { get; private set; }
 
         public SQLiteVisitor()
         {
-            this.sb = new StringBuilder();        
-            this.ps = new List<IDbDataParameter>(); 
+            this._sb = new StringBuilder();
+            this._parmas = new List<IDbDataParameter>();
         }
 
         public void Translate(Expression expression, int depth)
         {
-            this.sb.Length = 0;
-            this.ps.Clear();
+            this._sb.Length = 0;
+            this._parmas.Clear();
 
             this.Depth = depth;
             this._index = 0;
-            this._limit = false;
-
-            this.Visit(expression); 
+            
+            this.Visit(expression);
         }
 
         private static Expression StripQuotes(Expression e)
@@ -46,147 +48,135 @@ namespace System.Data.ODB.SQLite
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
-        {           
+        {
             if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
-            {             
+            {
                 this.Visit(m.Arguments[0]);
-                this.sb.Append(" WHERE ");
+                this._sb.Append(" WHERE ");
                 LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
-                this.Visit(lambda.Body);                               
+                this.Visit(lambda.Body);
             }
             else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Select")
             {
                 this.Visit(m.Arguments[0]);
-                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);                
+                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
                 this.Visit(lambda.Body);
             }
             else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Skip")
             {
                 this.Visit(m.Arguments[0]);
-                if (!this._limit)
-                {
-                    this.sb.Append(" LIMIT ");
 
-                    this._limit = true;
-                }
-                else
-                {
-                    this.sb.Append(" OFFSET ");
-                }
+                this.setlimit();
+                this._sb.Append(" OFFSET ");
+                 
                 this.Visit(m.Arguments[1]);
             }
             else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Take")
             {
                 this.Visit(m.Arguments[0]);
-                if (!this._limit)
-                {
-                    this.sb.Append(" LIMIT ");
 
-                    this._limit = true;
-                }
-                else
-                {
-                    this.sb.Append(", ");
-                }
+                this.setlimit();
+                this._sb.Append(", ");
+                 
                 this.Visit(m.Arguments[1]);
             }
             else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "OrderBy")
             {
                 this.Visit(m.Arguments[0]);
-                this.sb.Append(" ORDER BY ");
-                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]); 
+                this._sb.Append(" ORDER BY ");
+                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
                 this.Visit(lambda.Body);
             }
             else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "OrderByDescending")
             {
                 this.Visit(m.Arguments[0]);
-                this.sb.Append(" ORDER BY ");                
-                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);                 
+                this._sb.Append(" ORDER BY ");
+                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
                 this.Visit(lambda.Body);
-                this.sb.Append(" DESC");
+                this._sb.Append(" DESC");
             }
             else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "ThenBy")
             {
                 this.Visit(m.Arguments[0]);
-                this.sb.Append(", ");
-                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]); 
+                this._sb.Append(", ");
+                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
                 this.Visit(lambda.Body);
             }
             else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "ThenByDescending")
             {
                 this.Visit(m.Arguments[0]);
-                this.sb.Append(", ");
+                this._sb.Append(", ");
                 LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
                 this.Visit(lambda.Body);
-                this.sb.Append(" DESC");
-            }          
+                this._sb.Append(" DESC");
+            }
             else if (m.Method.Name == "Contains")
             {
                 this.Visit(m.Object);
-                this.sb.Append(" LIKE ('%' || "); 
+                this._sb.Append(" LIKE ('%' || ");
                 this.Visit(m.Arguments[0]);
-                this.sb.Append(" || '%')");
+                this._sb.Append(" || '%')");
             }
             else if (m.Method.Name == "StartsWith")
             {
                 this.Visit(m.Object);
-                this.sb.Append(" LIKE (");                
+                this._sb.Append(" LIKE (");
                 this.Visit(m.Arguments[0]);
-                this.sb.Append(" || '%')");
+                this._sb.Append(" || '%')");
             }
             else if (m.Method.Name == "EndsWith")
             {
                 this.Visit(m.Object);
-                this.sb.Append(" LIKE ('%' || ");
+                this._sb.Append(" LIKE ('%' || ");
                 this.Visit(m.Arguments[0]);
-                this.sb.Append(")");
+                this._sb.Append(")");
             }
             else if (m.Method.Name == "Equals")
             {
                 this.Visit(m.Object);
-                this.sb.Append(" = ");
+                this._sb.Append(" = ");
                 this.Visit(m.Arguments[0]);
             }
             else if (m.Method.Name == "Trim")
             {
-                this.sb.Append(" TRIM(");
+                this._sb.Append(" TRIM(");
                 this.Visit(m.Object);
-                this.sb.Append(")");
+                this._sb.Append(")");
             }
             else if (m.Method.Name == "ToLower")
             {
-                this.sb.Append(" LOWER(");
+                this._sb.Append(" LOWER(");
                 this.Visit(m.Object);
-                this.sb.Append(")");
+                this._sb.Append(")");
             }
             else if (m.Method.Name == "ToUpper")
             {
-                this.sb.Append(" UPPER(");
+                this._sb.Append(" UPPER(");
                 this.Visit(m.Object);
-                this.sb.Append(")");
-            }          
+                this._sb.Append(")");
+            }
             else if (m.Method.Name == "IndexOf")
             {
-                this.sb.Append(" INSTR(");
+                this._sb.Append(" INSTR(");
                 this.Visit(m.Object);
-                this.sb.Append(", ");
+                this._sb.Append(", ");
                 this.Visit(m.Arguments[0]);
-                this.sb.Append(")");
+                this._sb.Append(")");
             }
             else if (m.Method.Name == "Substring")
             {
-                this.sb.Append(" SUBSTR(");
+                this._sb.Append(" SUBSTR(");
                 this.Visit(m.Object);
-                this.sb.Append(", ");
+                this._sb.Append(", ");
                 this.Visit(m.Arguments[0]);
-                this.sb.Append(", ");
+                this._sb.Append(", ");
                 this.Visit(m.Arguments[1]);
-                this.sb.Append(")");
-            } 
-            else 
+                this._sb.Append(")");
+            }
+            else
                 throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
 
-            return m;            
+            return m;
         }
 
         protected override Expression VisitUnary(UnaryExpression u)
@@ -194,7 +184,7 @@ namespace System.Data.ODB.SQLite
             switch (u.NodeType)
             {
                 case ExpressionType.Not:
-                    this.sb.Append(" NOT ");
+                    this._sb.Append(" NOT ");
                     this.Visit(u.Operand);
                     break;
 
@@ -206,47 +196,47 @@ namespace System.Data.ODB.SQLite
         }
 
         protected override Expression VisitBinary(BinaryExpression b)
-        {            
+        {
             this.Visit(b.Left);
 
             switch (b.NodeType)
-            {               
+            {
                 case ExpressionType.AndAlso:
-                        this.sb.Append(" AND ");
-                        break;
+                    this._sb.Append(" AND ");
+                    break;
                 case ExpressionType.OrElse:
-                        this.sb.Append(" OR ");
-                     break;
+                    this._sb.Append(" OR ");
+                    break;
                 case ExpressionType.Equal:
-                        if (IsNullConstant(b.Right))
-                            this.sb.Append(" IS ");
-                        else
-                            this.sb.Append(" = ");
-                        break;
+                    if (IsNullConstant(b.Right))
+                        this._sb.Append(" IS ");
+                    else
+                        this._sb.Append(" = ");
+                    break;
                 case ExpressionType.NotEqual:
-                        if (IsNullConstant(b.Right))
-                            this.sb.Append(" IS NOT ");
-                        else
-                            this.sb.Append(" <> ");
-                        break;
+                    if (IsNullConstant(b.Right))
+                        this._sb.Append(" IS NOT ");
+                    else
+                        this._sb.Append(" <> ");
+                    break;
                 case ExpressionType.LessThan:
-                        this.sb.Append(" < ");
-                        break;
+                    this._sb.Append(" < ");
+                    break;
                 case ExpressionType.LessThanOrEqual:
-                        this.sb.Append(" <= ");
-                        break;
+                    this._sb.Append(" <= ");
+                    break;
                 case ExpressionType.GreaterThan:
-                        this.sb.Append(" > ");
-                        break;
+                    this._sb.Append(" > ");
+                    break;
                 case ExpressionType.GreaterThanOrEqual:
-                        this.sb.Append(" >= ");
-                        break;
+                    this._sb.Append(" >= ");
+                    break;
                 default:
                     throw new NotSupportedException(string.Format("The binary operator '{0}' is not supported", b.NodeType));
             }
 
             this.Visit(b.Right);
- 
+
             return b;
         }
 
@@ -255,25 +245,25 @@ namespace System.Data.ODB.SQLite
             IQueryable q = c.Value as IQueryable;
 
             if (q != null)
-            { 
+            {
                 TableVisitor tsel = new TableVisitor(this.Depth);
                 tsel.Visit(q.ElementType);
 
-                this.sb.Append("SELECT " + tsel.Colums);         
-                this.sb.Append(" FROM " + q.ElementType);
-                this.sb.Append(" AS T0");
+                this._sb.Append("SELECT " + string.Join(",", tsel.Colums));
+                this._sb.Append(" FROM " + MappingHelper.GetTableName(q.ElementType));
+                this._sb.Append(" AS " + this._alias);
             }
             else if (c.Value == null)
             {
-                this.sb.Append("NULL");
+                this._sb.Append("NULL");
             }
             else
             {
                 string name = this.Bind(this._index, c.Value);
 
-                this.sb.Append(name);
+                this._sb.Append(name);
 
-                this._index++;                    
+                this._index++;
             }
 
             return c;
@@ -283,38 +273,38 @@ namespace System.Data.ODB.SQLite
         {
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
-                this.sb.Append("T0." + m.Member.Name);
+                this._sb.Append(this.Enclosed(this._alias) + "." + this.Enclosed(m.Member.Name));
             }
             else if (m.Expression.NodeType == ExpressionType.Constant)
             {
                 ConstantExpression mc = m.Expression as ConstantExpression;
 
                 object b = (m.Member as FieldInfo).GetValue(mc.Value);
-                           
+
                 this.Visit(Expression.Constant(b));
             }
             else if (m.Member.DeclaringType == typeof(DateTime))
             {
                 if (m.Member.Name == "Now")
                 {
-                    this.sb.Append("datetime()");
-                }               
+                    this._sb.Append("datetime()");
+                }
             }
             else if (m.Member.DeclaringType == typeof(string))
             {
                 if (m.Member.Name == "Length")
                 {
-                    this.sb.Append("LENGTH(");
+                    this._sb.Append("LENGTH(");
 
                     this.Visit(m.Expression);
 
-                    this.sb.Append(")");
+                    this._sb.Append(")");
                 }
-            }          
-            else 
+            }
+            else
                 throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
-            
-            return m;           
+
+            return m;
         }
 
         private string Bind(int index, object b)
@@ -329,19 +319,34 @@ namespace System.Data.ODB.SQLite
 
             p.DbType = SqlType.Convert(b.GetType());
 
-            this.ps.Add(p);
+            this._parmas.Add(p);
 
             return name;
-        } 
+        }
+
+        private void setlimit()
+        {
+            if (this._limit == "")
+            {
+                this._limit = " LIMIT ";
+
+                this._sb.Append(this._limit);
+            }
+        }
+
+        private string Enclosed(string str)
+        {
+            return "[" + str + "]";
+        }
 
         public override string ToString()
         {
-            return this.sb.ToString();
+            return this._sb.ToString();
         }
 
         public IDbDataParameter[] GetParamters()
         {
-            return this.ps.ToArray();
+            return this._parmas.ToArray();
         }
-    }
+    } 
 }

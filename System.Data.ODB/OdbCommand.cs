@@ -94,11 +94,13 @@ namespace System.Data.ODB
             //begin foreach
             foreach (ColumnMapping col in MappingHelper.GetColumnMapping(type))
             {
-                if (!col.Attribute.IsAuto)
+                ColumnAttribute attr = col.Attribute;
+
+                if (!attr.IsAuto)
                 {
                     object b = col.GetValue(t);
 
-                    if (!col.Attribute.IsForeignkey)
+                    if (!attr.IsForeignkey)
                     {
                         if (b == null)                           
                             b = DBNull.Value;
@@ -137,7 +139,7 @@ namespace System.Data.ODB
                     n++;
                 }
 
-                if (col.Attribute.IsPrimaryKey)
+                if (attr.IsPrimaryKey)
                 {
                     ColPk = col;
                 }
@@ -170,8 +172,14 @@ namespace System.Data.ODB
             } 
         }
 
+        /// <summary>
+        /// Insert object return id
+        /// </summary>
         public abstract int ExecuteInsert(IQuery query);
-        
+         
+        /// <summary>
+        /// Update object
+        /// </summary>
         public virtual int ExecuteUpdate(IQuery query)
         {
             return this.Execute(query);

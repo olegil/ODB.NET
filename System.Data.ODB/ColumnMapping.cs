@@ -6,9 +6,9 @@ namespace System.Data.ODB
 {
     public class ColumnMapping
     {
-        public string Name { get; set; }
-        public PropertyInfo Property { get; set; }
-        public ColumnAttribute Attribute { get; set; }
+        public string Name { get; private set; }
+        public PropertyInfo Property { get; private set; }
+        public ColumnAttribute Attribute { get; private set; }
         
         public ColumnMapping(string name, PropertyInfo prop, ColumnAttribute attr)
         {

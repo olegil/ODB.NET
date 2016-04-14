@@ -30,9 +30,7 @@ namespace UnitTest
             };      
 
             int a = db.Insert(user);             
-
-            List<User> l = db.Query<User>().ToList();
-
+             
             db.Close();
 
             Assert.IsTrue(a > 0);
@@ -41,36 +39,23 @@ namespace UnitTest
         [TestMethod]
         public void TestStore2()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
+            //SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
-           // SqlContext db = new SqlContext(Command.MssqlConnStr);
+            SqlContext db = new SqlContext(Command.MssqlConnStr);
 
             db.Depth = 2;
 
-            User user = new User() { Name = "Peter", BID = 345f, IsPermit = true, Birthday = DateTime.Now };
+            //db.Create<Order>();
 
-            Order oo = new Order() { User = user, Date = DateTime.Now };
-
-           // db.Insert(oo);
-
-         //   IQuery<User> q1 = db.Query<User>().Where("Name").Eq("Peter");
-
-            IQuery<Order> q = db.Query<Order>().Where("Id").Eq(1);
-
-            Order order = q.First();
-
-            int a = 0;
-
-            if (order != null)
-            {
-                order.User.Name = "Ken";
-
-                a = db.Update(order);
-            }
+            User user = new User() { Name = "Stephen", BID = 345346.3245d, IsPermit = true, Birthday = DateTime.Now };
+ 
+            db.Insert(new Order() { PackageID = "234324GA", User = user, Date = DateTime.Now });
+            
+            Order order = db.Query<Order>().First(); 
 
             db.Close();
 
-            Assert.IsTrue(a > 0);
+            Assert.IsNotNull(order);
         }
 
         [TestMethod]
@@ -84,7 +69,7 @@ namespace UnitTest
             db.Create<Order>();
             db.Create<User>();
 
-            Order order = new Order() { User = new User() { Name = "Peter", BID = 234f }, Date = DateTime.Now };
+            Order order = new Order() { User = new User() { Name = "Peter", BID = 234.564d }, Date = DateTime.Now };
 
             OrderItem item = new OrderItem() { Name = "Ruler", Order = order, Quantity = 3 };
 

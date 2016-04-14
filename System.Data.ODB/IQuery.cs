@@ -9,7 +9,9 @@ namespace System.Data.ODB
         List<IDbDataParameter> Parameters { get; set; }
          
         DataSet Result();
-        T1 Single<T1>(); 
+        T1 Single<T1>();
+
+        void Reset();
 
         string ToString();
     }
@@ -17,7 +19,7 @@ namespace System.Data.ODB
     public interface IQuery<T> : IQuery 
     { 
         string Table { get; set; } 
-        string Alias { get; set; }
+        string Alias { get; set; } 
 
         IQuery<T> Insert(string[] cols);
         IQuery<T> Values(string[] cols);       
@@ -36,7 +38,7 @@ namespace System.Data.ODB
         IQuery<T> Lt(object val);
         IQuery<T> Gte(object val);
         IQuery<T> Lte(object val);
-        IQuery<T> Not(string str);
+        IQuery<T> Not();
         IQuery<T> Like(string str);
         IQuery<T> Set(string[] cols);
         IQuery<T> Count(string str);

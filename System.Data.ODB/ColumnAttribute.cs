@@ -15,7 +15,14 @@ namespace System.Data.ODB
         public bool NotMapped { get; set; }
        
         public ColumnAttribute()
-        {             
+        {
+            Name = "";
+            IsAuto = false;
+            IsForeignkey = false;
+            IsPrimaryKey = false;
+            IsNullable = true;
+            NotMapped = false;
+            Length = 0;
         }
     }
 }

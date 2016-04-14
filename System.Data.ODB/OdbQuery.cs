@@ -7,31 +7,32 @@ namespace System.Data.ODB
     public abstract class OdbQuery<T> : IQuery<T>
         where T : IEntity
     {
-        protected StringBuilder _sql; 
+        protected StringBuilder _sb;
 
-        protected IDbContext _db;
+        public IDbContext Db { get; set; }
 
         public List<IDbDataParameter> Parameters { get; set; }
 
         public string Table { get; set; }
         public string Alias { get; set; }
-         
-        public OdbQuery(IDbContext db)
-        {
-            this._sql = new StringBuilder();
 
-            this._db = db;
+        protected string _where;
+        protected string _limit;
+        protected string _order;
+         
+        public OdbQuery()
+        {
+            this._sb = new StringBuilder();
+             
             this.Parameters = new List<IDbDataParameter>();
 
-            this.Table = MappingHelper.GetTableName(typeof(T));
-
-            this.Alias = "";
+            this.Table = MappingHelper.GetTableName(typeof(T));   
         }
 
         public virtual IQuery<T> Select(string[] cols)
         {
-            this._sql.Append("SELECT ");
-            this._sql.Append(string.Join(",", cols));
+            this._sb.Append("SELECT ");
+            this._sb.Append(string.Join(",", cols));
 
             return this;
         }
@@ -43,9 +44,9 @@ namespace System.Data.ODB
 
         public virtual IQuery<T> From(string table, string alias = "")
         {
-            this._sql.Append(" FROM ");
+            this._sb.Append(" FROM ");
 
-            this._sql.Append(Enclosed(table));
+            this._sb.Append(Enclosed(table));
 
             if (!string.IsNullOrEmpty(alias))
             {
@@ -59,62 +60,167 @@ namespace System.Data.ODB
 
         public virtual IQuery<T> Insert(string[] cols)
         {
-            this._sql.Append("INSERT INTO ");
+            this._sb.Append("INSERT INTO ");
 
-            this._sql.Append(Enclosed(this.Table));
+            this._sb.Append(Enclosed(this.Table));
 
-            this._sql.Append(" (");    
-            this._sql.Append(string.Join(", ", cols));
-            this._sql.Append(")");                
+            this._sb.Append(" (");    
+            this._sb.Append(string.Join(", ", cols));
+            this._sb.Append(")");                
 
             return this;
         }
 
         public virtual IQuery<T> Values(string[] cols)
         {
-            this._sql.Append(" VALUES (");
-            this._sql.Append(string.Join(", ", cols));
-            this._sql.Append(")");
+            this._sb.Append(" VALUES (");
+            this._sb.Append(string.Join(", ", cols));
+            this._sb.Append(")");
 
             return this;
         }
 
         public virtual IQuery<T> Update()
         {
-            this._sql.Append("UPDATE ");
-            this._sql.Append(Enclosed(this.Table));
+            this._sb.Append("UPDATE ");
+            this._sb.Append(Enclosed(this.Table));
 
             return this;
         }
 
         public virtual IQuery<T> Set(string[] cols)
         {
-            this._sql.Append(" SET ");
-            this._sql.Append(string.Join(", ", cols));
+            this._sb.Append(" SET ");
+            this._sb.Append(string.Join(", ", cols));
 
             return this;
         }
 
         public virtual IQuery<T> Delete()
         {
-            this._sql.Append("DELETE");
+            this._sb.Append("DELETE");
 
             return this.From();
         }
+          
+        public virtual IQuery<T> Where(string str)
+        { 
+            this._where = this.AddAlias(str);
+
+            return this;
+        }
+
+        public virtual IQuery<T> AddWhere(string str)
+        {
+            this._where += str;
+
+            return this;
+        }
+
+        public virtual IQuery<T> And(string str)
+        {
+            this._where += " AND " + this.AddAlias(str); 
+
+            return this;
+        }
+
+        public virtual IQuery<T> Or(string str)
+        {
+            this._where += " OR " + this.AddAlias(str);  
+
+            return this;
+        }
+
+        public virtual IQuery<T> Equal(string str)
+        {
+            this._where += " = '" + str + "'";
+
+            return this;
+        } 
+
+        public virtual IQuery<T> Eq(object val)
+        {
+            this._where += " = '" + this.Add(val) + "'";
+
+            return this;
+        }
+
+        public virtual IQuery<T> NotEq(object val)
+        {
+            this._where += " <> '" + this.Add(val) + "'";
+
+            return this;
+        }
+
+        public virtual IQuery<T> Gt(object val)
+        {
+            this._where += " > '" + this.Add(val) + "'";
+
+            return this;
+        }
+
+        public virtual IQuery<T> Lt(object val)
+        {
+            this._where += " < '" + this.Add(val) + "'";
+
+            return this;
+        }
+
+        public virtual IQuery<T> Gte(object val)
+        {
+            this._where += " >= '" + this.Add(val) + "'";
          
+            return this;
+        }
+
+        public virtual IQuery<T> Lte(object val)
+        {
+            this._where += " <= '" + this.Add(val) + "'";
+             
+            return this;
+        } 
+
+        public virtual IQuery<T> Like(string str)
+        {
+            this._where += " LIKE " + this.Add("%" + str + "%");
+             
+            return this;
+        }
+
+        public virtual IQuery<T> OrderBy(string str)
+        {
+            this._order = this.AddAlias(str);
+           
+            return this;
+        }
+
+        public virtual IQuery<T> SortAsc()
+        {
+            this._order += " ASC";
+
+            return this;
+        }
+
+        public virtual IQuery<T> SortDesc()
+        {
+            this._order += " DESC";
+      
+            return this;
+        }
+
         public virtual IQuery<T> Join<T1>() where T1 : IEntity
         {
             Type type = typeof(T1);
- 
+
             return this.Join(MappingHelper.GetTableName(type));
         }
 
         public virtual IQuery<T> Join(string table)
         {
-            this._sql.Append(" JOIN ");
-            this._sql.Append(Enclosed(table));
+            this._sb.Append(" JOIN ");
+            this._sb.Append(Enclosed(table));
 
-            return this; 
+            return this;
         }
 
         public virtual IQuery<T> LeftJoin<T1>() where T1 : IEntity
@@ -126,78 +232,33 @@ namespace System.Data.ODB
 
         public virtual IQuery<T> LeftJoin(string table)
         {
-            this._sql.Append(" LEFT");
+            this._sb.Append(" LEFT");
 
             return this.Join(table);
         }
 
-        public virtual IQuery<T> Where(string str)
-        { 
-            this._sql.Append(" WHERE ");
-
-            return this.AddAlias(str);
-        }
-
-        public virtual IQuery<T> And(string str)
-        {
-            this._sql.Append(" AND ");
-
-            return this.AddAlias(str);
-        }
-
-        public virtual IQuery<T> Or(string str)
-        {
-            this._sql.Append(" OR ");
-
-            return this.AddAlias(str);
-        }
-
-        public virtual IQuery<T> Equal(string str)
-        {
-            this._sql.Append(" = '");
-            this._sql.Append(str);
-            this._sql.Append("'");
-
-            return this;
-        }
-
         public virtual IQuery<T> As(string str)
         {
-            this._sql.Append(" AS ");
-            this._sql.Append(Enclosed(str));
+            this._sb.Append(" AS ");
+            this._sb.Append(Enclosed(str));
 
             return this;
         }
 
         public virtual IQuery<T> On(string str)
         {
-            this._sql.Append(" ON ");
-            this._sql.Append(str);
+            this._sb.Append(" ON ");
+            this._sb.Append(str);
 
             return this;
         }
 
-        public virtual IQuery<T> OrderBy(string str)
+        public IQuery<T> Not()
         {
-            this._sql.Append(" ORDER BY ");
-            this._sql.Append(Enclosed(str));
+            this._where += " NOT ";
 
             return this;
         }
-
-        public virtual IQuery<T> SortAsc()
-        {
-            this._sql.Append(" ASC");
-
-            return this;
-        }
-
-        public virtual IQuery<T> SortDesc()
-        {
-            this._sql.Append(" DESC");
-
-            return this;
-        } 
 
         public virtual IQuery<T> Count(string str)  
         {
@@ -209,93 +270,33 @@ namespace System.Data.ODB
         public abstract IQuery<T> Skip(int start);
 
         public abstract IQuery<T> Take(int count);
-
-        public virtual IQuery<T> Eq(object val)
-        {
-            this._sql.Append(" = ");
-            
-            return this.Add(val);
-        }
-
-        public virtual IQuery<T> NotEq(object val)
-        {
-            this._sql.Append(" <> ");     
-
-            return this.Add(val);
-        }
-
-        public virtual IQuery<T> Gt(object val)
-        {
-            this._sql.Append(" > ");
-
-            return this.Add(val);
-        }
-
-        public virtual IQuery<T> Lt(object val)
-        {
-            this._sql.Append(" < ");
-
-            return this.Add(val);
-        }
-
-        public virtual IQuery<T> Gte(object val)
-        {
-            this._sql.Append(" >= ");
-
-            return this.Add(val);
-        }
-
-        public virtual IQuery<T> Lte(object val)
-        {
-            this._sql.Append(" <= ");
-
-            return this.Add(val);
-        }
-
-        public virtual IQuery<T> Not(string str)
-        {
-            this._sql.Append(" NOT ");
-
-            return this;
-        }
-
-        public virtual IQuery<T> Like(string str)
-        {
-            this._sql.Append(" LIKE ");
-
-            return this.Add("%" + str + "%");
-        }
-
-        public virtual IQuery<T> Add(object b)
+         
+        public virtual string Add(object b)
         {
             string name = "@p" + this.Parameters.Count;
 
             IDbDataParameter param = this.Bind(name, b, SqlType.Convert(b.GetType()));
 
             this.Parameters.Add(param);
-
-            this._sql.Append(name);
-
-            return this;
+  
+            return name;
         }
 
         public abstract IDbDataParameter Bind(string name, object b, DbType dtype);        
 
-        public virtual IQuery<T> AddAlias(string str)
+        public virtual string AddAlias(string str)
         {
             if (!string.IsNullOrEmpty(this.Alias))
             {
-                this._sql.Append(Enclosed(this.Alias) + ".");
+                return Enclosed(this.Alias) + "." + Enclosed(str);
             }
-
-            this._sql.Append(Enclosed(str));
-
-            return this;
+ 
+            return Enclosed(str);
         }
 
         public IQuery Append(string str)
         {
-            this._sql.Append(str);
+            this._sb.Append(str);
 
             return this;
         }
@@ -304,17 +305,17 @@ namespace System.Data.ODB
 
         public DataSet Result()
         {
-            return this._db.ExecuteDataSet(this._sql.ToString(), this.Parameters.ToArray());
+            return this.Db.ExecuteDataSet(this._sb.ToString(), this.Parameters.ToArray());
         }
  
         public List<T> ToList()
         {
-            return this._db.Get<T>(this) as List<T>;
+            return this.Db.Get<T>(this) as List<T>;
         }       
           
         public T1 Single<T1>()
         {
-            return this._db.ExecuteScalar<T1>(this._sql.ToString(), this.Parameters.ToArray());
+            return this.Db.ExecuteScalar<T1>(this._sb.ToString(), this.Parameters.ToArray());
         }
 
         private string Enclosed(string str)
@@ -327,9 +328,14 @@ namespace System.Data.ODB
             return str;
         }
 
-        public override string ToString()
+        public void Reset()
         {
-            return this._sql.ToString();
-        } 
+            this._sb.Length = 0;
+            this.Parameters.Clear();
+
+            this._where = "";
+            this._order = "";
+            this._limit = "";
+        }
     }
 }

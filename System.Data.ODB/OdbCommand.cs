@@ -30,7 +30,7 @@ namespace System.Data.ODB
         { 
             List<string> cols = new List<string>();
 
-            foreach (ColumnMapping col in MappingHelper.GetColumnMapping(type))
+            foreach (OdbColumn col in OdbMapping.GetColumn(type))
             { 
                 if (col.Attribute.IsForeignkey)
                 {   
@@ -40,7 +40,7 @@ namespace System.Data.ODB
                 cols.Add(this.SqlDefine(col));                 
             }
 
-            string table = MappingHelper.GetTableName(type);
+            string table = OdbMapping.GetTableName(type);
 
             this.Create(table, cols.ToArray());
         }
@@ -57,7 +57,7 @@ namespace System.Data.ODB
 
         public virtual void ExecuteDrop(Type type)
         {
-            foreach (ColumnMapping col in MappingHelper.GetColumnMapping(type))
+            foreach (OdbColumn col in OdbMapping.GetColumn(type))
             {
                 if (col.Attribute.IsForeignkey)
                 {
@@ -65,7 +65,7 @@ namespace System.Data.ODB
                 } 
             } 
 
-            string table = MappingHelper.GetTableName(type);
+            string table = OdbMapping.GetTableName(type);
 
             this.Drop(table);
         }
@@ -82,17 +82,17 @@ namespace System.Data.ODB
             IQuery<T> query = this.Db.CreateQuery<T>();
 
             //Type is IEntity
-            query.Table = MappingHelper.GetTableName(type);
+            query.Table = OdbMapping.GetTableName(type);
 
             int n = 0;
 
             List<string> cols = new List<string>();
             List<string> ps = new List<string>();
 
-            ColumnMapping ColPk = null;
+            OdbColumn ColPk = null;
              
             //begin foreach
-            foreach (ColumnMapping col in MappingHelper.GetColumnMapping(type))
+            foreach (OdbColumn col in OdbMapping.GetColumn(type))
             {
                 ColumnAttribute attr = col.Attribute;
 
@@ -197,11 +197,11 @@ namespace System.Data.ODB
 
             Type type = t.GetType();
 
-            query.Table = MappingHelper.GetTableName(type);
+            query.Table = OdbMapping.GetTableName(type);
 
-            ColumnMapping colKey = null;
+            OdbColumn colKey = null;
 
-            foreach (ColumnMapping col in MappingHelper.GetColumnMapping(type))
+            foreach (OdbColumn col in OdbMapping.GetColumn(type))
             {
                 if (col.Attribute.IsPrimaryKey)
                 {
@@ -223,7 +223,7 @@ namespace System.Data.ODB
 
         public abstract string TypeMapping(DbType dtype);
 
-        public abstract string SqlDefine(ColumnMapping col);
+        public abstract string SqlDefine(OdbColumn col);
 
         protected int Execute(IQuery query)
         {

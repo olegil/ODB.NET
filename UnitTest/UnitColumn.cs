@@ -10,7 +10,7 @@ namespace UnitTest
         [TestMethod]
         public void TestColumns()
         { 
-            TableVisitor col = new TableVisitor(3);
+            OdbDiagram col = new OdbDiagram(3);
 
             col.Visit(typeof(User), 0);
 

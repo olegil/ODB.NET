@@ -42,7 +42,7 @@ namespace System.Data.ODB.MSSQL
             return (int)this.Db.ExecuteScalar<long>(sql, query.Parameters.ToArray());
         } 
 
-        public override string SqlDefine(ColumnMapping col)
+        public override string SqlDefine(OdbColumn col)
         {
             string dbtype = this.TypeMapping(col.GetDbType());
             string sql = "[" + col.Name + "] " + dbtype;

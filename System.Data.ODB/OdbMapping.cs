@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace System.Data.ODB
 {
-    public class MappingHelper
+    public class OdbMapping
     {
         public static string GetTableName(Type type)
         {
@@ -19,7 +19,7 @@ namespace System.Data.ODB
             return type.Name;
         }
 
-        public static ColumnAttribute GetColumnAttribute(PropertyInfo pi)
+        public static ColumnAttribute GetColAttribute(PropertyInfo pi)
         {
             object[] objAttrs = pi.GetCustomAttributes(typeof(ColumnAttribute), true);
 
@@ -31,13 +31,13 @@ namespace System.Data.ODB
             return new ColumnAttribute();
         }
 
-        public static IEnumerable<ColumnMapping> GetColumnMapping(Type type)
+        public static IEnumerable<OdbColumn> GetColumn(Type type)
         {
             PropertyInfo[] propes = type.GetProperties();
 
             for (int i = 0; i < propes.Length; i++)
             {
-                ColumnAttribute colAttr = GetColumnAttribute(propes[i]);
+                ColumnAttribute colAttr = GetColAttribute(propes[i]);
 
                 if (!colAttr.NotMapped)
                 {
@@ -48,7 +48,7 @@ namespace System.Data.ODB
                         name = propes[i].Name + "Id";
                     }
 
-                    yield return new ColumnMapping(name,  propes[i], colAttr);
+                    yield return new OdbColumn(name,  propes[i], colAttr);
                 }
             }
         }

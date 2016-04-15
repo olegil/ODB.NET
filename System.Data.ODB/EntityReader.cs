@@ -61,7 +61,7 @@ namespace System.Data.ODB
 
             foreach (PropertyInfo pi in type.GetProperties())
             {
-                ColumnAttribute colAttr = MappingHelper.GetColumnAttribute(pi);
+                ColumnAttribute colAttr = OdbMapping.GetColAttribute(pi);
 
                 if (!colAttr.NotMapped)
                 {

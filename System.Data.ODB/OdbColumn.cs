@@ -4,13 +4,13 @@ using System.Reflection;
 
 namespace System.Data.ODB
 {
-    public class ColumnMapping
+    public class OdbColumn
     {
         public string Name { get; private set; }
         public PropertyInfo Property { get; private set; }
         public ColumnAttribute Attribute { get; private set; }
         
-        public ColumnMapping(string name, PropertyInfo prop, ColumnAttribute attr)
+        public OdbColumn(string name, PropertyInfo prop, ColumnAttribute attr)
         {
             this.Name = name;
             this.Property = prop;
@@ -24,7 +24,7 @@ namespace System.Data.ODB
 
         public DbType GetDbType()
         {
-            return SqlType.Convert(this.Property.PropertyType);
+            return OdbSqlType.Convert(this.Property.PropertyType);
         }
 
         public object GetValue(IEntity t)

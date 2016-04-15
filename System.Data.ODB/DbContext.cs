@@ -111,22 +111,23 @@ namespace System.Data.ODB
 
         public IQuery<T> Query<T>() where T : IEntity
         {
-            TableVisitor tr = new TableVisitor(this.Depth);
-
             Type type = typeof(T);
 
-            tr.Visit(type);
+            OdbDiagram dg = new OdbDiagram(this.Depth);
 
-            IQuery<T> q = this.CreateQuery<T>().Select(tr.Colums);
+            dg.Visit(type);
 
-            q.Alias = "T0";
+            int n = 0;
 
-            foreach (KeyValuePair<string, string> tc in tr.Tables)
+            OdbTable table = dg.Table[n++];
+
+            IQuery<T> q = this.CreateQuery<T>().Select(dg.Colums).From(table.Name, table.Alias);
+                        
+            foreach (KeyValuePair<string, string> tc in dg.ForigeKey)
             {
-                if (tc.Value == "")
-                    q.From(tc.Key);
-                else
-                    q.LeftJoin(tc.Key).On(tc.Value);
+                OdbTable tab = dg.Table[n++];
+
+                q.LeftJoin(tab.Name).As(tab.Alias).On(tc.Key).Equal(tc.Value);
             }
 
             return q;

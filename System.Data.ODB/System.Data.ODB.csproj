@@ -41,10 +41,11 @@
     <Compile Include="ICommand.cs" />
     <Compile Include="OdbCommand.cs" />
     <Compile Include="OdbException.cs" />
-    <Compile Include="TableVisitor.cs" />
+    <Compile Include="OdbTable.cs" />
+    <Compile Include="OdbDiagem.cs" />
     <Compile Include="OdbEntity.cs" />
     <Compile Include="ColumnAttribute.cs" />
-    <Compile Include="ColumnMapping.cs" />
+    <Compile Include="OdbColumn.cs" />
     <Compile Include="DataType.cs" />
     <Compile Include="DbContext.cs" />
     <Compile Include="IDbContext.cs" />
@@ -52,12 +53,12 @@
     <Compile Include="IQuery.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="MappingHelper.cs" />
+    <Compile Include="OdbMapping.cs" />
     <Compile Include="OdbQuery.cs" />
     <Compile Include="OdbRepository.cs" />
     <Compile Include="EntityReader.cs" />
     <Compile Include="TableAttribute.cs" />
-    <Compile Include="SqlType.cs" />
+    <Compile Include="OdbSqlType.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

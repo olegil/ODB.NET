@@ -48,10 +48,12 @@ namespace UnitTest
             //db.Create<Order>();
 
             User user = new User() { Name = "Stephen", BID = 345346.3245d, IsPermit = true, Birthday = DateTime.Now };
- 
-            db.Insert(new Order() { PackageID = "234324GA", User = user, Date = DateTime.Now });
-            
-            Order order = db.Query<Order>().First(); 
+   
+            Order order = db.Query<Order>().First();
+
+            order.User = user;
+
+            db.Update(order);
 
             db.Close();
 

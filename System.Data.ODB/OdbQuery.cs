@@ -26,7 +26,11 @@ namespace System.Data.ODB
              
             this.Parameters = new List<IDbDataParameter>();
 
-            this.Table = MappingHelper.GetTableName(typeof(T));   
+            this.Table = OdbMapping.GetTableName(typeof(T));
+
+            this._where = "";
+            this._limit = "";
+            this._order = "";
         }
 
         public virtual IQuery<T> Select(string[] cols)
@@ -133,49 +137,50 @@ namespace System.Data.ODB
 
         public virtual IQuery<T> Equal(string str)
         {
-            this._where += " = '" + str + "'";
+            this._sb.Append(" = ");
+            this._sb.Append(str);
 
             return this;
         } 
 
         public virtual IQuery<T> Eq(object val)
         {
-            this._where += " = '" + this.Add(val) + "'";
+            this._where += " = " + this.Add(val);
 
             return this;
         }
 
         public virtual IQuery<T> NotEq(object val)
         {
-            this._where += " <> '" + this.Add(val) + "'";
+            this._where += " <> " + this.Add(val);
 
             return this;
         }
 
         public virtual IQuery<T> Gt(object val)
         {
-            this._where += " > '" + this.Add(val) + "'";
+            this._where += " > " + this.Add(val);
 
             return this;
         }
 
         public virtual IQuery<T> Lt(object val)
         {
-            this._where += " < '" + this.Add(val) + "'";
+            this._where += " < " + this.Add(val);
 
             return this;
         }
 
         public virtual IQuery<T> Gte(object val)
         {
-            this._where += " >= '" + this.Add(val) + "'";
+            this._where += " >= " + this.Add(val);
          
             return this;
         }
 
         public virtual IQuery<T> Lte(object val)
         {
-            this._where += " <= '" + this.Add(val) + "'";
+            this._where += " <= " + this.Add(val);
              
             return this;
         } 
@@ -212,7 +217,7 @@ namespace System.Data.ODB
         {
             Type type = typeof(T1);
 
-            return this.Join(MappingHelper.GetTableName(type));
+            return this.Join(OdbMapping.GetTableName(type));
         }
 
         public virtual IQuery<T> Join(string table)
@@ -227,7 +232,7 @@ namespace System.Data.ODB
         {
             Type type = typeof(T1);
 
-            return this.LeftJoin(MappingHelper.GetTableName(type));
+            return this.LeftJoin(OdbMapping.GetTableName(type));
         }
 
         public virtual IQuery<T> LeftJoin(string table)
@@ -275,7 +280,7 @@ namespace System.Data.ODB
         {
             string name = "@p" + this.Parameters.Count;
 
-            IDbDataParameter param = this.Bind(name, b, SqlType.Convert(b.GetType()));
+            IDbDataParameter param = this.Bind(name, b, OdbSqlType.Convert(b.GetType()));
 
             this.Parameters.Add(param);
   

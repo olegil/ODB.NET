@@ -34,7 +34,7 @@ namespace System.Data.ODB.SQLite
             return (int)(this.Db.Connection as SQLiteConnection).LastInsertRowId; 
         }
  
-        public override string SqlDefine(ColumnMapping col)
+        public override string SqlDefine(OdbColumn col)
         {
             string dbtype = this.TypeMapping(col.GetDbType());
             string sql = "[" + col.Name + "] " + dbtype;

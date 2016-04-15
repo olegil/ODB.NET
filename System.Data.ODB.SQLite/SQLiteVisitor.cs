@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -12,17 +13,17 @@ namespace System.Data.ODB.SQLite
     public class SQLiteVisitor : ODBExpressionVisitor, IVisitor
     {
         private StringBuilder _sb;
+        private OdbDiagram _dg;
         private List<IDbDataParameter> _parmas;
         private string _limit = "";       
         private int _index = 0;
-
-        private string _alias = "T0";
-
+         
         public int Depth { get; private set; }
 
         public SQLiteVisitor()
         {
-            this._sb = new StringBuilder();
+            this._sb = new StringBuilder();           
+
             this._parmas = new List<IDbDataParameter>();
         }
 
@@ -52,14 +53,19 @@ namespace System.Data.ODB.SQLite
             if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
             {
                 this.Visit(m.Arguments[0]);
+
                 this._sb.Append(" WHERE ");
                 LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
+
                 this.Visit(lambda.Body);
             }
             else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Select")
             {
                 this.Visit(m.Arguments[0]);
+
+                this._sb.Insert(0, " FROM ");
                 LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
+
                 this.Visit(lambda.Body);
             }
             else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Skip")
@@ -76,8 +82,7 @@ namespace System.Data.ODB.SQLite
                 this.Visit(m.Arguments[0]);
 
                 this.setlimit();
-                this._sb.Append(", ");
-                 
+                
                 this.Visit(m.Arguments[1]);
             }
             else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "OrderBy")
@@ -246,12 +251,13 @@ namespace System.Data.ODB.SQLite
 
             if (q != null)
             {
-                TableVisitor tsel = new TableVisitor(this.Depth);
-                tsel.Visit(q.ElementType);
+                this._dg = new OdbDiagram(this.Depth);
+                this._dg.Visit(q.ElementType);
 
-                this._sb.Append("SELECT " + string.Join(",", tsel.Colums));
-                this._sb.Append(" FROM " + MappingHelper.GetTableName(q.ElementType));
-                this._sb.Append(" AS " + this._alias);
+                OdbTable table = this._dg.Table[0]; 
+
+                this._sb.Append("[" + table.Name + "] ");
+                this._sb.Append("AS " + table.Alias);
             }
             else if (c.Value == null)
             {
@@ -273,7 +279,7 @@ namespace System.Data.ODB.SQLite
         {
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
-                this._sb.Append(this.Enclosed(this._alias) + "." + this.Enclosed(m.Member.Name));
+                this._sb.Append(this.Enclosed(m.Member.Name));
             }
             else if (m.Expression.NodeType == ExpressionType.Constant)
             {
@@ -307,6 +313,65 @@ namespace System.Data.ODB.SQLite
             return m;
         }
 
+        protected override NewExpression VisitNew(NewExpression nex)
+        {
+            this._sb.Insert(0, "SELECT ");
+
+            IEnumerable<Expression> args = this.VisitExpressionList(nex.Arguments);
+                         
+            List<string> cols = new List<string>();
+            
+            foreach (var s in args)
+            {
+                MemberExpression m = s as MemberExpression;
+
+                cols.Add(m.Member.Name);
+            }
+             
+            this._sb.Insert(7, string.Join(",", cols.ToArray()));
+
+
+            if (args != nex.Arguments)
+            {
+                if (nex.Members != null)
+                    return Expression.New(nex.Constructor, args, nex.Members);
+                else
+                    return Expression.New(nex.Constructor, args);
+            }
+
+            return nex;
+        }
+
+        protected override ReadOnlyCollection<Expression> VisitExpressionList(ReadOnlyCollection<Expression> original)
+        {
+            List<Expression> list = null;
+
+            for (int i = 0, n = original.Count; i < n; i++)
+            {
+                Expression p = this.Visit(original[i]);
+                if (list != null)
+                {
+                    list.Add(p);
+                }
+                else if (p != original[i])
+                {
+                    list = new List<Expression>(n);
+                    for (int j = 0; j < i; j++)
+                    {
+                        list.Add(original[j]);
+                    }
+                    list.Add(p);
+                }
+            }
+
+            if (list != null)
+            {
+                return list.AsReadOnly();
+            }
+
+            return original;
+        }
+
         private string Bind(int index, object b)
         {
             string name = "@p" + index;
@@ -317,7 +382,7 @@ namespace System.Data.ODB.SQLite
             p.Value = b;
             //p.Size = attr.Size;
 
-            p.DbType = SqlType.Convert(b.GetType());
+            p.DbType = OdbSqlType.Convert(b.GetType());
 
             this._parmas.Add(p);
 

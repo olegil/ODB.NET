@@ -23,23 +23,30 @@ namespace System.Data.ODB.SQLite
          
         public override IQuery<T> Skip(int start)
         {
-            this._limit = start.ToString();
-         
+            if (string.IsNullOrEmpty(this._limit))             
+            {
+                this.Take(-1);
+            }
+
+            this._limit += " OFFSET " + start;
+
             return this;
         }
 
         public override IQuery<T> Take(int count)
-        {
-            if (!string.IsNullOrEmpty(this._limit))
+        {               
+            if (this._limit.IndexOf("OFFSET") > 0)
             {
-                this._limit += " , ";
+                this._limit = this._limit.Replace("-1", count.ToString());
             }
-
-            this._limit += count.ToString();
+            else
+            {
+                this._limit = count < 0 ? "-1" : count.ToString();
+            }
 
             return this;
         }
-
+ 
         public override T First() 
         {
             this.Skip(0).Take(1);

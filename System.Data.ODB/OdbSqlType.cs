@@ -2,7 +2,7 @@
 
 namespace System.Data.ODB
 {
-    public class SqlType
+    public class OdbSqlType
     {
         public static DbType Convert(Type t)
         { 

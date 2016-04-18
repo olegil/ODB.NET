@@ -5,6 +5,8 @@ namespace System.Data.ODB.SQLite
 {
     public class SQLiteProvider : QueryProvider
     {
+        private SQLiteVisitor visitor;
+
         public SQLiteProvider(IDbContext db) : base(db)
         {
         }
@@ -13,22 +15,20 @@ namespace System.Data.ODB.SQLite
         {
             Type elementType = TypeSystem.GetElementType(expression.Type);
 
-            SQLiteVisitor expr = new SQLiteVisitor();
+            this.visitor = new SQLiteVisitor(expression);
 
-            expr.Translate(expression, this.Db.Depth);
+            this.visitor.Level = this.Db.Depth;
 
-            IDataReader sr = this.Db.ExecuteReader(expr.ToString(), expr.GetParamters());
+            string sql = this.visitor.GetQueryText();
+
+            IDataReader sr = this.Db.ExecuteReader(sql, this.visitor.GetParamters());
 
             return Activator.CreateInstance(typeof(EntityReader<>).MakeGenericType(elementType), new object[] { sr, this.Db.Depth });
         }
 
         public override string GetSQL(Expression expression)
         {
-            IVisitor expr = new SQLiteVisitor();
-
-            expr.Translate(expression, this.Db.Depth);
-
-            return expr.ToString();
+            return this.visitor.ToString();
         } 
     }
 }

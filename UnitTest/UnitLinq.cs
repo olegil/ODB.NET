@@ -15,12 +15,11 @@ namespace UnitTest
         {
             MyRepository respo = new MyRepository();
 
-            var query = from u in respo.Users
-                        select u;
+            var query = from u in respo.Orders 
+                        where u.User.Age > 3 && u.PackageID == "234324GA"
+                        select new { PName = u.User.Name };
 
-            string sql = query.ToString();
-
-            List<User> users = query.ToList();
+            var users = query.ToList();
 
             respo.Dispose();
 

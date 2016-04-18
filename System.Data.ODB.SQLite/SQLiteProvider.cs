@@ -13,7 +13,7 @@ namespace System.Data.ODB.SQLite
         {
             Type elementType = TypeSystem.GetElementType(expression.Type);
 
-            IVisitor expr = new SQLiteVisitor();
+            SQLiteVisitor expr = new SQLiteVisitor();
 
             expr.Translate(expression, this.Db.Depth);
 

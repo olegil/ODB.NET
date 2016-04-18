@@ -115,13 +115,13 @@ namespace System.Data.ODB
 
             OdbDiagram dg = new OdbDiagram(this.Depth);
 
-            dg.Visit(type);
-
-            int n = 0;
-
-            OdbTable table = dg.Table[n++];
-
+            dg.Analyze(type);
+            
+            OdbTable table = dg.Table[0];
+                        
             IQuery<T> q = this.CreateQuery<T>().Select(dg.Colums).From(table.Name, table.Alias);
+
+            int n = 1;
                         
             foreach (KeyValuePair<string, string> tc in dg.ForigeKey)
             {

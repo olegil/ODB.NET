@@ -12,7 +12,7 @@ namespace UnitTest
         { 
             OdbDiagram col = new OdbDiagram(3);
 
-            col.Visit(typeof(User), 0);
+            col.Analyze(typeof(User));
 
             Assert.IsTrue(col.Colums.Length > 0);
         }

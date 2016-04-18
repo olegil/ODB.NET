@@ -4,9 +4,9 @@ using System.Linq.Expressions;
 
 namespace System.Data.ODB.Linq
 {
-    public abstract class ODBExpressionVisitor
-    {
-        protected ODBExpressionVisitor()
+    public abstract class OdbExpressionVisitor
+    { 
+        protected OdbExpressionVisitor()
         { 
         }
                
@@ -423,6 +423,11 @@ namespace System.Data.ODB.Linq
         protected virtual bool IsNullConstant(Expression exp)
         {
             return (exp.NodeType == ExpressionType.Constant && ((ConstantExpression)exp).Value == null);
+        }
+
+        protected static string Enclosed(string str)
+        {
+            return "[" + str + "]";
         }
     }
 }

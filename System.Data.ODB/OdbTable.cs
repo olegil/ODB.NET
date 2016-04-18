@@ -9,6 +9,6 @@ namespace System.Data.ODB
     public class OdbTable
     {
         public string Name { get; set; }
-        public string Alias { get; set; }
+        public string Alias { get; set; } 
     }
 }

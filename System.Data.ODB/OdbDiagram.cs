@@ -3,13 +3,15 @@ using System.Reflection;
 
 namespace System.Data.ODB
 {
-    public class OdbDiagram 
+    public class OdbDiagram
     { 
         public Dictionary<string, string> ForigeKey { get; private set; }
         public List<OdbTable> Table { get; set; }
 
         private List<string> _cols;
-       
+
+        private int _count;
+
         public string[] Colums
         {
             get
@@ -28,21 +30,23 @@ namespace System.Data.ODB
             this.Table = new List<OdbTable>();
 
             this._cols = new List<string>();
+
+            this._count = 0;
         }
 
-        public virtual void Visit(Type type, int index = 0)
+        public virtual void Analyze(Type type)
         {
-            this.Table.Add(new OdbTable() { Name = OdbMapping.GetTableName(type), Alias = "T" + index });
+            this.Table.Add(new OdbTable() { Name = OdbMapping.GetTableName(type), Alias = "T" + this._count });
            
             foreach (OdbColumn col in OdbMapping.GetColumn(type))
             {
                 ColumnAttribute attr = col.Attribute;
    
-                string colName = Enclosed("T" + index) + "." + Enclosed(col.Name);
+                string colName = Enclosed("T" + this._count) + "." + Enclosed(col.Name);
 
                 if (!attr.IsForeignkey)
                 {
-                    this._cols.Add(colName + " AS " + Enclosed("T" + index + "." + col.Name));
+                    this._cols.Add(colName + " AS " + Enclosed("T" + this._count + "." + col.Name));
                 }
                 else  
                 {
@@ -50,13 +54,15 @@ namespace System.Data.ODB
                     { 
                         this.Level--;
 
-                        int next = this.Table.Count; 
+                        this._count++;
 
-                        string joinKey = Enclosed("T" + next) + "." + Enclosed("Id");
+                        string joinKey = Enclosed("T" + this._count) + "." + Enclosed("Id");
 
                         this.ForigeKey.Add(colName, joinKey);
 
-                        this.Visit(col.GetColumnType(), next);
+                        this.Analyze(col.GetColumnType());
+
+                        this._count--;
 
                         this.Level++;
                     }                     

@@ -92,15 +92,17 @@ namespace UnitTest
     public class MyRepository : OdbRepository
     {
         public QueryTable<User> Users { get; set; }
+        public QueryTable<Order> Orders { get; set; }
 
         public MyRepository()
         {           
             this.Db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
+            this.Db.Depth = 3;
 
             QueryProvider provider = new SQLiteProvider(this.Db);
 
             this.Users = new QueryTable<User>(provider);
-
+            this.Orders = new QueryTable<Order>(provider);
         }
     }
 }

@@ -8,12 +8,14 @@ using System.Data.SQLite;
 using System.Data.ODB.Linq;
 
 namespace System.Data.ODB.SQLite
-{ 
-
-    public class SQLiteVisitor : ODBExpressionVisitor, IVisitor
+{  
+    public class SQLiteVisitor : OdbExpressionVisitor, IVisitor
     {
         private StringBuilder _sb;
-        private OdbDiagram _dg;
+
+        private OdbDiagram _dig;
+        public OdbDiagram Diagram { get; set; }
+
         private List<IDbDataParameter> _parmas;
         private string _limit = "";       
         private int _index = 0;
@@ -34,7 +36,9 @@ namespace System.Data.ODB.SQLite
 
             this.Depth = depth;
             this._index = 0;
-            
+
+            this.Diagram = new OdbDiagram(this.Depth);            
+
             this.Visit(expression);
         }
 
@@ -50,20 +54,22 @@ namespace System.Data.ODB.SQLite
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
-            if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
+            if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Select")
+            {
+                this.Visit(m.Arguments[0]); 
+
+                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
+
+                this._sb.Insert(0, "SELECT ");
+           
+ 
+                this.Visit(lambda.Body); 
+            }
+            else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
             {
                 this.Visit(m.Arguments[0]);
 
                 this._sb.Append(" WHERE ");
-                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
-
-                this.Visit(lambda.Body);
-            }
-            else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Select")
-            {
-                this.Visit(m.Arguments[0]);
-
-                this._sb.Insert(0, " FROM ");
                 LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
 
                 this.Visit(lambda.Body);
@@ -251,13 +257,22 @@ namespace System.Data.ODB.SQLite
 
             if (q != null)
             {
-                this._dg = new OdbDiagram(this.Depth);
-                this._dg.Visit(q.ElementType);
+                this.Diagram.Analyze(q.ElementType);
 
-                OdbTable table = this._dg.Table[0]; 
+                OdbTable table = this.Diagram.Table[0]; 
 
-                this._sb.Append("[" + table.Name + "] ");
-                this._sb.Append("AS " + table.Alias);
+                this._sb.Append(" FROM ");
+                this._sb.Append(Enclosed(table.Name));
+                this._sb.Append(" AS " + table.Alias);
+
+                int n = 1;
+
+                foreach (KeyValuePair<string, string> tc in this.Diagram.ForigeKey)
+                {
+                    OdbTable tab = this.Diagram.Table[n++];
+
+                    this._sb.Append(" LEFT JOIN " + Enclosed(tab.Name) + " AS " + tab.Alias + " ON " + tc.Key + " = " + tc.Value);
+                }
             }
             else if (c.Value == null)
             {
@@ -276,10 +291,14 @@ namespace System.Data.ODB.SQLite
         }
 
         protected override Expression VisitMemberAccess(MemberExpression m)
-        {
-            if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
+        {           
+            if (m.Expression.NodeType == ExpressionType.MemberAccess || m.Expression.NodeType == ExpressionType.Parameter)
             {
-                this._sb.Append(this.Enclosed(m.Member.Name));
+                MemberVisitor mv = new MemberVisitor(m);
+
+                mv.Diagram = this.Diagram;
+
+                this._sb.Append(mv.ToString());                 
             }
             else if (m.Expression.NodeType == ExpressionType.Constant)
             {
@@ -315,21 +334,21 @@ namespace System.Data.ODB.SQLite
 
         protected override NewExpression VisitNew(NewExpression nex)
         {
-            this._sb.Insert(0, "SELECT ");
-
             IEnumerable<Expression> args = this.VisitExpressionList(nex.Arguments);
-                         
+
             List<string> cols = new List<string>();
-            
+
+            int n = 0;
+
             foreach (var s in args)
-            {
-                MemberExpression m = s as MemberExpression;
+            { 
+                MemberVisitor mv = new MemberVisitor(s);
+                mv.Diagram = this.Diagram;
 
-                cols.Add(m.Member.Name);
+                cols.Add(mv.ToString() + " AS " + nex.Members[n++].Name);
             }
-             
-            this._sb.Insert(7, string.Join(",", cols.ToArray()));
 
+            this._sb.Insert(7, string.Join(",", cols.ToArray())); 
 
             if (args != nex.Arguments)
             {
@@ -397,16 +416,20 @@ namespace System.Data.ODB.SQLite
 
                 this._sb.Append(this._limit);
             }
-        }
-
-        private string Enclosed(string str)
-        {
-            return "[" + str + "]";
-        }
+        } 
 
         public override string ToString()
         {
-            return this._sb.ToString();
+            string sql = this._sb.ToString();
+
+            if (sql.IndexOf("SELECT") < 0)
+            {
+                string select = "SELECT " + string.Join(",", this.Diagram.Colums);
+
+                sql = sql.Insert(0, select);
+            }
+
+            return sql;
         }
 
         public IDbDataParameter[] GetParamters()

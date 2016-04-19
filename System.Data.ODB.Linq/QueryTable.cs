@@ -57,12 +57,12 @@ namespace System.Data.ODB.Linq
 
         public IEnumerator<T> GetEnumerator()
         {
-            return ((IEnumerable<T>)this.Provider.Execute(Expression)).GetEnumerator();
+            return this.Provider.Execute<IEnumerable<T>>(Expression).GetEnumerator();
         }
         
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable)this.Provider.Execute(Expression)).GetEnumerator();
+            return GetEnumerator();
         }
 
         public override string ToString()

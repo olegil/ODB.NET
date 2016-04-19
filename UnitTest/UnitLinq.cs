@@ -68,15 +68,15 @@ namespace UnitTest
         {
             MyRepository respo = new MyRepository();
 
-            var query = respo.Users.Where(p => p.Name.Substring(3, 2) == "Chan").Select( p => p.Name.Trim() );
+            var query = respo.Users.Where(p => p.Name.Substring(3, 2) == "Chan");
                         
-            string sql = query.ToString();
+            //string sql = query.ToString();
 
-            //List<User> list = query.ToList();
+            var list = query.ToList();
 
             respo.Dispose();
 
-            Assert.IsTrue(sql.Length > 0);
+            Assert.IsTrue(list.Count > 0);
         }
     }
 }

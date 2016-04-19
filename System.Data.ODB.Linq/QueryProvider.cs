@@ -12,9 +12,9 @@ namespace System.Data.ODB.Linq
             this.Db = db; 
         }
 
-        IQueryable<S> IQueryProvider.CreateQuery<S>(Expression expression)
+        IQueryable<T> IQueryProvider.CreateQuery<T>(Expression expression)
         {
-            return new QueryTable<S>(this, expression);
+            return new QueryTable<T>(this, expression);
         }
 
         IQueryable IQueryProvider.CreateQuery(Expression expression)
@@ -31,18 +31,10 @@ namespace System.Data.ODB.Linq
                 throw ex.InnerException;
             }
         }
-
-        S IQueryProvider.Execute<S>(Expression expression)
-        {
-            return (S)this.Execute(expression);
-        }
-
-        object IQueryProvider.Execute(Expression expression)
-        {
-            return this.Execute(expression);
-        } 
-
+  
         public abstract object Execute(Expression expression);
+
+        public abstract T Execute<T>(Expression expression);                   
 
         public abstract string GetSQL(Expression expression); 
     }

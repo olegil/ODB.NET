@@ -14,6 +14,11 @@ namespace System.Data.ODB.SQLite
             return new QueryTable<T>(this);
         }
 
+        public override T Execute<T>(Expression expression) 
+        {
+            return (T)Execute(expression);                       
+        }
+
         public override object Execute(Expression expression)
         {
             Type elementType = TypeSystem.GetElementType(expression.Type);

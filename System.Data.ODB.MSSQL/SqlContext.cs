@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace System.Data.ODB.MSSQL
 {
-    public class SqlContext : DbContext
+    public class SqlContext : OdbContext
     {
         public SqlContext(string conn)
             : base(new SqlConnection(conn))

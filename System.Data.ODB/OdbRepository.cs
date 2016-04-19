@@ -6,7 +6,7 @@ namespace System.Data.ODB
 {
     public abstract class OdbRepository : IRepository, IDisposable
     {
-        protected DbContext Db;        
+        protected OdbContext Db;        
 
         public OdbRepository()
         { 

@@ -17,7 +17,8 @@ namespace UnitTest
 
             var query = from u in respo.Orders 
                         where u.User.Age > 3 && u.PackageID == "234324GA"
-                        select new { PName = u.User.Name };
+                        orderby u.User.Age ascending
+                        select u;
 
             var users = query.ToList();
 

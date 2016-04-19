@@ -47,7 +47,7 @@
     <Compile Include="ColumnAttribute.cs" />
     <Compile Include="OdbColumn.cs" />
     <Compile Include="DataType.cs" />
-    <Compile Include="DbContext.cs" />
+    <Compile Include="OdbContext.cs" />
     <Compile Include="IDbContext.cs" />
     <Compile Include="IEntity.cs" />
     <Compile Include="IQuery.cs" />

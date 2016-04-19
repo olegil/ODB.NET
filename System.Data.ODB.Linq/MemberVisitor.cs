@@ -6,18 +6,17 @@ using System.Text;
  
 namespace System.Data.ODB.Linq
 {
-    public class MemberVisitor : OdbExpressionVisitor
+    public class MemberVisitor : OdbVisitor
     { 
-        public OdbDiagram Diagram { get; set; }
-        public string Alias { get; set; }
-        public string Name { get; set; }
+        private string _alias;
+        private string _name;
 
         private Expression _expression;
         private int level;
 
         public MemberVisitor(Expression expression)
         { 
-            this._expression = expression;
+            this._expression = expression;     
             this.level = 0;
         }
 
@@ -30,7 +29,7 @@ namespace System.Data.ODB.Linq
                 if (this.level < 2)
                     this.Visit(m.Expression);
 
-                this.Name = m.Member.Name;
+                this._name = m.Member.Name;
             }             
             else if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
@@ -44,10 +43,10 @@ namespace System.Data.ODB.Linq
                 {
                     table = OdbMapping.GetTableName(m.Expression.Type);
                   
-                    this.Name = m.Member.Name;
+                    this._name = m.Member.Name;
                 }
 
-                this.Alias = this.getAlias(table); 
+                this._alias = this.getAlias(table); 
             } 
             else
                 throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
@@ -69,11 +68,14 @@ namespace System.Data.ODB.Linq
 
         public override string ToString()
         {
+            if (this.Diagram == null)
+                throw new OdbException("No Table diagram."); 
+
             this.level = 0;
 
             this.Visit(this._expression);
 
-            return Enclosed(this.Alias) + "." + Enclosed(this.Name);
+            return Enclosed(this._alias) + "." + Enclosed(this._name);
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Data.ODB;
 
 namespace System.Data.ODB.SQLite
 {
-    public class SQLiteContext : DbContext
+    public class SQLiteContext : OdbContext
     {
         public SQLiteContext(string conn)
             : base(new SQLiteConnection(conn))

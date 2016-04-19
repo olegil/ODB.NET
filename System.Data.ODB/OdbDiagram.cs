@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Text;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace System.Data.ODB
@@ -68,7 +69,7 @@ namespace System.Data.ODB
                     }                     
                 }                      
             }
-        }         
+        }
 
         private static string Enclosed(string str)
         {

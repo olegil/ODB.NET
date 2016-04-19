@@ -12,12 +12,12 @@ namespace System.Data.ODB.Linq
         public string Alias { get; set; }
         public string Name { get; set; }
 
-        private Expression _expr;
+        private Expression _expression;
         private int level;
 
         public MemberVisitor(Expression expression)
         { 
-            this._expr = expression;
+            this._expression = expression;
             this.level = 0;
         }
 
@@ -68,8 +68,10 @@ namespace System.Data.ODB.Linq
         }
 
         public override string ToString()
-        { 
-            this.Visit(this._expr);
+        {
+            this.level = 0;
+
+            this.Visit(this._expression);
 
             return Enclosed(this.Alias) + "." + Enclosed(this.Name);
         }

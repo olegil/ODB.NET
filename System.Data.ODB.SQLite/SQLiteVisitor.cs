@@ -12,34 +12,29 @@ namespace System.Data.ODB.SQLite
     public class SQLiteVisitor : OdbExpressionVisitor, IVisitor
     {
         private StringBuilder _sb;
-
-        private OdbDiagram _dig;
+        
         public OdbDiagram Diagram { get; set; }
 
+        private Expression _expression;
         private List<IDbDataParameter> _parmas;
         private string _limit = "";       
         private int _index = 0;
          
-        public int Depth { get; private set; }
+        public int Level { get; set; }
 
-        public SQLiteVisitor()
+        public SQLiteVisitor(Expression expression)
         {
-            this._sb = new StringBuilder();           
+            this._expression = expression;
 
+            this._sb = new StringBuilder();                       
             this._parmas = new List<IDbDataParameter>();
         }
 
-        public void Translate(Expression expression, int depth)
+        private void init()
         {
             this._sb.Length = 0;
-            this._parmas.Clear();
-
-            this.Depth = depth;
-            this._index = 0;
-
-            this.Diagram = new OdbDiagram(this.Depth);            
-
-            this.Visit(expression);
+            this._parmas.Clear();                      
+            this._index = 0;           
         }
 
         private static Expression StripQuotes(Expression e)
@@ -58,12 +53,11 @@ namespace System.Data.ODB.SQLite
             {
                 this.Visit(m.Arguments[0]); 
 
+                this._sb.Insert(0, "SELECT ");
+
                 LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
 
-                this._sb.Insert(0, "SELECT ");
-           
- 
-                this.Visit(lambda.Body); 
+                this.Visit(lambda.Body);
             }
             else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
             {
@@ -257,6 +251,7 @@ namespace System.Data.ODB.SQLite
 
             if (q != null)
             {
+                this.Diagram = new OdbDiagram(this.Level);
                 this.Diagram.Analyze(q.ElementType);
 
                 OdbTable table = this.Diagram.Table[0]; 
@@ -367,7 +362,7 @@ namespace System.Data.ODB.SQLite
 
             for (int i = 0, n = original.Count; i < n; i++)
             {
-                Expression p = this.Visit(original[i]);
+                Expression p =  original[i] as MemberExpression;
                 if (list != null)
                 {
                     list.Add(p);
@@ -416,10 +411,19 @@ namespace System.Data.ODB.SQLite
 
                 this._sb.Append(this._limit);
             }
-        } 
+        }  
 
-        public override string ToString()
+        public IDbDataParameter[] GetParamters()
         {
+            return this._parmas.ToArray();
+        }
+         
+        public string GetQueryText()
+        {
+            this.init();
+
+            this.Visit(this._expression);
+
             string sql = this._sb.ToString();
 
             if (sql.IndexOf("SELECT") < 0)
@@ -430,11 +434,6 @@ namespace System.Data.ODB.SQLite
             }
 
             return sql;
-        }
-
-        public IDbDataParameter[] GetParamters()
-        {
-            return this._parmas.ToArray();
         }
     } 
 }

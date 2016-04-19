@@ -2,4 +2,5 @@
 *.pdb
 *.cache
 *.txt
-.vs/
+obj/
+bin/

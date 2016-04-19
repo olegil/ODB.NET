@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Text;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 
@@ -7,9 +8,13 @@ namespace System.Data.ODB.Linq
     public abstract class OdbVisitor 
     {
         public OdbDiagram Diagram { get; set; }
+        public StringBuilder SqlBuilder { get; set; }
+
+        protected Expression _expression;
 
         protected OdbVisitor()
-        { 
+        {
+            this.SqlBuilder = new StringBuilder();
         }
                
         protected virtual Expression Visit(Expression exp)

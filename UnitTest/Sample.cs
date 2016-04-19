@@ -99,10 +99,10 @@ namespace UnitTest
             this.Db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
             this.Db.Depth = 3;
 
-            QueryProvider provider = new SQLiteProvider(this.Db);
+            SQLiteProvider provider = new SQLiteProvider(this.Db);
 
-            this.Users = new QueryTable<User>(provider);
-            this.Orders = new QueryTable<Order>(provider);
+            this.Users = provider.Create<User>();
+            this.Orders = provider.Create<Order>();
         }
     }
 }

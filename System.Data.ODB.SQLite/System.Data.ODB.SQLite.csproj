@@ -63,6 +63,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MemberVisitor.cs" />
+    <Compile Include="SelectVisitor.cs" />
     <Compile Include="OdbLiteCommand.cs" />
     <Compile Include="SQLiteProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

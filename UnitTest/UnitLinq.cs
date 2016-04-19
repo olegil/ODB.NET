@@ -16,9 +16,9 @@ namespace UnitTest
             MyRepository respo = new MyRepository();
 
             var query = from u in respo.Orders 
-                        where u.User.Age > 3 && u.PackageID == "234324GA"
+                        where u.User.Name.Length > 3 && u.PackageID == "23523145"
                         orderby u.User.Age ascending
-                        select u;
+                        select u.User.Name.ToUpper();
 
             var users = query.ToList();
 
@@ -68,15 +68,15 @@ namespace UnitTest
         {
             MyRepository respo = new MyRepository();
 
-            var query = respo.Users.Where(p => p.Name == "Chan");
+            var query = respo.Users.Where(p => p.Name.Substring(3, 2) == "Chan").Select( p => p.Name.Trim() );
                         
             string sql = query.ToString();
 
-            List<User> list = query.ToList();
+            //List<User> list = query.ToList();
 
             respo.Dispose();
 
-            Assert.IsTrue(list.Count > 0);
+            Assert.IsTrue(sql.Length > 0);
         }
     }
 }

@@ -4,31 +4,34 @@ using System.Linq.Expressions;
 namespace System.Data.ODB.SQLite
 {
     public class SQLiteProvider : QueryProvider
-    {
-        private SQLiteVisitor visitor;
-
+    { 
         public SQLiteProvider(IDbContext db) : base(db)
         {
+        } 
+
+        public QueryTable<T> Create<T>() where T : IEntity
+        {
+            return new QueryTable<T>(this);
         }
 
         public override object Execute(Expression expression)
         {
             Type elementType = TypeSystem.GetElementType(expression.Type);
 
-            this.visitor = new SQLiteVisitor(expression);
+            SQLiteVisitor visitor = new SQLiteVisitor(expression);
+            visitor.Level = this.Db.Depth; 
 
-            this.visitor.Level = this.Db.Depth;
-
-            string sql = this.visitor.GetQueryText();
-
-            IDataReader sr = this.Db.ExecuteReader(sql, this.visitor.GetParamters());
+            IDataReader sr = this.Db.ExecuteReader(visitor.GetQueryText(), visitor.GetParamters());
 
             return Activator.CreateInstance(typeof(EntityReader<>).MakeGenericType(elementType), new object[] { sr, this.Db.Depth });
         }
 
         public override string GetSQL(Expression expression)
         {
-            return this.visitor.ToString();
+            SQLiteVisitor visitor = new SQLiteVisitor(expression);
+            visitor.Level = this.Db.Depth;
+
+            return visitor.GetQueryText();
         } 
     }
 }

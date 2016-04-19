@@ -44,8 +44,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IOdbVisitor.cs" />
-    <Compile Include="MemberVisitor.cs" />
-    <Compile Include="SelectVisitor.cs" />
     <Compile Include="TypeSystem.cs" />
     <Compile Include="OdbVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

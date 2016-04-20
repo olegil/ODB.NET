@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace System.Data.ODB
 {
-    public class EntityReader<T> : IEnumerable<T>, IDisposable where T : IEntity
+    public class OdbReader<T> : IEnumerable<T>, IDisposable where T : IEntity
     {
         private IDataReader sr;
 
@@ -12,7 +12,7 @@ namespace System.Data.ODB
 
         public int Level { get; private set; }
       
-        public EntityReader(IDataReader reader, int depth)
+        public OdbReader(IDataReader reader, int depth)
         {
             this.sr = reader;
 

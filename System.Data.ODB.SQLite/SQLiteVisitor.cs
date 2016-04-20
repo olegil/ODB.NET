@@ -1,14 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Reflection;
 using System.Data.SQLite;
 using System.Data.ODB.Linq;
 
 namespace System.Data.ODB.SQLite
-{  
+{
     public class SQLiteVisitor : OdbVisitor, IOdbVisitor
     {   
         public int Level { get; set; }
@@ -19,42 +16,25 @@ namespace System.Data.ODB.SQLite
 
         public SQLiteVisitor(Expression expression) : base()
         {
-            this._expression = expression;
-                       
+            this._expression = expression;                       
             this._parmas = new List<IDbDataParameter>();
+
+            this.Level = 1;
         }
-
-        private void init()
-        {
-            this.SqlBuilder.Length = 0;
-            this._parmas.Clear();                      
-            this._index = 0;
-            this._limit = "";
-        }
-
-        private static Expression StripQuotes(Expression e)
-        {
-            while (e.NodeType == ExpressionType.Quote)
-            {
-                e = (e as UnaryExpression).Operand;
-            }
-
-            return e;
-        }
-
+         
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
             if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Select")
             {
                 this.Visit(m.Arguments[0]);
-                
+
                 LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
 
                 SelectVisitor se = new SelectVisitor(lambda.Body);
                 se.Diagram = this.Diagram;
 
                 this.SqlBuilder.Insert(0, "SELECT ");
-                this.SqlBuilder.Insert(7, se.ToString());
+                this.SqlBuilder.Insert(7, se.ToString());                
             }
             else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
             {
@@ -275,11 +255,24 @@ namespace System.Data.ODB.SQLite
         }
 
         protected override Expression VisitMemberAccess(MemberExpression m)
-        { 
-            MemberVisitor mv = new MemberVisitor(m);
-            mv.Diagram = this.Diagram;
+        {
+            if (m.Member.DeclaringType == typeof(DateTime) && m.Member.Name == "Now")
+            {
+                this.SqlBuilder.Append("datetime()");
+            }
+            else if (m.Member.DeclaringType == typeof(string) && m.Member.Name == "Length")
+            {
+                this.SqlBuilder.Append("LENGTH(");
+                this.Visit(m.Expression);
+                this.SqlBuilder.Append(")");
+            }
+            else
+            {
+                MemberVisitor mv = new MemberVisitor(m);
+                mv.Diagram = this.Diagram;
 
-            this.SqlBuilder.Append(mv.ToString());
+                this.SqlBuilder.Append(mv.ToString());
+            }
 
             return m;
         }
@@ -317,11 +310,19 @@ namespace System.Data.ODB.SQLite
          
         public string GetQueryText()
         {
-            this.init();
-
+            this.SqlBuilder.Length = 0;
+            this._parmas.Clear();
+            this._index = 0;
+            this._limit = "";
+ 
             this.Visit(this._expression);
+ 
+            return this.SqlBuilder.ToString(); 
+        }
 
-            string sql = this.SqlBuilder.ToString();
+        public override string ToString()
+        {
+            string sql = this.GetQueryText();
 
             if (sql.IndexOf("SELECT") < 0)
             {
@@ -331,11 +332,6 @@ namespace System.Data.ODB.SQLite
             }
 
             return sql;
-        }
-
-        public override string ToString()
-        {
-            return this.GetQueryText();
         }
     } 
 }

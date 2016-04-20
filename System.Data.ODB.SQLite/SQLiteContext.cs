@@ -19,9 +19,8 @@ namespace System.Data.ODB.SQLite
 
         public override IQuery<T> CreateQuery<T>(string sql)
         {
-            SQLiteQuery<T> q = new SQLiteQuery<T>();
-
-            q.Db = this;
+            SQLiteQuery<T> q = new SQLiteQuery<T>(this);
+ 
             q.Append(sql);
 
             return q;

@@ -10,5 +10,11 @@ namespace System.Data.ODB
     {
         public string Name { get; set; }
         public string Alias { get; set; } 
+        public List<string> Columns { get; set; }
+
+        public OdbTable()
+        {
+            this.Columns = new List<string>();
+        }            
     }
 }

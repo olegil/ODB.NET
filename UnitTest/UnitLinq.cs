@@ -15,10 +15,10 @@ namespace UnitTest
         {
             MyRepository respo = new MyRepository();
 
-            var query = from u in respo.Orders 
-                        where u.User.Name.Length > 3 && u.PackageID == "23523145"
+            var query = from u in respo.Orders
+                        where u.User.Name.Length > 3 && u.PackageID.Trim() == "23523145"
                         orderby u.User.Age ascending
-                        select u.User.Name.ToUpper();
+                        select u.User;
 
             var users = query.ToList();
 

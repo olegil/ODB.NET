@@ -14,7 +14,7 @@ namespace System.Data.ODB.Linq
 
         protected OdbVisitor()
         {
-            this.SqlBuilder = new StringBuilder();
+            this.SqlBuilder = new StringBuilder(); 
         }
                
         protected virtual Expression Visit(Expression exp)
@@ -432,6 +432,16 @@ namespace System.Data.ODB.Linq
             return (exp.NodeType == ExpressionType.Constant && ((ConstantExpression)exp).Value == null);
         }
 
+        protected static Expression StripQuotes(Expression e)
+        {
+            while (e.NodeType == ExpressionType.Quote)
+            {
+                e = (e as UnaryExpression).Operand;
+            }
+
+            return e;
+        }
+        
         protected static string Enclosed(string str)
         {
             return "[" + str + "]";

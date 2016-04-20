@@ -21,14 +21,19 @@ namespace System.Data.ODB.SQLite
 
         public override object Execute(Expression expression)
         {
-            Type elementType = TypeSystem.GetElementType(expression.Type);
+            Type type = TypeSystem.GetElementType(expression.Type);
 
             SQLiteVisitor visitor = new SQLiteVisitor(expression);
             visitor.Level = this.Db.Depth; 
 
-            IDataReader sr = this.Db.ExecuteReader(visitor.GetQueryText(), visitor.GetParamters());
+            IDataReader sr = this.Db.ExecuteReader(visitor.ToString(), visitor.GetParamters());
 
-            return Activator.CreateInstance(typeof(EntityReader<>).MakeGenericType(elementType), new object[] { sr, this.Db.Depth });
+            if (DataType.OdbEntity.IsAssignableFrom(type))
+            {
+                return Activator.CreateInstance(typeof(OdbReader<>).MakeGenericType(type), new object[] { sr, this.Db.Depth });
+            }
+
+            return null;            
         }
 
         public override string GetSQL(Expression expression)
@@ -36,7 +41,7 @@ namespace System.Data.ODB.SQLite
             SQLiteVisitor visitor = new SQLiteVisitor(expression);
             visitor.Level = this.Db.Depth;
 
-            return visitor.GetQueryText();
+            return visitor.ToString();
         } 
     }
 }

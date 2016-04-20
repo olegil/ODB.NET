@@ -8,8 +8,9 @@ namespace System.Data.ODB.SQLite
     public class SQLiteQuery<T> : OdbQuery<T>
         where T : IEntity
     {      
-        public SQLiteQuery()  
-        { 
+        public SQLiteQuery(IDbContext db)  
+        {
+            this.Db = db;
         }
 
         public override IDbDataParameter Bind(string name, object b, DbType dtype)

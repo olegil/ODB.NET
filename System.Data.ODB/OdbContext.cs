@@ -170,7 +170,7 @@ namespace System.Data.ODB
             {
                 IList<T> list = new List<T>();
 
-                using (EntityReader<T> edr = new EntityReader<T>(rdr, this.Depth))
+                using (OdbReader<T> edr = new OdbReader<T>(rdr, this.Depth))
                 {
                     foreach (T t in edr)
                     {

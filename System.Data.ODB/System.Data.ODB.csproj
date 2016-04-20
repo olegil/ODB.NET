@@ -56,7 +56,7 @@
     <Compile Include="OdbMapping.cs" />
     <Compile Include="OdbQuery.cs" />
     <Compile Include="OdbRepository.cs" />
-    <Compile Include="EntityReader.cs" />
+    <Compile Include="OdbReader.cs" />
     <Compile Include="TableAttribute.cs" />
     <Compile Include="OdbSqlType.cs" />
   </ItemGroup>

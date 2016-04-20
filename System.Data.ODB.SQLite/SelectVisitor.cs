@@ -15,11 +15,20 @@ namespace System.Data.ODB.SQLite
         }
 
         protected override Expression VisitMemberAccess(MemberExpression m)
-        { 
-            MemberVisitor mv = new MemberVisitor(m);
-            mv.Diagram = this.Diagram;
+        {
+            Type type = m.Type;
 
-            this.SqlBuilder.Append(mv.ToString());
+            if (DataType.OdbEntity.IsAssignableFrom(type))
+            {
+
+            }
+            else
+            {
+                MemberVisitor mv = new MemberVisitor(m);
+                mv.Diagram = this.Diagram;
+
+                this.SqlBuilder.Append(mv.ToString());
+            }
             
             return m;
         }

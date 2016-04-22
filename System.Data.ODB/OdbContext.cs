@@ -225,21 +225,31 @@ namespace System.Data.ODB
         }
         
         /// <summary>
-        /// Delete data
+        /// Delete object
         /// </summary>
         public int Delete<T>(T t) where T : IEntity
         {
-            ICommand cmd = this.CreateCommand();
+            this.Erase<T>(t.Id);
 
-            return cmd.ExecuteDelete(t);
+            return 1;             
+        }
+        
+        public virtual void Erase<T>(long id) where T : IEntity
+        {
+            IQuery query = this.CreateQuery<T>().Delete().Where("Id").Eq(id);
+
+            query.Execute();
         }
 
+        /// <summary>
+        /// Clear table data
+        /// </summary>
         public virtual void Clear<T>() where T : IEntity
         { 
             IQuery query = this.CreateQuery<T>().Delete();
 
             this.ExecuteNonQuery(query.ToString(), null);
-        } 
+        }
 
         #endregion
 

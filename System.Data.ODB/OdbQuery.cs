@@ -342,5 +342,10 @@ namespace System.Data.ODB
             this._order = "";
             this._limit = "";
         }
+
+        public void Execute()
+        {
+            this.Db.ExecuteNonQuery(this._sb.ToString(), this.Parameters.ToArray());
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Data.ODB;
 using System.Data.ODB.SQLite;
 
 namespace UnitTest
@@ -51,10 +52,16 @@ namespace UnitTest
                      
             User user = db.Query<User>().First();
 
+            IQuery<User> q =  db.CreateQuery<User>().Delete().Where("").Eq(1);
+
             int a = 0;
 
             if (user != null)
             {
+               
+
+                q.Execute();
+
                 a = db.Delete(user);
             }
 

@@ -12,6 +12,7 @@ namespace System.Data.ODB
         T1 Single<T1>();
 
         void Reset();
+        void Execute();
 
         string ToString();
     }

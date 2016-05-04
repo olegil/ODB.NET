@@ -7,23 +7,13 @@ namespace System.Data.ODB.SQLite
 {
     public class SQLiteContext : OdbContext
     {
-        public SQLiteContext(string conn)
-            : base(new SQLiteConnection(conn))
+        public SQLiteContext(string conn) : base(new SQLiteConnection(conn))
         {        
         }
-
-        public override IQuery<T> CreateQuery<T>()
-        {
-            return this.CreateQuery<T>("");
-        }
-
-        public override IQuery<T> CreateQuery<T>(string sql)
-        {
-            SQLiteQuery<T> q = new SQLiteQuery<T>(this);
  
-            q.Append(sql);
-
-            return q;
+        public override IQuery<T> Query<T>()
+        {      
+            return new SQLiteQuery<T>(this); 
         }
 
         public override DataSet ExecuteDataSet(string sql, params IDbDataParameter[] commandParameters)

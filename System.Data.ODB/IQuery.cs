@@ -12,7 +12,7 @@ namespace System.Data.ODB
         T1 Single<T1>();
 
         void Reset();
-        void Execute();
+        int Execute();
 
         string ToString();
     }
@@ -25,7 +25,7 @@ namespace System.Data.ODB
         IQuery<T> Insert(string[] cols);
         IQuery<T> Values(string[] cols);       
         IQuery<T> Delete();
-        IQuery<T> Update();
+        IQuery<T> Update();     
         IQuery<T> Select(string[] cols);
         IQuery<T> From();
         IQuery<T> From(string table, string alias = "");

@@ -17,7 +17,7 @@ namespace System.Data.ODB
             this.Db = db;
             this.level = db.Depth;
         }
-        
+ 
         /// <summary>
         /// Create Table
         /// </summary>
@@ -25,6 +25,8 @@ namespace System.Data.ODB
         {
             this.Create(typeof(T));
         }
+        
+        public abstract void Create(string table, string[] cols);
 
         public virtual void Create(Type type)
         { 
@@ -43,9 +45,7 @@ namespace System.Data.ODB
             string table = OdbMapping.GetTableName(type);
 
             this.Create(table, cols.ToArray());
-        }
-
-        public abstract void Create(string table, string[] cols);
+        } 
          
         /// <summary>
         /// Drop Table
@@ -54,6 +54,8 @@ namespace System.Data.ODB
         { 
             this.ExecuteDrop(typeof(T));
         }
+
+        public abstract void Drop(string table);
 
         public virtual void ExecuteDrop(Type type)
         {
@@ -69,20 +71,17 @@ namespace System.Data.ODB
 
             this.Drop(table);
         }
-
-        public abstract void Drop(string table);
-
+         
         /// <summary>
         /// Persistence object
         /// </summary>
-        public virtual int ExecuteNonQuery<T>(T t) where T : IEntity
+        public virtual int ExecutePersist<T>(T t) where T : IEntity
         {  
             Type type = t.GetType();
 
-            IQuery<T> query = this.Db.CreateQuery<T>();
+            IQuery<T> query = this.Db.Query<T>();
 
-            //Type is IEntity
-            query.Table = OdbMapping.GetTableName(type);
+            //query.Table = OdbMapping.GetTableName(type);
 
             int n = 0;
 
@@ -116,7 +115,7 @@ namespace System.Data.ODB
                                 this.level--;
 
                                 //return id
-                                b = this.ExecuteNonQuery(entry);
+                                b = this.ExecutePersist(entry);
 
                                 this.level++;
                             }                     
@@ -184,41 +183,7 @@ namespace System.Data.ODB
         {
             return this.Execute(query);
         }
-
-        /// <summary>
-        /// Delete object
-        /// </summary>
-        public virtual int ExecuteDelete<T>(T t) where T : IEntity
-        {
-            if (t == null || !t.IsPersisted)
-                return -1;
-
-            IQuery<T> query = this.Db.CreateQuery<T>();
-
-            Type type = t.GetType();
-
-            query.Table = OdbMapping.GetTableName(type);
-
-            OdbColumn colKey = null;
-
-            foreach (OdbColumn col in OdbMapping.GetColumn(type))
-            {
-                if (col.Attribute.IsPrimaryKey)
-                {
-                    colKey = col;
-                }
-            }
-
-            if (colKey == null)
-            {
-                throw new Exception("No key column.");
-            }
-
-            query.Delete().Where(colKey.Name).Eq(colKey.GetValue(t));
-
-            return this.Execute(query);
-        }
-
+         
         public abstract IDbDataParameter CreateParameter();
 
         public abstract string TypeMapping(DbType dtype);

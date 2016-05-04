@@ -52,7 +52,7 @@ namespace UnitTest
                      
             User user = db.Query<User>().First();
 
-            IQuery<User> q =  db.CreateQuery<User>().Delete().Where("").Eq(1);
+            IQuery<User> q =  db.Query<User>().Delete().Where("").Eq(1);
 
             int a = 0;
 

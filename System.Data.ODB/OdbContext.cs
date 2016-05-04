@@ -105,34 +105,8 @@ namespace System.Data.ODB
 
         #region ORM 
 
-        public abstract IQuery<T> CreateQuery<T>() where T : IEntity;
-
-        public abstract IQuery<T> CreateQuery<T>(string sql) where T : IEntity;       
-
-        public IQuery<T> Query<T>() where T : IEntity
-        {
-            Type type = typeof(T);
-
-            OdbDiagram dg = new OdbDiagram(this.Depth);
-
-            dg.Analyze(type);
-            
-            OdbTable table = dg.Table[0];
-                        
-            IQuery<T> q = this.CreateQuery<T>().Select(dg.Colums).From(table.Name, table.Alias);
-
-            int n = 1;
-                        
-            foreach (KeyValuePair<string, string> tc in dg.ForigeKey)
-            {
-                OdbTable tab = dg.Table[n++];
-
-                q.LeftJoin(tab.Name).As(tab.Alias).On(tc.Key).Equal(tc.Value);
-            }
-
-            return q;
-        }
-
+        public abstract IQuery<T> Query<T>() where T : IEntity;
+ 
         /// <summary>
         /// Create Table 
         /// </summary>
@@ -166,7 +140,9 @@ namespace System.Data.ODB
   
         public virtual IList<T> Get<T>(IQuery q) where T : IEntity
         {
-            using (IDataReader rdr = this.ExecuteReader(q))
+            string sql = this.Select<T>() + q.ToString();
+
+            using (IDataReader rdr = this.ExecuteReader(sql, q.Parameters.ToArray()))
             {
                 IList<T> list = new List<T>();
 
@@ -182,9 +158,35 @@ namespace System.Data.ODB
             }
         }
 
+        private string Select<T>() where T : IEntity
+        {
+            Type type = typeof(T);
+
+            OdbDiagram dg = new OdbDiagram(this.Depth);
+
+            dg.Analyze(type);
+
+            OdbTable table = dg.Table[0];
+
+            IQuery<T> q = this.Query<T>(); 
+
+            q.Select(dg.Colums).From(table.Name, table.Alias);
+
+            int i = 1;
+
+            foreach (KeyValuePair<string, string> tc in dg.ForigeKey)
+            {
+                OdbTable tab = dg.Table[i++];
+
+                q.LeftJoin(tab.Name).As(tab.Alias).On(tc.Key).Equal(tc.Value);
+            }
+
+            return q.ToString();
+        }
+
         public virtual int Count<T>(string str) where T : IEntity
         {
-            IQuery<T> q = this.CreateQuery<T>().Count(str).From();
+            IQuery<T> q = this.Query<T>().Count(str).From();
 
             return this.ExecuteScalar<int>(q);
         }
@@ -197,13 +199,11 @@ namespace System.Data.ODB
         /// <summary>
         /// Insert object
         /// </summary>
-        public int Insert(IEntity t)
+        public virtual int Insert<T>(T t) where T : IEntity
         {
             if (!t.IsPersisted)
             {
-                ICommand cmd = this.CreateCommand();
-
-                return cmd.ExecuteNonQuery(t);
+                return this.Persist(t);
             }
 
             return -1;
@@ -212,43 +212,39 @@ namespace System.Data.ODB
         /// <summary>
         /// Update object
         /// </summary>
-        public int Update(IEntity t)
+        public virtual int Update<T>(T t) where T : IEntity
         {
             if (t.IsPersisted)
             {
-                ICommand cmd = this.CreateCommand();
-
-                return cmd.ExecuteNonQuery(t);
+                return this.Persist(t);
             }
 
             return -1;
         }
-        
+
+        public int Persist<T>(T t)where T : IEntity
+        {
+            ICommand cmd = this.CreateCommand();
+
+            return cmd.ExecutePersist(t);
+        }
+
         /// <summary>
         /// Delete object
         /// </summary>
         public int Delete<T>(T t) where T : IEntity
         {
-            this.Erase<T>(t.Id);
+            IQuery query = this.Query<T>().Delete().Where("Id").Eq(t.Id);
 
-            return 1;             
-        }
-        
-        public virtual void Erase<T>(long id) where T : IEntity
-        {
-            IQuery query = this.CreateQuery<T>().Delete().Where("Id").Eq(id);
-
-            query.Execute();
-        }
-
+            return query.Execute(); 
+        }        
+       
         /// <summary>
         /// Clear table data
         /// </summary>
         public virtual void Clear<T>() where T : IEntity
         { 
-            IQuery query = this.CreateQuery<T>().Delete();
-
-            this.ExecuteNonQuery(query.ToString(), null);
+            this.Query<T>().Delete().Execute();            
         }
 
         #endregion

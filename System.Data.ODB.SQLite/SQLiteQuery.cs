@@ -8,9 +8,8 @@ namespace System.Data.ODB.SQLite
     public class SQLiteQuery<T> : OdbQuery<T>
         where T : IEntity
     {      
-        public SQLiteQuery(IDbContext db)  
-        {
-            this.Db = db;
+        public SQLiteQuery(IDbContext db) : base(db) 
+        {            
         }
 
         public override IDbDataParameter Bind(string name, object b, DbType dtype)
@@ -63,11 +62,6 @@ namespace System.Data.ODB.SQLite
         public override string ToString()
         {
             string sql = this._sb.ToString();
-
-            if (!string.IsNullOrEmpty(this._where))
-            {
-                sql += " WHERE " + this._where;
-            }
 
             if (!string.IsNullOrEmpty(this._order))
             {

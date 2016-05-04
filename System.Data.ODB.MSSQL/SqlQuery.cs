@@ -13,7 +13,7 @@ namespace System.Data.ODB.MSSQL
         private int _skip = 0;
         private int _take = 0;
 
-        public SqlQuery()
+        public SqlQuery(IDbContext db) : base(db)
         {
         } 
 
@@ -61,11 +61,6 @@ namespace System.Data.ODB.MSSQL
         {
             string sql = this._sb.ToString();
 
-            if (!string.IsNullOrEmpty(this._where))
-            {
-                sql += " WHERE " + this._where;
-            }
-
             if (this._skip == 0 && !string.IsNullOrEmpty(this._order))
             {
                 sql += " ORDER BY " + this._order;
@@ -81,7 +76,7 @@ namespace System.Data.ODB.MSSQL
                 return sql.Insert(7, "TOP(" + this._take + ") ");
             }
 
-            return sql; 
+            return this._sb.ToString(); 
         }
     }
 }

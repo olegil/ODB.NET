@@ -34,7 +34,7 @@ namespace UnitTest
 
             User user = new User() { Name = "Peter", BID = 345f, Birthday = DateTime.Now };
 
-            db.Insert(user);
+           // db.Insert(user);
 
             IQuery<User> q = db.Query<User>().Where("Name").Eq("Peter");
             

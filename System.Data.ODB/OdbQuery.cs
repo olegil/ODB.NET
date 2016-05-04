@@ -9,29 +9,29 @@ namespace System.Data.ODB
     {
         protected StringBuilder _sb;
 
-        public IDbContext Db { get; set; }
+        public IDbContext Db { get; private set; }
 
         public List<IDbDataParameter> Parameters { get; set; }
 
         public string Table { get; set; }
         public string Alias { get; set; }
-
-        protected string _where;
+              
         protected string _limit;
         protected string _order;
          
-        public OdbQuery()
+        public OdbQuery(IDbContext db)
         {
+            this.Db = db;
+
             this._sb = new StringBuilder();
              
             this.Parameters = new List<IDbDataParameter>();
 
             this.Table = OdbMapping.GetTableName(typeof(T));
-
-            this._where = "";
+ 
             this._limit = "";
             this._order = "";
-        }
+        }             
 
         public virtual IQuery<T> Select(string[] cols)
         {
@@ -108,29 +108,25 @@ namespace System.Data.ODB
         }
           
         public virtual IQuery<T> Where(string str)
-        { 
-            this._where = this.AddAlias(str);
-
-            return this;
-        }
-
-        public virtual IQuery<T> AddWhere(string str)
         {
-            this._where += str;
+            this._sb.Append(" WHERE ");
+            this._sb.Append(this.AddAlias(str));
 
             return this;
         }
-
+                
         public virtual IQuery<T> And(string str)
         {
-            this._where += " AND " + this.AddAlias(str); 
+            this._sb.Append(" AND ");
+            this._sb.Append(this.AddAlias(str)); 
 
             return this;
         }
 
         public virtual IQuery<T> Or(string str)
         {
-            this._where += " OR " + this.AddAlias(str);  
+            this._sb.Append(" OR ");
+            this._sb.Append(this.AddAlias(str));  
 
             return this;
         }
@@ -145,49 +141,56 @@ namespace System.Data.ODB
 
         public virtual IQuery<T> Eq(object val)
         {
-            this._where += " = " + this.Add(val);
+            this._sb.Append(" = ");
+            this._sb.Append(this.Add(val));
 
             return this;
         }
 
         public virtual IQuery<T> NotEq(object val)
         {
-            this._where += " <> " + this.Add(val);
+            this._sb.Append(" <> ");
+            this._sb.Append(this.Add(val));
 
             return this;
         }
 
         public virtual IQuery<T> Gt(object val)
         {
-            this._where += " > " + this.Add(val);
+            this._sb.Append(" > ");
+            this._sb.Append(this.Add(val));
 
             return this;
         }
 
         public virtual IQuery<T> Lt(object val)
         {
-            this._where += " < " + this.Add(val);
+            this._sb.Append(" < ");
+            this._sb.Append(this.Add(val));
 
             return this;
         }
 
         public virtual IQuery<T> Gte(object val)
         {
-            this._where += " >= " + this.Add(val);
+            this._sb.Append(" >= ");
+            this._sb.Append(this.Add(val));
          
             return this;
         }
 
         public virtual IQuery<T> Lte(object val)
         {
-            this._where += " <= " + this.Add(val);
+            this._sb.Append(" <= ");
+            this._sb.Append(this.Add(val));
              
             return this;
         } 
 
         public virtual IQuery<T> Like(string str)
         {
-            this._where += " LIKE " + this.Add("%" + str + "%");
+            this._sb.Append(" LIKE ");
+            this._sb.Append(this.Add("%" + str + "%"));
              
             return this;
         }
@@ -260,7 +263,7 @@ namespace System.Data.ODB
 
         public IQuery<T> Not()
         {
-            this._where += " NOT ";
+            this._sb.Append(" NOT ");
 
             return this;
         }
@@ -333,19 +336,40 @@ namespace System.Data.ODB
             return str;
         }
 
+        private void set()
+        {
+            Type type = typeof(T);
+
+            OdbDiagram dg = new OdbDiagram(this.Db.Depth);
+
+            dg.Analyze(type);
+
+            OdbTable table = dg.Table[0];
+
+            this.Select(dg.Colums).From(table.Name, table.Alias);
+
+            int i = 1;
+
+            foreach (KeyValuePair<string, string> tc in dg.ForigeKey)
+            {
+                OdbTable tab = dg.Table[i++];
+
+                this.LeftJoin(tab.Name).As(tab.Alias).On(tc.Key).Equal(tc.Value);
+            }
+        }
+
         public void Reset()
         {
             this._sb.Length = 0;
             this.Parameters.Clear();
-
-            this._where = "";
+            
             this._order = "";
             this._limit = "";
         }
 
-        public void Execute()
+        public int Execute()
         {
-            this.Db.ExecuteNonQuery(this._sb.ToString(), this.Parameters.ToArray());
+            return this.Db.ExecuteNonQuery(this._sb.ToString(), this.Parameters.ToArray());
         }
     }
 }

@@ -13,21 +13,11 @@ namespace System.Data.ODB.MSSQL
         {        
         }
 
-        public override IQuery<T> CreateQuery<T>()
+        public override IQuery<T> Query<T>()
         {
-            return this.CreateQuery<T>("");
+            return new SqlQuery<T>(this); 
         }
-
-        public override IQuery<T> CreateQuery<T>(string sql)
-        {
-            SqlQuery<T> q = new SqlQuery<T>();
-
-            q.Db = this;
-            q.Append(sql);
-
-            return q;
-        }
-
+         
         public override ICommand CreateCommand()
         {
             return new OdbSqlCommand(this);

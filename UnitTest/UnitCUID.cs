@@ -11,25 +11,23 @@ namespace UnitTest
         [TestMethod]
         public void TestAdd()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
+            MyRepository db = new MyRepository();
 
             db.Clear<User>();
            
             User user = new User() { Name = "Stephen", BID = 123F };
                     
-            int a = db.Insert(user);
- 
-            db.Close();
-
+            int a = db.Store(user);
+  
             Assert.IsTrue(a > 0);
         }
 
         [TestMethod]
         public void TestUpdate()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
+            MyRepository db = new MyRepository();
 
-            User user = db.Query<User>().First();
+            User user = db.Collect<User>().First<User>();
 
             int ret = 0;
 
@@ -37,22 +35,20 @@ namespace UnitTest
             {
                 user.Birthday = DateTime.Now;
 
-                ret = db.Update(user);
+                ret = db.Store(user);
             }
-
-            db.Close();
-
+ 
             Assert.IsTrue(ret != 0);
         }
 
         [TestMethod]
         public void TestDelete()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
-                     
-            User user = db.Query<User>().First();
+            MyRepository respo = new MyRepository();
 
-            IQuery<User> q =  db.Query<User>().Delete().Where("").Eq(1);
+            User user = respo.Collect<User>().First<User>();
+
+            IQuery q = respo.Collect<User>().Delete().Where("").Eq(1);
 
             int a = 0;
 
@@ -62,11 +58,9 @@ namespace UnitTest
 
                 q.Execute();
 
-                a = db.Delete(user);
+                a = respo.Delete(user);
             }
-
-            db.Close();
-
+ 
             Assert.IsTrue(a > 0);
         }
     }

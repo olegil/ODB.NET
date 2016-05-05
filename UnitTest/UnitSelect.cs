@@ -14,13 +14,11 @@ namespace UnitTest
         [TestMethod]
         public void TestSelect()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
+            MyRepository respo = new MyRepository();
 
-            db.Depth = 2;
-                       
-            IQuery<Order>  q = db.Query<Order>();
+            IQuery q = respo.Collect<Order>();
 
-            List<Order> list = q.ToList();
+            List<Order> list = q.ToList<Order>();
   
             Assert.IsTrue(list.Count > 0);
         }
@@ -28,31 +26,25 @@ namespace UnitTest
         [TestMethod]
         public void TestWhere()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
-
-            db.Depth = 2;
+            MyRepository db = new MyRepository();
 
             User user = new User() { Name = "Peter", BID = 345f, Birthday = DateTime.Now };
 
-           // db.Insert(user);
+            db.Store(user);
 
-            IQuery<User> q = db.Query<User>().Where("Name").Eq("Peter");
+            IQuery q = db.Collect<User>().Where("Name").Eq("Peter");
             
-            User user2 = q.First();
-
-            db.Close();
-
+            User user2 = q.First<User>();
+ 
             Assert.IsNotNull(user);
         }
 
         [TestMethod]
         public void TestFirst()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
+            MyRepository respo = new MyRepository();
 
-            db.Depth = 2;
-  
-            User user = db.Query<User>().First();
+            User user = respo.Collect<User>().First<User>();
 
             Assert.IsTrue(user != null);
         }
@@ -62,11 +54,11 @@ namespace UnitTest
         {
             //SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
 
-            SqlContext db = new SqlContext(Command.MssqlConnStr);
+            MyRepository respo = new MyRepository();
 
-            IQuery<User> q = db.Query<User>().Where("Name").Like("hen");
+            IQuery q = respo.Collect<User>().Where("Name").Like("hen");
 
-            List<User> list = q.ToList();
+            List<User> list = q.ToList<User>();
              
             Assert.IsTrue(list.Count > 0);
         }

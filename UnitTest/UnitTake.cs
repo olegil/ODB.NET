@@ -26,29 +26,24 @@ namespace UnitTest
             string sql = q1.ToString();
 
             var list = q1.ToList();
-
-            respo.Dispose();
-
+ 
             Assert.IsTrue(list.Count > 0);
         }
 
         [TestMethod]
         public void TestSkip()
         {
-            //SqlContext db = new SqlContext(Command.MssqlConnStr);
-            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
+            MyRepository respo = new MyRepository();
 
-            db.Depth = 2;
+            IQuery q1 = respo.Collect<Order>().Skip(4);
 
-            IQuery<Order> q1 = db.Query<Order>().Skip(4);
+            IQuery q2 = respo.Collect<User>().Take(2);
 
-            IQuery<User> q2 = db.Query<User>().Take(2);
+            IQuery q3 = respo.Collect<User>().Skip(1).Take(2);
 
-            IQuery<User> q3 = db.Query<User>().Skip(1).Take(2);
+            IQuery q4 = respo.Collect<User>().Take(2).Skip(1);
 
-            IQuery<User> q4 = db.Query<User>().Take(2).Skip(1);
-
-            List<User> list = q2.ToList();
+            List<User> list = q2.ToList<User>();
 
             Assert.IsTrue(list.Count > 0);
         }

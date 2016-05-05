@@ -2,61 +2,52 @@
 using System.Collections.Generic;
 
 namespace System.Data.ODB
-{
-    public interface IQuery
-    {
-        IQuery Append(string str); 
-        List<IDbDataParameter> Parameters { get; set; }
-         
-        DataSet Result();
-        T1 Single<T1>();
+{ 
+    public interface IQuery 
+    {      
+        IQuery Insert<T>(string[] cols) where T : IEntity;
+        IQuery Values(string[] cols);             
+        IQuery Update<T>() where T : IEntity;
+        IQuery Delete();
+        IQuery Select(string[] cols);
+        IQuery From<T>() where T : IEntity;
+        IQuery From(string table, string alias = "");
+        IQuery Where(string str);
+        IQuery And(string str);
+        IQuery Or(string str);
+        IQuery OrderBy(string str);
+        IQuery Eq(object val);
+        IQuery NotEq(object val);
+        IQuery Gt(object val);
+        IQuery Lt(object val);
+        IQuery Gte(object val);
+        IQuery Lte(object val);
+        IQuery Not();
+        IQuery Like(string str);
+        IQuery Set(string[] cols);
+        IQuery Count(string str);
+        IQuery Skip(int start);
+        IQuery Take(int count);
+        IQuery Join<T>() where T : IEntity;
+        IQuery Join(string table);
+        IQuery LeftJoin<T>() where T : IEntity;
+        IQuery LeftJoin(string table);
+        IQuery As(string str);
+        IQuery On(string str);
+        IQuery Equal(string str);
+        IQuery SortAsc();
+        IQuery SortDesc();
 
-        void Reset();
+        IQuery Append(string str);
+        List<IDbDataParameter> Parameters { get; set; }
+
+        DataSet Result();
+        T First<T>() where T : IEntity;
+        List<T> ToList<T>() where T : IEntity;
         int Execute();
 
+        void Reset();
+
         string ToString();
-    }
-
-    public interface IQuery<T> : IQuery 
-    { 
-        string Table { get; set; } 
-        string Alias { get; set; } 
-
-        IQuery<T> Insert(string[] cols);
-        IQuery<T> Values(string[] cols);       
-        IQuery<T> Delete();
-        IQuery<T> Update();     
-        IQuery<T> Select(string[] cols);
-        IQuery<T> From();
-        IQuery<T> From(string table, string alias = "");
-        IQuery<T> Where(string str);
-        IQuery<T> And(string str);
-        IQuery<T> Or(string str);
-        IQuery<T> OrderBy(string str);
-        IQuery<T> Eq(object val);
-        IQuery<T> NotEq(object val);
-        IQuery<T> Gt(object val);
-        IQuery<T> Lt(object val);
-        IQuery<T> Gte(object val);
-        IQuery<T> Lte(object val);
-        IQuery<T> Not();
-        IQuery<T> Like(string str);
-        IQuery<T> Set(string[] cols);
-        IQuery<T> Count(string str);
-        IQuery<T> Skip(int start);
-        IQuery<T> Take(int count);
-        IQuery<T> Join<T1>() where T1 : IEntity;
-        IQuery<T> Join(string table);
-        IQuery<T> LeftJoin<T1>() where T1 : IEntity;
-        IQuery<T> LeftJoin(string table);
-        IQuery<T> As(string str);
-        IQuery<T> On(string str);
-        IQuery<T> Equal(string str);
-        IQuery<T> SortAsc();
-        IQuery<T> SortDesc();
- 
-        T First();
-
-        List<T> ToList();       
     }
 }

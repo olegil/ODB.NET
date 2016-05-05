@@ -1,14 +1,28 @@
-﻿using System.Collections.Generic;
-using System.Text;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace System.Data.ODB
 {
-    public abstract class OdbContext : IDbContext, IDisposable       
-    {         
-        public int Depth { get; set; }
+    public abstract class OdbContext : IDbContext, IDisposable
+    {
+        protected IDbConnection Connection { get; set; }
+        protected IDbTransaction Transaction { get; set; }
  
+        public int Depth { get; set; }
+
+        private bool _inTrans;
+
         private bool disposed = false;
+        
+        public OdbContext(IDbConnection Connection, int depth)
+        {
+            this.Connection = Connection;
+            this.Depth = depth;
+        }
 
         protected virtual void Dispose(bool disposing)
         {
@@ -27,29 +41,15 @@ namespace System.Data.ODB
         {
             this.Dispose(true);
             GC.SuppressFinalize(this);
-        } 
-
-        public IDbConnection Connection { get; set; }
-
-        public IDbTransaction OdbTransaction { get; set; }
-
-        private bool _inTrans;
-        public bool InTransaction { get { return this._inTrans; } }
-
-        public OdbContext(IDbConnection DbConnection)
-        {
-            this.Connection = DbConnection;
-
-            this.Depth = 1;            
         }
-
+ 
         public void Close()
         {
-            if (this.OdbTransaction != null)
+            if (this.Transaction != null)
             {
-                this.OdbTransaction.Dispose();
+                this.Transaction.Dispose();
 
-                this.OdbTransaction = null;
+                this.Transaction = null;
             }
 
             if (this.Connection != null)
@@ -58,8 +58,8 @@ namespace System.Data.ODB
                     this.Connection.Close();
 
                 this.Connection = null;
-            }               
-        } 
+            }
+        }
 
         #region Transaction
 
@@ -68,81 +68,97 @@ namespace System.Data.ODB
             if (this.Connection.State != ConnectionState.Open)
                 this.Connection.Open();
 
-            this.OdbTransaction = this.Connection.BeginTransaction();
+            this.Transaction = this.Connection.BeginTransaction();
 
             this._inTrans = true;
         }
 
         public void CommitTrans()
-        { 
+        {
             try
             {
-                this.OdbTransaction.Commit();             
-                    
+                this.Transaction.Commit();
+
                 this._inTrans = false;
             }
             catch
             {
                 throw;
-            }                            
+            }
         }
 
         public void RollBack()
         {
             try
             {
-                this.OdbTransaction.Rollback();
+                this.Transaction.Rollback();
 
                 this._inTrans = false;
             }
             catch
             {
                 throw;
-            }   
+            }
         }
 
         #endregion
+              
+        public abstract IQuery Query();
 
-        #region ORM 
+        public virtual void ExecuteCreate<T>() where T : IEntity
+        {
+            this.Create(typeof(T));
+        }
+        
+        public abstract void Create(string table, string[] cols);
 
-        public abstract IQuery<T> Query<T>() where T : IEntity;
+        private void Create(Type type)
+        { 
+            List<string> cols = new List<string>();
+
+            foreach (OdbColumn col in OdbMapping.GetColumn(type))
+            { 
+                if (col.Attribute.IsForeignkey)
+                {   
+                    this.Create(col.GetColumnType());
+                }
  
-        /// <summary>
-        /// Create Table 
-        /// </summary>
-        /// 
-        public void Create<T>() where T : IEntity
-        {
-            ICommand cmd = this.CreateCommand();
+                cols.Add(this.SqlDefine(col));                 
+            }
 
-            cmd.ExecuteCreate<T>();
-        }
-         
-        /// <summary>
-        /// Drop Table 
-        /// </summary>
-        public virtual void Remove<T>() where T : IEntity
-        {
-            ICommand cmd = this.CreateCommand();
+            string table = OdbMapping.GetTableName(type);
 
-            cmd.ExecuteDrop<T>();
+            this.Create(table, cols.ToArray());
+        } 
+    
+        public virtual void ExecuteDrop<T>() where T : IEntity
+        { 
+            this.Drop(typeof(T));
         }
-                  
+
+        public abstract void Drop(string table);
+
+        private void Drop(Type type)
+        {
+            foreach (OdbColumn col in OdbMapping.GetColumn(type))
+            {
+                if (col.Attribute.IsForeignkey)
+                {
+                    this.Drop(col.GetColumnType());
+                } 
+            } 
+
+            string table = OdbMapping.GetTableName(type);
+
+            this.Drop(table);
+        }
+
         /// <summary>
         /// Get query result
-        /// </summary>
-        public virtual IList<T> Get<T>() where T : IEntity
-        {  
-            IQuery<T> q = this.Query<T>();
-  
-            return this.Get<T>(q);
-        }
-  
-        public virtual IList<T> Get<T>(IQuery q) where T : IEntity
+        /// </summary>    
+        public virtual IList<T> ExecuteList<T>(IQuery q) where T : IEntity
         {
-            string sql = this.Select<T>() + q.ToString();
-
-            using (IDataReader rdr = this.ExecuteReader(sql, q.Parameters.ToArray()))
+            using (IDataReader rdr = this.ExecuteReader(q.ToString(), q.Parameters.ToArray()))
             {
                 IList<T> list = new List<T>();
 
@@ -151,185 +167,124 @@ namespace System.Data.ODB
                     foreach (T t in edr)
                     {
                         list.Add(t);
-                    } 
+                    }
                 }
 
-                return list;             
+                return list;
             }
         }
-
-        private string Select<T>() where T : IEntity
-        {
-            Type type = typeof(T);
-
-            OdbDiagram dg = new OdbDiagram(this.Depth);
-
-            dg.Analyze(type);
-
-            OdbTable table = dg.Table[0];
-
-            IQuery<T> q = this.Query<T>(); 
-
-            q.Select(dg.Colums).From(table.Name, table.Alias);
-
-            int i = 1;
-
-            foreach (KeyValuePair<string, string> tc in dg.ForigeKey)
-            {
-                OdbTable tab = dg.Table[i++];
-
-                q.LeftJoin(tab.Name).As(tab.Alias).On(tc.Key).Equal(tc.Value);
-            }
-
-            return q.ToString();
-        }
-
-        public virtual int Count<T>(string str) where T : IEntity
-        {
-            IQuery<T> q = this.Query<T>().Count(str).From();
-
-            return this.ExecuteScalar<int>(q);
-        }
-
-        public virtual int Count<T>() where T : IEntity
-        {
-            return this.Count<T>("Id");
-        }
-
+ 
         /// <summary>
-        /// Insert object
+        /// Persistence object
         /// </summary>
-        public virtual int Insert<T>(T t) where T : IEntity
-        {
-            if (!t.IsPersisted)
+        public virtual int ExecutePersist<T>(T t) where T : IEntity
+        {  
+            Type type = t.GetType();
+
+            IQuery query = this.Query();
+
+            int n = 0;
+
+            List<string> cols = new List<string>();
+            List<string> ps = new List<string>();
+
+            OdbColumn ColPk = null;
+             
+            //begin foreach
+            foreach (OdbColumn col in OdbMapping.GetColumn(type))
             {
-                return this.Persist(t);
+                ColumnAttribute attr = col.Attribute;
+
+                if (!attr.IsAuto)
+                {
+                    object b = col.GetValue(t);
+
+                    if (!attr.IsForeignkey)
+                    {
+                        if (b == null)                           
+                            b = DBNull.Value;
+                    }
+                    else
+                    { 
+                        if (this.Depth > 1 )
+                        {
+                            if (b != null)
+                            {
+                                IEntity entry = b as IEntity;
+
+                                this.Depth--;
+
+                                //return id
+                                b = this.ExecutePersist(entry);
+
+                                this.Depth++;
+                            }                     
+                        }
+                    }
+
+                    string name = "@p" + n;
+
+                    IDbDataParameter p = this.CreateParameter();
+
+                    p.ParameterName = name;
+                    p.Value = b;
+                    p.DbType = col.GetDbType();
+
+                    query.Parameters.Add(p);
+
+                    ps.Add(name);
+                    cols.Add("[" + col.Name + "]");
+
+                    n++;
+                }
+
+                if (attr.IsPrimaryKey)
+                {
+                    ColPk = col;
+                }
             }
+            //end
 
-            return -1;
-        }
-
-        /// <summary>
-        /// Update object
-        /// </summary>
-        public virtual int Update<T>(T t) where T : IEntity
-        {
+            if (ColPk == null)
+            {
+                throw new OdbException("No Key.");
+            }
+            
             if (t.IsPersisted)
             {
-                return this.Persist(t);
+                for(int i = 0; i< cols.Count; i++)
+                {
+                    cols[i] = cols[i] + "=" + ps[i];
+                } 
+            
+                query.Update<T>().Set(cols.ToArray()).Where(ColPk.Name).Eq(ColPk.GetValue(t));
+
+                this.ExecuteNonQuery(query.ToString(), query.Parameters.ToArray());
+
+                return (int)t.Id; 
             }
-
-            return -1;
-        }
-
-        public int Persist<T>(T t)where T : IEntity
-        {
-            ICommand cmd = this.CreateCommand();
-
-            return cmd.ExecutePersist(t);
-        }
-
-        /// <summary>
-        /// Delete object
-        /// </summary>
-        public int Delete<T>(T t) where T : IEntity
-        {
-            IQuery query = this.Query<T>().Delete().Where("Id").Eq(t.Id);
-
-            return query.Execute(); 
-        }        
-       
-        /// <summary>
-        /// Clear table data
-        /// </summary>
-        public virtual void Clear<T>() where T : IEntity
-        { 
-            this.Query<T>().Delete().Execute();            
-        }
-
-        #endregion
-
-        #region Data Access   
-        public abstract ICommand CreateCommand();
-
-        public abstract DataSet ExecuteDataSet(string sql, params IDbDataParameter[] cmdParms);
-
-        public virtual IDataReader ExecuteReader(IQuery query)
-        {
-            return this.ExecuteReader(query.ToString(), query.Parameters.ToArray());
-        }
-
-        public IDataReader ExecuteReader(string sql, params IDbDataParameter[] cmdParms)
-        {
-            //create a command 
-            IDbCommand cmd = this.Connection.CreateCommand();
-
-            SetCommand(cmd, this.Connection, this.OdbTransaction, sql, cmdParms);
-         
-            try
+            else
             {
-                IDataReader rdr = cmd.ExecuteReader();
+                query.Insert<T>(cols.ToArray()).Values(ps.ToArray());
 
-                cmd.Parameters.Clear();
-
-                return rdr;
-            }
-            catch
-            {
-                this.Connection.Close();
-
-                throw;
-            }
+                return this.ExecuteInsertId(query);
+            } 
         }
 
-        public T ExecuteScalar<T>(IQuery query)
-        {
-            return this.ExecuteScalar<T>(query.ToString(), query.Parameters.ToArray());
-        }
+        public abstract int ExecuteInsertId(IQuery q);
+        
+        public abstract IDbDataParameter CreateParameter();
 
-        public T ExecuteScalar<T>(string sql, params IDbDataParameter[] cmdParms)
-        {
-            //create a command 
-            IDbCommand cmd = this.Connection.CreateCommand();
+        public abstract string TypeMapping(DbType dtype);
 
-            SetCommand(cmd, this.Connection, this.OdbTransaction, sql, cmdParms);
+        public abstract string SqlDefine(OdbColumn col);
 
-            //execute the command & return the results
-            try
-            {
-                object retval = cmd.ExecuteScalar();
-
-                cmd.Parameters.Clear();
-
-                return (T)retval;
-            }
-            catch(Exception ex)
-            {
-                this.Connection.Close();
-
-                throw ex;
-            }           
-        }
-
-        public int ExecuteNonQuery(string sql, params IDbDataParameter[] cmdParms)
-        {
-            //create a command
-            IDbCommand cmd = this.Connection.CreateCommand();
-          
-            SetCommand(cmd, this.Connection, this.OdbTransaction, sql, cmdParms);
-
-            int n = cmd.ExecuteNonQuery();
-            cmd.Parameters.Clear();
-
-            //cmd.Dispose();
-
-            return n;
-        }
-
-        protected static void SetCommand(IDbCommand cmd, IDbConnection conn, IDbTransaction trans, string cmdText, IDbDataParameter[] cmdParms)
+        protected static IDbCommand SetCommand(IDbConnection conn, IDbTransaction trans, string cmdText, IDbDataParameter[] cmdParms)
         {
             if (conn.State != ConnectionState.Open)
                 conn.Open();
+
+            IDbCommand cmd = conn.CreateCommand();
 
             cmd.Connection = conn;
             cmd.CommandText = cmdText;
@@ -345,14 +300,65 @@ namespace System.Data.ODB
                     cmd.Parameters.Add(parm);
             }
 
-            return;
+            return cmd;
         }
-
-        public int Delete(IEntity t)
+         
+        public abstract DataSet ExecuteDataSet(string sql, params IDbDataParameter[] cmdParms);
+ 
+        public IDataReader ExecuteReader(string sql, params IDbDataParameter[] cmdParms)
         {
-            throw new NotImplementedException();
+            //create a command 
+            IDbCommand cmd = SetCommand(this.Connection, this.Transaction, sql, cmdParms);
+
+            try
+            {
+                IDataReader rdr = cmd.ExecuteReader();
+
+                cmd.Parameters.Clear();
+
+                return rdr;
+            }
+            catch
+            {
+                this.Connection.Close();
+
+                throw;
+            }
         } 
 
-        #endregion
+        public T ExecuteScalar<T>(string sql, params IDbDataParameter[] cmdParms)
+        {
+            //create a command 
+            IDbCommand cmd = SetCommand(this.Connection, this.Transaction, sql, cmdParms);
+
+            //execute the command & return the results
+            try
+            {
+                object retval = cmd.ExecuteScalar();
+
+                cmd.Parameters.Clear();
+
+                return (T)retval;
+            }
+            catch (Exception ex)
+            {
+                this.Connection.Close();
+
+                throw ex;
+            }
+        }
+
+        public int ExecuteNonQuery(string sql, params IDbDataParameter[] cmdParms)
+        {
+            //create a command
+            IDbCommand cmd = SetCommand(this.Connection, this.Transaction, sql, cmdParms);
+
+            int n = cmd.ExecuteNonQuery();
+            cmd.Parameters.Clear();
+
+            cmd.Dispose();
+
+            return n;
+        } 
     }
 }

@@ -21,9 +21,7 @@ namespace UnitTest
                         select u.User;
 
             var users = query.ToList();
-
-            respo.Dispose();
-
+ 
             Assert.IsTrue(users.Count > 0);
         }        
 
@@ -39,9 +37,7 @@ namespace UnitTest
             string sql = query.ToString();
 
             List<User> list = query.ToList();
-
-            respo.Dispose();
-
+ 
             Assert.IsTrue(list.Count > 0);
         }
 
@@ -57,9 +53,7 @@ namespace UnitTest
             string sql = query.ToString();
 
             List<User> list = query.ToList();
-
-            respo.Dispose();
-
+ 
             Assert.IsTrue(list.Count > 0);
         }
 
@@ -73,9 +67,7 @@ namespace UnitTest
             //string sql = query.ToString();
 
             var list = query.ToList();
-
-            respo.Dispose();
-
+ 
             Assert.IsTrue(list.Count > 0);
         }
     }

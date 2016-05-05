@@ -11,22 +11,22 @@ namespace UnitTest
         [TestMethod]
         public void TestBatch()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
+            MyRepository db = new MyRepository();
 
             db.Create<User>();
 
-            db.StartTrans();
+           // db.StartTrans();
 
             for(int i = 0; i < 10; i++)
             {
                 User user = new User() { Name = "Chan", BID = 645.75f };
 
-                db.Insert(user);
+                db.Store(user);
             }
 
-            db.CommitTrans();
+           // db.CommitTrans();
 
-            db.Close();        
+          //  db.Close();        
         }
     }
 }

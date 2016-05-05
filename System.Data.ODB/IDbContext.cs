@@ -1,36 +1,26 @@
 ﻿using System;
-using System.Collections.Generic; 
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace System.Data.ODB
 {
-    public interface IDbContext 
+    public interface IDbContext
     {
         int Depth { get; set; }
 
-        void Create<T>() where T : IEntity;
+        IQuery Query();
+     
+        void ExecuteCreate<T>() where T : IEntity;
+        void ExecuteDrop<T>() where T : IEntity;
+        int ExecutePersist<T>(T t) where T : IEntity;
+        IList<T> ExecuteList<T>(IQuery q) where T : IEntity;
+   
+        int ExecuteNonQuery(string sql, params IDbDataParameter[] cmdParms);
+        IDataReader ExecuteReader(string sql, params IDbDataParameter[] cmdParms);
+        DataSet ExecuteDataSet(string sql, params IDbDataParameter[] cmdParms);
 
-        void Remove<T>() where T : IEntity;
-
-        int Insert<T>(T t) where T : IEntity;
-
-        int Update<T>(T t) where T : IEntity;
-
-        int Delete<T>(T t) where T : IEntity;
-
-        IQuery<T> Query<T>() where T : IEntity;
-                
-        IList<T> Get<T>(IQuery query) where T : IEntity;
-
-        IDbConnection Connection { get; set; }
-
-        ICommand CreateCommand();
-
-        DataSet ExecuteDataSet(string sql, params IDbDataParameter[] commandParameters);
- 
-        IDataReader ExecuteReader(string sql, params IDbDataParameter[] commandParameters);
-
-        int ExecuteNonQuery(string sql, params IDbDataParameter[] commandParameters);
-
-        T ExecuteScalar<T>(string sql, params IDbDataParameter[] commandParameters); 
+        IDbDataParameter CreateParameter();
     }
 }

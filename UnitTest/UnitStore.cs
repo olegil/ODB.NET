@@ -14,10 +14,8 @@ namespace UnitTest
         [TestMethod]
         public void TestStore()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
-
-            db.Depth = 2;
- 
+            MyRepository respo = new MyRepository();
+                     
             Publish pub = new Publish() { Name = "Bloger", Address = new Address() { Flat = "64", Street = "ABC", City = "Hong Kong" } };
             User user = new User() { Name = "Peter", BID = 235f, Birthday = DateTime.Now };
 
@@ -29,69 +27,54 @@ namespace UnitTest
                 User = user
             };      
 
-            int a = db.Insert(user);             
-             
-            db.Close();
-
+            int a = respo.Store(user);             
+              
             Assert.IsTrue(a > 0);
         }
 
         [TestMethod]
         public void TestStore2()
         {
-            //SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
-
-            SqlContext db = new SqlContext(Command.MssqlConnStr);
-
-            db.Depth = 2;
-
+            MyRepository respo = new MyRepository();
             //db.Create<Order>();
 
             User user = new User() { Name = "Stephen", BID = 345346.3245d, IsPermit = true, Birthday = DateTime.Now };
    
-            Order order = db.Query<Order>().First();
+            Order order = respo.Collect<Order>().First<Order>();
 
             order.User = user;
 
-            db.Update(order);
-
-            db.Close();
-
+            respo.Store(order);
+          
             Assert.IsNotNull(order);
         }
 
         [TestMethod]
         public void TestStore3()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
+            MyRepository respo = new MyRepository();
 
-            db.Depth = 3;
-
-            db.Create<OrderItem>();
-            db.Create<Order>();
-            db.Create<User>();
+            respo.Create<OrderItem>();
+            respo.Create<Order>();
+            respo.Create<User>();
 
             Order order = new Order() { User = new User() { Name = "Peter", BID = 234.564d }, Date = DateTime.Now };
 
             OrderItem item = new OrderItem() { Name = "Ruler", Order = order, Quantity = 3 };
 
-            int a = db.Insert(item);      
-
-            db.Close();
-
+            int a = respo.Store(item);      
+ 
             Assert.IsTrue(a > 0);
         }
 
         [TestMethod]
         public void TestStore4()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
+            MyRepository respo = new MyRepository();
 
-            db.Remove<OrderItem>();
-            db.Create<OrderItem>();
-                     
-            db.Close();
-
+            respo.Remove<OrderItem>();
+            respo.Create<OrderItem>();
+          
             int a = 1;
 
             Assert.IsTrue(a > 0);

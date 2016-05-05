@@ -5,11 +5,11 @@ using System.Data.SQLite;
 
 namespace System.Data.ODB.SQLite
 {
-    public class SQLiteQuery<T> : OdbQuery<T>
-        where T : IEntity
+    public class SQLiteQuery : OdbQuery        
     {      
-        public SQLiteQuery(IDbContext db) : base(db) 
-        {            
+        public SQLiteQuery(IDbContext db) 
+        {
+            this.Db = db;
         }
 
         public override IDbDataParameter Bind(string name, object b, DbType dtype)
@@ -21,7 +21,7 @@ namespace System.Data.ODB.SQLite
             return p;
         } 
          
-        public override IQuery<T> Skip(int start)
+        public override IQuery Skip(int start)
         {
             if (string.IsNullOrEmpty(this._limit))             
             {
@@ -33,7 +33,7 @@ namespace System.Data.ODB.SQLite
             return this;
         }
 
-        public override IQuery<T> Take(int count)
+        public override IQuery Take(int count)
         {               
             if (this._limit.IndexOf("OFFSET") > 0)
             {
@@ -47,11 +47,11 @@ namespace System.Data.ODB.SQLite
             return this;
         }
  
-        public override T First() 
+        public override T First<T>() 
         {
             this.Skip(0).Take(1);
 
-            IList<T> list = this.Db.Get<T>(this);
+            IList<T> list = this.Db.ExecuteList<T>(this);
 
             if (list.Count > 0)
                 return list[0];

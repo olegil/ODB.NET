@@ -22,9 +22,7 @@ namespace UnitTest
             string sql = query.ToString();
 
             List<User> list = query.ToList();
-
-            respo.Dispose();
-
+ 
             Assert.IsTrue(list.Count > 0);
         }
     }

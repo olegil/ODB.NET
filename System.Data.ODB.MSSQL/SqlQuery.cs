@@ -7,14 +7,14 @@ using System.Data.SqlClient;
 
 namespace System.Data.ODB.MSSQL
 {
-    public class SqlQuery<T> : OdbQuery<T>
-        where T : IEntity
+    public class SqlQuery : OdbQuery          
     {
         private int _skip = 0;
         private int _take = 0;
 
-        public SqlQuery(IDbContext db) : base(db)
+        public SqlQuery(IDbContext db)  
         {
+            this.Db = db;
         } 
 
         public override IDbDataParameter Bind(string name, object b, DbType dtype)
@@ -26,11 +26,11 @@ namespace System.Data.ODB.MSSQL
             return p;
         }
 
-        public override T First()
+        public override T First<T>()
         {
             this.Take(1);
             
-            IList<T> list = this.Db.Get<T>(this);
+            IList<T> list = this.Db.ExecuteList<T>(this);
 
             if (list.Count > 0)
                 return list[0];
@@ -38,7 +38,7 @@ namespace System.Data.ODB.MSSQL
             return default(T);
         }
 
-        public override IQuery<T> Skip(int start)
+        public override IQuery Skip(int start)
         { 
             if (string.IsNullOrEmpty(this._order))
             {
@@ -50,7 +50,7 @@ namespace System.Data.ODB.MSSQL
             return this;
         }
 
-        public override IQuery<T> Take(int count)
+        public override IQuery Take(int count)
         {
             this._take = count;
              

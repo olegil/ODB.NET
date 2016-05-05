@@ -12,12 +12,12 @@ namespace UnitTest
     {
         [TestMethod]
         public void TestInsertId()
-        {            
-            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
+        {
+            MyRepository db = new MyRepository();
 
             Publish pub = new Publish() { Name = "Bloger", Address = new Address() { Street = "Queen Road", Flat = "Westland" } };
 
-            int i = db.Insert(pub);
+            int i = db.Store(pub);
 
             Assert.IsTrue(i != 0);
         }

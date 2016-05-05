@@ -2,6 +2,7 @@
 using System.Data.ODB;
 using System.Data.ODB.Linq;
 using System.Data.ODB.SQLite;
+using System.Data.SQLite;
 
 namespace UnitTest
 {   
@@ -89,17 +90,14 @@ namespace UnitTest
         public decimal Price { get; set; }
     }
      
-    public class MyRepository : OdbRepository
+    public class MyRepository : OdbContainer
     {
         public QueryTable<User> Users { get; set; }
         public QueryTable<Order> Orders { get; set; }
 
-        public MyRepository()
-        {           
-            this.Db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
-            this.Db.Depth = 3;
-
-            SQLiteProvider provider = new SQLiteProvider(this.Db);
+        public MyRepository() : base(new System.Data.ODB.SQLite.SQLiteContext(new SQLiteConnection(string.Format(Command.SqliteconnStr, "test1.db3")), 3))
+        {         
+            SQLiteProvider provider = new SQLiteProvider(this.DbConext);
 
             this.Users = provider.Create<User>();
             this.Orders = provider.Create<Order>();

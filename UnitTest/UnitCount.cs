@@ -14,16 +14,14 @@ namespace UnitTest
         [TestMethod]
         public void TestCount()
         {
-            SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
+            MyRepository respo = new MyRepository();
 
             User user = new User() { BID = 2345F, Name = "Chan Peter" };
 
-            db.Insert(user);
+            respo.Store(user);
 
-            int n = db.Count<User>(); 
- 
-            db.Close();
-
+            int n = 0; // respo.Count<User>(); 
+  
             Assert.IsTrue(n > 0);
 
         }

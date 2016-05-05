@@ -4,49 +4,45 @@ using System.Reflection;
 
 namespace System.Data.ODB
 {
-    public abstract class OdbQuery<T> : IQuery<T>
-        where T : IEntity
+    public abstract class OdbQuery : IQuery        
     {
         protected StringBuilder _sb;
 
-        public IDbContext Db { get; private set; }
+        public IDbContext Db { get; set; }
 
         public List<IDbDataParameter> Parameters { get; set; }
 
-        public string Table { get; set; }
-        public string Alias { get; set; }
-              
+        private string _alias;
+
         protected string _limit;
         protected string _order;
          
-        public OdbQuery(IDbContext db)
-        {
-            this.Db = db;
-
+        public OdbQuery( )
+        { 
             this._sb = new StringBuilder();
              
             this.Parameters = new List<IDbDataParameter>();
-
-            this.Table = OdbMapping.GetTableName(typeof(T));
- 
+  
             this._limit = "";
             this._order = "";
         }             
 
-        public virtual IQuery<T> Select(string[] cols)
+        public virtual IQuery Select(string[] cols)
         {
             this._sb.Append("SELECT ");
             this._sb.Append(string.Join(",", cols));
 
             return this;
-        }
+        }               
 
-        public virtual IQuery<T> From()
+        public virtual IQuery From<T>() where T : IEntity 
         {
-            return From(this.Table);
+            string table = OdbMapping.GetTableName(typeof(T));
+
+            return From(table);
         }
 
-        public virtual IQuery<T> From(string table, string alias = "")
+        public virtual IQuery From(string table, string alias = "")
         {
             this._sb.Append(" FROM ");
 
@@ -54,7 +50,7 @@ namespace System.Data.ODB
 
             if (!string.IsNullOrEmpty(alias))
             {
-                this.Alias = alias;
+                this._alias = alias;
 
                 return this.As(alias);
             }
@@ -62,11 +58,13 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery<T> Insert(string[] cols)
+        public virtual IQuery Insert<T>(string[] cols) where T : IEntity
         {
             this._sb.Append("INSERT INTO ");
 
-            this._sb.Append(Enclosed(this.Table));
+            string table = OdbMapping.GetTableName(typeof(T));
+
+            this._sb.Append(Enclosed(table));
 
             this._sb.Append(" (");    
             this._sb.Append(string.Join(", ", cols));
@@ -75,7 +73,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery<T> Values(string[] cols)
+        public virtual IQuery Values(string[] cols)
         {
             this._sb.Append(" VALUES (");
             this._sb.Append(string.Join(", ", cols));
@@ -84,15 +82,18 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery<T> Update()
+        public virtual IQuery Update<T>() where T : IEntity
         {
             this._sb.Append("UPDATE ");
-            this._sb.Append(Enclosed(this.Table));
+
+            string table = OdbMapping.GetTableName(typeof(T));
+
+            this._sb.Append(Enclosed(table));
 
             return this;
         }
 
-        public virtual IQuery<T> Set(string[] cols)
+        public virtual IQuery Set(string[] cols)
         {
             this._sb.Append(" SET ");
             this._sb.Append(string.Join(", ", cols));
@@ -100,14 +101,14 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery<T> Delete()
+        public virtual IQuery Delete()
         {
             this._sb.Append("DELETE");
 
-            return this.From();
+            return this;
         }
           
-        public virtual IQuery<T> Where(string str)
+        public virtual IQuery Where(string str)
         {
             this._sb.Append(" WHERE ");
             this._sb.Append(this.AddAlias(str));
@@ -115,7 +116,7 @@ namespace System.Data.ODB
             return this;
         }
                 
-        public virtual IQuery<T> And(string str)
+        public virtual IQuery And(string str)
         {
             this._sb.Append(" AND ");
             this._sb.Append(this.AddAlias(str)); 
@@ -123,7 +124,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery<T> Or(string str)
+        public virtual IQuery Or(string str)
         {
             this._sb.Append(" OR ");
             this._sb.Append(this.AddAlias(str));  
@@ -131,7 +132,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery<T> Equal(string str)
+        public virtual IQuery Equal(string str)
         {
             this._sb.Append(" = ");
             this._sb.Append(str);
@@ -139,7 +140,7 @@ namespace System.Data.ODB
             return this;
         } 
 
-        public virtual IQuery<T> Eq(object val)
+        public virtual IQuery Eq(object val)
         {
             this._sb.Append(" = ");
             this._sb.Append(this.Add(val));
@@ -147,7 +148,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery<T> NotEq(object val)
+        public virtual IQuery NotEq(object val)
         {
             this._sb.Append(" <> ");
             this._sb.Append(this.Add(val));
@@ -155,7 +156,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery<T> Gt(object val)
+        public virtual IQuery Gt(object val)
         {
             this._sb.Append(" > ");
             this._sb.Append(this.Add(val));
@@ -163,7 +164,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery<T> Lt(object val)
+        public virtual IQuery Lt(object val)
         {
             this._sb.Append(" < ");
             this._sb.Append(this.Add(val));
@@ -171,7 +172,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery<T> Gte(object val)
+        public virtual IQuery Gte(object val)
         {
             this._sb.Append(" >= ");
             this._sb.Append(this.Add(val));
@@ -179,7 +180,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery<T> Lte(object val)
+        public virtual IQuery Lte(object val)
         {
             this._sb.Append(" <= ");
             this._sb.Append(this.Add(val));
@@ -187,7 +188,7 @@ namespace System.Data.ODB
             return this;
         } 
 
-        public virtual IQuery<T> Like(string str)
+        public virtual IQuery Like(string str)
         {
             this._sb.Append(" LIKE ");
             this._sb.Append(this.Add("%" + str + "%"));
@@ -195,35 +196,35 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery<T> OrderBy(string str)
+        public virtual IQuery OrderBy(string str)
         {
             this._order = this.AddAlias(str);
            
             return this;
         }
 
-        public virtual IQuery<T> SortAsc()
+        public virtual IQuery SortAsc()
         {
             this._order += " ASC";
 
             return this;
         }
 
-        public virtual IQuery<T> SortDesc()
+        public virtual IQuery SortDesc()
         {
             this._order += " DESC";
       
             return this;
         }
 
-        public virtual IQuery<T> Join<T1>() where T1 : IEntity
+        public virtual IQuery Join<T1>() where T1 : IEntity
         {
             Type type = typeof(T1);
 
             return this.Join(OdbMapping.GetTableName(type));
         }
 
-        public virtual IQuery<T> Join(string table)
+        public virtual IQuery Join(string table)
         {
             this._sb.Append(" JOIN ");
             this._sb.Append(Enclosed(table));
@@ -231,21 +232,21 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery<T> LeftJoin<T1>() where T1 : IEntity
+        public virtual IQuery LeftJoin<T1>() where T1 : IEntity
         {
             Type type = typeof(T1);
 
             return this.LeftJoin(OdbMapping.GetTableName(type));
         }
 
-        public virtual IQuery<T> LeftJoin(string table)
+        public virtual IQuery LeftJoin(string table)
         {
             this._sb.Append(" LEFT");
 
             return this.Join(table);
         }
 
-        public virtual IQuery<T> As(string str)
+        public virtual IQuery As(string str)
         {
             this._sb.Append(" AS ");
             this._sb.Append(Enclosed(str));
@@ -253,7 +254,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery<T> On(string str)
+        public virtual IQuery On(string str)
         {
             this._sb.Append(" ON ");
             this._sb.Append(str);
@@ -261,23 +262,23 @@ namespace System.Data.ODB
             return this;
         }
 
-        public IQuery<T> Not()
+        public IQuery Not()
         {
             this._sb.Append(" NOT ");
 
             return this;
         }
 
-        public virtual IQuery<T> Count(string str)  
+        public virtual IQuery Count(string str)  
         {
             string[] cols = { " COUNT(" + str + ")" };
 
             return this.Select(cols); 
         }
 
-        public abstract IQuery<T> Skip(int start);
+        public abstract IQuery Skip(int start);
 
-        public abstract IQuery<T> Take(int count);
+        public abstract IQuery Take(int count);
          
         public virtual string Add(object b)
         {
@@ -294,13 +295,13 @@ namespace System.Data.ODB
 
         public virtual string AddAlias(string str)
         {
-            if (!string.IsNullOrEmpty(this.Alias))
+            if (!string.IsNullOrEmpty(this._alias))
             {
-                return Enclosed(this.Alias) + "." + Enclosed(str);
+                return Enclosed(this._alias) + "." + Enclosed(str);
             }
  
             return Enclosed(str);
-        }
+        } 
 
         public IQuery Append(string str)
         {
@@ -309,23 +310,18 @@ namespace System.Data.ODB
             return this;
         }
   
-        public abstract T First();        
+        public abstract T First<T>() where T : IEntity;        
 
         public DataSet Result()
         {
             return this.Db.ExecuteDataSet(this._sb.ToString(), this.Parameters.ToArray());
         }
  
-        public List<T> ToList()
+        public List<T> ToList<T>() where T : IEntity
         {
-            return this.Db.Get<T>(this) as List<T>;
+            return this.Db.ExecuteList<T>(this) as List<T>;
         }       
-          
-        public T1 Single<T1>()
-        {
-            return this.Db.ExecuteScalar<T1>(this._sb.ToString(), this.Parameters.ToArray());
-        }
-
+        
         private string Enclosed(string str)
         {
             if (str.IndexOf('[') == -1)
@@ -334,29 +330,7 @@ namespace System.Data.ODB
             }
 
             return str;
-        }
-
-        private void set()
-        {
-            Type type = typeof(T);
-
-            OdbDiagram dg = new OdbDiagram(this.Db.Depth);
-
-            dg.Analyze(type);
-
-            OdbTable table = dg.Table[0];
-
-            this.Select(dg.Colums).From(table.Name, table.Alias);
-
-            int i = 1;
-
-            foreach (KeyValuePair<string, string> tc in dg.ForigeKey)
-            {
-                OdbTable tab = dg.Table[i++];
-
-                this.LeftJoin(tab.Name).As(tab.Alias).On(tc.Key).Equal(tc.Value);
-            }
-        }
+        }        
 
         public void Reset()
         {
@@ -370,6 +344,6 @@ namespace System.Data.ODB
         public int Execute()
         {
             return this.Db.ExecuteNonQuery(this._sb.ToString(), this.Parameters.ToArray());
-        }
+        } 
     }
 }

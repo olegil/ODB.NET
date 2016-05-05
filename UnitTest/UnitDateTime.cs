@@ -4,6 +4,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System.Data.ODB;
 using System.Data.ODB.Linq;
+using System.Data.ODB.SQLite;
+using System.Data.SQLite;
 
 namespace UnitTest
 {
@@ -12,7 +14,7 @@ namespace UnitTest
     {
         [TestMethod]
         public void TestDateTime()
-        {
+        { 
             MyRepository respo = new MyRepository();
 
             DateTime dt = DateTime.Parse("2016-01-10");
@@ -22,9 +24,7 @@ namespace UnitTest
                         select u;
 
             List<User> list = query.ToList();
-
-            respo.Dispose();
-
+ 
             Assert.IsTrue(list.Count > 0);
         }
     }

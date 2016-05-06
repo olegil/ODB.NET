@@ -9,15 +9,17 @@ namespace System.Data.ODB
 {
     public abstract class OdbContext : IDbContext, IDisposable
     {
-        protected IDbConnection Connection { get; set; }
-        protected IDbTransaction Transaction { get; set; }
+        public IDbConnection Connection { get; set; }
+        public IDbTransaction Transaction { get; set; }
  
         public int Depth { get; set; }
 
-        private bool _inTrans;
-
         private bool disposed = false;
         
+        public OdbContext(IDbConnection Connection) : this(Connection, 1)
+        {             
+        }
+
         public OdbContext(IDbConnection Connection, int depth)
         {
             this.Connection = Connection;
@@ -55,12 +57,10 @@ namespace System.Data.ODB
             if (this.Connection != null)
             {
                 if (this.Connection.State == ConnectionState.Open)
-                    this.Connection.Close();
-
-                this.Connection = null;
+                    this.Connection.Close();                               
             }
         }
-
+        
         #region Transaction
 
         public void StartTrans()
@@ -68,22 +68,18 @@ namespace System.Data.ODB
             if (this.Connection.State != ConnectionState.Open)
                 this.Connection.Open();
 
-            this.Transaction = this.Connection.BeginTransaction();
-
-            this._inTrans = true;
+            this.Transaction = this.Connection.BeginTransaction(); 
         }
 
         public void CommitTrans()
         {
             try
             {
-                this.Transaction.Commit();
-
-                this._inTrans = false;
+                this.Transaction.Commit();       
             }
             catch
             {
-                throw;
+                throw new OdbException("Transaction commit fail.");
             }
         }
 
@@ -92,12 +88,10 @@ namespace System.Data.ODB
             try
             {
                 this.Transaction.Rollback();
-
-                this._inTrans = false;
             }
             catch
             {
-                throw;
+                throw new OdbException("Transaction commit fail."); 
             }
         }
 
@@ -105,6 +99,10 @@ namespace System.Data.ODB
               
         public abstract IQuery Query();
 
+        /// <summary>
+        /// Create Table
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
         public virtual void ExecuteCreate<T>() where T : IEntity
         {
             this.Create(typeof(T));
@@ -131,6 +129,10 @@ namespace System.Data.ODB
             this.Create(table, cols.ToArray());
         } 
     
+        /// <summary>
+        /// Drop Table
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
         public virtual void ExecuteDrop<T>() where T : IEntity
         { 
             this.Drop(typeof(T));
@@ -154,8 +156,11 @@ namespace System.Data.ODB
         }
 
         /// <summary>
-        /// Get query result
-        /// </summary>    
+        /// Get result list
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="q"></param>
+        /// <returns></returns>
         public virtual IList<T> ExecuteList<T>(IQuery q) where T : IEntity
         {
             using (IDataReader rdr = this.ExecuteReader(q.ToString(), q.Parameters.ToArray()))
@@ -173,111 +178,32 @@ namespace System.Data.ODB
                 return list;
             }
         }
+
+        public void ExecutePersist<T>(T t) where T : IEntity
+        { 
+            OdbWriter wr = new OdbWriter(this);
+
+            wr.Write(t);                
+        }
  
         /// <summary>
-        /// Persistence object
+        /// Delete object
         /// </summary>
-        public virtual int ExecutePersist<T>(T t) where T : IEntity
-        {  
-            Type type = t.GetType();
-
-            IQuery query = this.Query();
-
-            int n = 0;
-
-            List<string> cols = new List<string>();
-            List<string> ps = new List<string>();
-
-            OdbColumn ColPk = null;
-             
-            //begin foreach
-            foreach (OdbColumn col in OdbMapping.GetColumn(type))
-            {
-                ColumnAttribute attr = col.Attribute;
-
-                if (!attr.IsAuto)
-                {
-                    object b = col.GetValue(t);
-
-                    if (!attr.IsForeignkey)
-                    {
-                        if (b == null)                           
-                            b = DBNull.Value;
-                    }
-                    else
-                    { 
-                        if (this.Depth > 1 )
-                        {
-                            if (b != null)
-                            {
-                                IEntity entry = b as IEntity;
-
-                                this.Depth--;
-
-                                //return id
-                                b = this.ExecutePersist(entry);
-
-                                this.Depth++;
-                            }                     
-                        }
-                    }
-
-                    string name = "@p" + n;
-
-                    IDbDataParameter p = this.CreateParameter();
-
-                    p.ParameterName = name;
-                    p.Value = b;
-                    p.DbType = col.GetDbType();
-
-                    query.Parameters.Add(p);
-
-                    ps.Add(name);
-                    cols.Add("[" + col.Name + "]");
-
-                    n++;
-                }
-
-                if (attr.IsPrimaryKey)
-                {
-                    ColPk = col;
-                }
-            }
-            //end
-
-            if (ColPk == null)
-            {
-                throw new OdbException("No Key.");
-            }
-            
-            if (t.IsPersisted)
-            {
-                for(int i = 0; i< cols.Count; i++)
-                {
-                    cols[i] = cols[i] + "=" + ps[i];
-                } 
-            
-                query.Update<T>().Set(cols.ToArray()).Where(ColPk.Name).Eq(ColPk.GetValue(t));
-
-                this.ExecuteNonQuery(query.ToString(), query.Parameters.ToArray());
-
-                return (int)t.Id; 
-            }
-            else
-            {
-                query.Insert<T>(cols.ToArray()).Values(ps.ToArray());
-
-                return this.ExecuteInsertId(query);
-            } 
+        /// <typeparam name="T"></typeparam>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public int ExecuteDelete<T>(T t) where T : IEntity
+        {
+            return this.Query().Delete<T>().Where("Id").Eq(t.Id).Execute();
         }
-
-        public abstract int ExecuteInsertId(IQuery q);
         
         public abstract IDbDataParameter CreateParameter();
 
         public abstract string TypeMapping(DbType dtype);
 
         public abstract string SqlDefine(OdbColumn col);
+
+        #region Data access
 
         protected static IDbCommand SetCommand(IDbConnection conn, IDbTransaction trans, string cmdText, IDbDataParameter[] cmdParms)
         {
@@ -359,6 +285,8 @@ namespace System.Data.ODB
             cmd.Dispose();
 
             return n;
-        } 
+        }
+         
+        #endregion
     }
 }

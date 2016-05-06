@@ -102,5 +102,15 @@ namespace UnitTest
             this.Users = provider.Create<User>();
             this.Orders = provider.Create<Order>();
         }
+
+        public void Clear<T>() where T : IEntity
+        {
+            this.DbConext.Query().Delete<T>().Execute();
+        }
+
+        public IQuery Collect<T>() where T : IEntity
+        {
+            return this.DbConext.Query().Select<T>();
+        }
     }
 }

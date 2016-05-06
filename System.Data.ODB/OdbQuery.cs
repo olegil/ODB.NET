@@ -8,7 +8,7 @@ namespace System.Data.ODB
     {
         protected StringBuilder _sb;
 
-        public IDbContext Db { get; set; }
+        protected IDbContext Db;
 
         public List<IDbDataParameter> Parameters { get; set; }
 
@@ -35,11 +35,35 @@ namespace System.Data.ODB
             return this;
         }               
 
+        public virtual IQuery Select<T>() where T: IEntity
+        {
+            OdbDiagram dg = new OdbDiagram(this.Db.Depth);
+
+            Type type = typeof(T);
+
+            dg.Analyze(type);
+
+            OdbTable table = dg.Table[0];
+             
+            this.Select(dg.Colums).From(table.Name, table.Alias);
+
+            int i = 1;
+
+            foreach (KeyValuePair<string, string> tc in dg.ForigeKey)
+            {
+                OdbTable tab = dg.Table[i++];
+
+                this.LeftJoin(tab.Name).As(tab.Alias).On(tc.Key).Equal(tc.Value);
+            }
+
+            return this;
+        }
+
         public virtual IQuery From<T>() where T : IEntity 
         {
             string table = OdbMapping.GetTableName(typeof(T));
 
-            return From(table);
+            return this.From(table);
         }
 
         public virtual IQuery From(string table, string alias = "")
@@ -101,11 +125,11 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery Delete()
+        public virtual IQuery Delete<T>() where T : IEntity
         {
             this._sb.Append("DELETE");
 
-            return this;
+            return this.From<T>();
         }
           
         public virtual IQuery Where(string str)
@@ -322,7 +346,7 @@ namespace System.Data.ODB
             return this.Db.ExecuteList<T>(this) as List<T>;
         }       
         
-        private string Enclosed(string str)
+        protected string Enclosed(string str)
         {
             if (str.IndexOf('[') == -1)
             {
@@ -343,7 +367,9 @@ namespace System.Data.ODB
 
         public int Execute()
         {
-            return this.Db.ExecuteNonQuery(this._sb.ToString(), this.Parameters.ToArray());
-        } 
+            return this.Db.ExecuteNonQuery(this.ToString(), this.Parameters.ToArray());
+        }
+
+        public abstract int ExecuteReturnId();        
     }
 }

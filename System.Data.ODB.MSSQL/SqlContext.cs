@@ -24,16 +24,7 @@ namespace System.Data.ODB.MSSQL
             this.ExecuteNonQuery(string.Format(sql, table, table));
         }
 
-        public override int ExecuteInsertId(IQuery query)
-        {
-            string sql = query.ToString();
-
-            int i = sql.IndexOf("VALUES") - 1;
-
-            sql = sql.Insert(i, " OUTPUT INSERTED.Id ");
-
-            return (int)this.ExecuteScalar<long>(sql, query.Parameters.ToArray());
-        }
+      
 
         public override DataSet ExecuteDataSet(string sql, params IDbDataParameter[] commandParameters)
         {

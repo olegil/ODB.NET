@@ -31,14 +31,7 @@ namespace System.Data.ODB.SQLite
         {
             this.ExecuteNonQuery("DROP TABLE IF EXISTS [" + table + "]");
         }
-
-        public override int ExecuteInsertId(IQuery query)
-        {
-            this.ExecuteNonQuery(query.ToString(), query.Parameters.ToArray());
-
-            return (int)(this.Connection as SQLiteConnection).LastInsertRowId; 
-        }
-
+ 
         public override DataSet ExecuteDataSet(string sql, params IDbDataParameter[] commandParameters)
         {          
            IDbCommand cmd = SetCommand(this.Connection, this.Transaction, sql, commandParameters);

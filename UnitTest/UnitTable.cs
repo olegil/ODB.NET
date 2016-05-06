@@ -24,9 +24,9 @@ namespace UnitTest
 
             Order order = new Order() { PackageID = "3452347-57452357", User = new User() { Name = "Peter", BID = 2445.235d, IsPermit = false, Birthday = DateTime.Now }, Date = DateTime.Now };
 
-            int a = respo.Store(order);
+            respo.Store(order);
  
-            Assert.IsTrue( a > 0);
+            Assert.IsTrue(order.Id > 0);
         }
 
         [TestMethod]

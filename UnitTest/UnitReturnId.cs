@@ -17,9 +17,9 @@ namespace UnitTest
 
             Publish pub = new Publish() { Name = "Bloger", Address = new Address() { Street = "Queen Road", Flat = "Westland" } };
 
-            int i = db.Store(pub);
+            db.Store(pub);
 
-            Assert.IsTrue(i != 0);
+            Assert.IsTrue(pub.Id > 0);
         }
     }
 }

@@ -15,7 +15,23 @@ namespace System.Data.ODB.MSSQL
         public SqlQuery(IDbContext db)  
         {
             this.Db = db;
-        } 
+        }
+
+        public override IQuery Insert<T>(string[] cols)
+        {
+            string table = OdbMapping.GetTableName(typeof(T));
+
+            this._sb.Append("INSERT INTO ");
+            this._sb.Append(Enclosed(table));
+
+            this._sb.Append(" (");
+            this._sb.Append(string.Join(", ", cols));
+            this._sb.Append(")");
+
+            this._sb.Append(" OUTPUT INSERTED.Id ");
+
+            return this;
+        }
 
         public override IDbDataParameter Bind(string name, object b, DbType dtype)
         {
@@ -77,6 +93,11 @@ namespace System.Data.ODB.MSSQL
             }
 
             return this._sb.ToString(); 
+        }
+
+        public override int ExecuteReturnId()
+        { 
+            return (int)this.Db.ExecuteScalar<long>(this.ToString(), this.Parameters.ToArray());
         }
     }
 }

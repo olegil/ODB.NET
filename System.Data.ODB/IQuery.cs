@@ -8,7 +8,8 @@ namespace System.Data.ODB
         IQuery Insert<T>(string[] cols) where T : IEntity;
         IQuery Values(string[] cols);             
         IQuery Update<T>() where T : IEntity;
-        IQuery Delete();
+        IQuery Delete<T>() where T : IEntity;
+        IQuery Select<T>() where T : IEntity;
         IQuery Select(string[] cols);
         IQuery From<T>() where T : IEntity;
         IQuery From(string table, string alias = "");
@@ -45,7 +46,7 @@ namespace System.Data.ODB
         T First<T>() where T : IEntity;
         List<T> ToList<T>() where T : IEntity;
         int Execute();
-
+        int ExecuteReturnId();       
         void Reset();
 
         string ToString();

@@ -27,9 +27,9 @@ namespace UnitTest
                 User = user
             };      
 
-            int a = respo.Store(user);             
+            respo.Store(user);             
               
-            Assert.IsTrue(a > 0);
+            Assert.IsTrue(user.Id > 0);
         }
 
         [TestMethod]
@@ -62,9 +62,9 @@ namespace UnitTest
 
             OrderItem item = new OrderItem() { Name = "Ruler", Order = order, Quantity = 3 };
 
-            int a = respo.Store(item);      
+            respo.Store(item);      
  
-            Assert.IsTrue(a > 0);
+            Assert.IsTrue(item.Id > 0);
         }
 
         [TestMethod]

@@ -17,9 +17,9 @@ namespace UnitTest
            
             User user = new User() { Name = "Stephen", BID = 123F };
                     
-            int a = db.Store(user);
+            db.Store(user);
   
-            Assert.IsTrue(a > 0);
+            Assert.IsTrue(user.Id > 0);
         }
 
         [TestMethod]
@@ -28,17 +28,15 @@ namespace UnitTest
             MyRepository db = new MyRepository();
 
             User user = db.Collect<User>().First<User>();
-
-            int ret = 0;
-
+ 
             if (user != null)
             {
                 user.Birthday = DateTime.Now;
 
-                ret = db.Store(user);
+                db.Store(user);
             }
  
-            Assert.IsTrue(ret != 0);
+            Assert.IsTrue(user.Id > 0);
         }
 
         [TestMethod]
@@ -48,16 +46,11 @@ namespace UnitTest
 
             User user = respo.Collect<User>().First<User>();
 
-            IQuery q = respo.Collect<User>().Delete().Where("").Eq(1);
-
             int a = 0;
 
             if (user != null)
             {
-               
-
-                q.Execute();
-
+                
                 a = respo.Delete(user);
             }
  

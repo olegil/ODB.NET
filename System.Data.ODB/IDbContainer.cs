@@ -9,12 +9,8 @@ namespace System.Data.ODB
 
         void Remove<T>() where T : IEntity;
 
-        int Store<T>(T t) where T : IEntity;
+        void Store<T>(T t) where T : IEntity;
 
         int Delete<T>(T t) where T : IEntity;
-                       
-        IList<T> Get<T>() where T : IEntity;
-
-        IQuery Collect<T>() where T : IEntity;      
     }
 }

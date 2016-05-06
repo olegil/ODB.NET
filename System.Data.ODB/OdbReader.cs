@@ -47,7 +47,7 @@ namespace System.Data.ODB
 
             while (this.sr.Read())
             {
-                object b = this.getEntry(type, 0);               
+                object b = this.getEntity(type, 0);               
                 
                 yield return (T)b;
             }
@@ -55,7 +55,7 @@ namespace System.Data.ODB
             this.Dispose();          
         }
 
-        private object getEntry(Type type, int index)
+        private object getEntity(Type type, int index)
         { 
             object instance = Activator.CreateInstance(type);  
 
@@ -82,7 +82,7 @@ namespace System.Data.ODB
 
                             int next = index + 1;
 
-                            object b = this.getEntry(pi.PropertyType, next);
+                            object b = this.getEntity(pi.PropertyType, next);
 
                             this.Level++;
  

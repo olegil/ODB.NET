@@ -75,5 +75,12 @@ namespace System.Data.ODB.SQLite
 
             return sql;
         }
+
+        public override int ExecuteReturnId()
+        {
+            this.Execute();
+
+            return (int)(this.Db.Connection as SQLiteConnection).LastInsertRowId;
+        }
     }
 }

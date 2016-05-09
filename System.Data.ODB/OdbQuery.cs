@@ -16,6 +16,8 @@ namespace System.Data.ODB
 
         protected string _limit;
         protected string _order;
+
+        public OdbDiagram Diagram { get; set; }
          
         public OdbQuery( )
         { 
@@ -33,31 +35,7 @@ namespace System.Data.ODB
             this._sb.Append(string.Join(",", cols));
 
             return this;
-        }               
-
-        public virtual IQuery Select<T>() where T: IEntity
-        {
-            OdbDiagram dg = new OdbDiagram(this.Db.Depth);
-
-            Type type = typeof(T);
-
-            dg.Analyze(type);
-
-            OdbTable table = dg.Table[0];
-             
-            this.Select(dg.Colums).From(table.Name, table.Alias);
-
-            int i = 1;
-
-            foreach (KeyValuePair<string, string> tc in dg.ForigeKey)
-            {
-                OdbTable tab = dg.Table[i++];
-
-                this.LeftJoin(tab.Name).As(tab.Alias).On(tc.Key).Equal(tc.Value);
-            }
-
-            return this;
-        }
+        }    
 
         public virtual IQuery From<T>() where T : IEntity 
         {
@@ -82,12 +60,9 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery Insert<T>(string[] cols) where T : IEntity
+        public virtual IQuery Insert(string table, string[] cols) 
         {
-            this._sb.Append("INSERT INTO ");
-
-            string table = OdbMapping.GetTableName(typeof(T));
-
+            this._sb.Append("INSERT INTO "); 
             this._sb.Append(Enclosed(table));
 
             this._sb.Append(" (");    
@@ -106,11 +81,9 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery Update<T>() where T : IEntity
+        public virtual IQuery Update(string table)
         {
-            this._sb.Append("UPDATE ");
-
-            string table = OdbMapping.GetTableName(typeof(T));
+            this._sb.Append("UPDATE "); 
 
             this._sb.Append(Enclosed(table));
 
@@ -293,7 +266,7 @@ namespace System.Data.ODB
             return this;
         }
 
-        public virtual IQuery Count(string str)  
+        public virtual IQuery Count(string str)
         {
             string[] cols = { " COUNT(" + str + ")" };
 
@@ -338,7 +311,7 @@ namespace System.Data.ODB
 
         public DataSet Result()
         {
-            return this.Db.ExecuteDataSet(this._sb.ToString(), this.Parameters.ToArray());
+            return this.Db.ExecuteDataSet(this.ToString(), this.Parameters.ToArray());
         }
  
         public List<T> ToList<T>() where T : IEntity
@@ -354,22 +327,15 @@ namespace System.Data.ODB
             }
 
             return str;
-        }        
-
-        public void Reset()
-        {
-            this._sb.Length = 0;
-            this.Parameters.Clear();
-            
-            this._order = "";
-            this._limit = "";
         }
 
-        public int Execute()
+        public abstract int Single();
+       
+        public virtual int Execute()
         {
             return this.Db.ExecuteNonQuery(this.ToString(), this.Parameters.ToArray());
         }
 
-        public abstract int ExecuteReturnId();        
+        public abstract long ExecuteReturnId();
     }
 }

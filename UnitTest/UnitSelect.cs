@@ -15,10 +15,8 @@ namespace UnitTest
         public void TestSelect()
         {
             MyRepository respo = new MyRepository();
-
-            IQuery q = respo.Collect<Order>();
-
-            List<Order> list = q.ToList<Order>();
+ 
+            List<Order> list = respo.Collect<Order>().ToList<Order>();
   
             Assert.IsTrue(list.Count > 0);
         }
@@ -28,15 +26,15 @@ namespace UnitTest
         {
             MyRepository db = new MyRepository();
 
-            User user = new User() { Name = "Peter", BID = 345f, Birthday = DateTime.Now };
+            User user = new User() { Name = "Peter", Balance = 345f, Birthday = DateTime.Now };
 
             db.Store(user);
 
             IQuery q = db.Collect<User>().Where("Name").Eq("Peter");
             
-            User user2 = q.First<User>();
+            List<User> users = q.ToList<User>();
  
-            Assert.IsNotNull(user);
+            Assert.IsTrue(users.Count > 0);
         }
 
         [TestMethod]
@@ -51,12 +49,10 @@ namespace UnitTest
 
         [TestMethod]
         public void TestLike()
-        {
-            //SQLiteContext db = new SQLiteContext(string.Format(Command.SqliteconnStr, Command.Dbname));
-
+        { 
             MyRepository respo = new MyRepository();
 
-            IQuery q = respo.Collect<User>().Where("Name").Like("hen");
+            IQuery q = respo.Collect<User>().Where("Name").Like("Peter");
 
             List<User> list = q.ToList<User>();
              

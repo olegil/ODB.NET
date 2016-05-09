@@ -15,30 +15,28 @@ namespace UnitTest
     public class UnitTable
     {
         [TestMethod]
-        public void TestTable()
+        public void TestCreate()
         {
             MyRepository respo = new MyRepository();
-             
-            respo.Remove<Order>();
-            respo.Create<Order>();
-
-            Order order = new Order() { PackageID = "3452347-57452357", User = new User() { Name = "Peter", BID = 2445.235d, IsPermit = false, Birthday = DateTime.Now }, Date = DateTime.Now };
-
-            respo.Store(order);
- 
-            Assert.IsTrue(order.Id > 0);
+                       
+            respo.Create<OrderItem>();
+        
+            int a = 1;
+            Assert.IsTrue(a == 1);        
         }
 
         [TestMethod]
-        public void TestClear()
+        public void TestRemove()
         {
             MyRepository respo = new MyRepository();
 
-            respo.Clear<Order>();
+            respo.Remove<OrderItem>();
+            respo.Remove<Order>();
+            respo.Remove<User>();
+            respo.Remove<Address>();
 
-            int a = 0;
-
-            Assert.IsTrue(a > 0);
+            int a = 1;
+            Assert.IsTrue(a == 1);
         }
     }
 }

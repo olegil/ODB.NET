@@ -15,11 +15,11 @@ namespace UnitTest
         {
             MyRepository db = new MyRepository();
 
-            Publish pub = new Publish() { Name = "Bloger", Address = new Address() { Street = "Queen Road", Flat = "Westland" } };
+            User user = new User() { Name = "Peter", Balance = 234.564d };
 
-            db.Store(pub);
+            db.Store(user);
 
-            Assert.IsTrue(pub.Id > 0);
+            Assert.IsTrue(user.Id > 0);
         }
     }
 }

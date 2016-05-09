@@ -31,5 +31,10 @@ namespace System.Data.ODB
         {
             return this.Property.GetValue(t, null);
         }
+
+        public void Set(IEntity t, object b)
+        {
+            this.Property.SetValue(t, b, null);
+        }
     }
 }

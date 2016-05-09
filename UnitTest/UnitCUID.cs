@@ -15,7 +15,7 @@ namespace UnitTest
 
             db.Clear<User>();
            
-            User user = new User() { Name = "Stephen", BID = 123F };
+            User user = new User() { Name = "Stephen", Balance = 123F };
                     
             db.Store(user);
   
@@ -55,6 +55,16 @@ namespace UnitTest
             }
  
             Assert.IsTrue(a > 0);
+        }
+
+        [TestMethod]
+        public void TestDelete2()
+        {
+            MyRepository respo = new MyRepository();
+
+            bool ret = respo.Clear<User>();          
+
+            Assert.IsTrue(ret);
         }
     }
 }

@@ -7,9 +7,7 @@ using System.Data.ODB.Linq;
 namespace System.Data.ODB.SQLite
 {
     public class SQLiteVisitor : OdbVisitor, IOdbVisitor
-    {   
-        public int Level { get; set; }
-   
+    {  
         private List<IDbDataParameter> _parmas;
         private string _limit = "";       
         private int _index = 0;
@@ -17,9 +15,7 @@ namespace System.Data.ODB.SQLite
         public SQLiteVisitor(Expression expression) : base()
         {
             this._expression = expression;                       
-            this._parmas = new List<IDbDataParameter>();
-
-            this.Level = 1;
+            this._parmas = new List<IDbDataParameter>(); 
         }
          
         protected override Expression VisitMethodCall(MethodCallExpression m)
@@ -221,10 +217,7 @@ namespace System.Data.ODB.SQLite
             IQueryable q = c.Value as IQueryable;
 
             if (q != null)
-            {
-                this.Diagram = new OdbDiagram(this.Level);
-                this.Diagram.Analyze(q.ElementType);
-
+            { 
                 OdbTable table = this.Diagram.Table[0]; 
 
                 this.SqlBuilder.Append(" FROM ");

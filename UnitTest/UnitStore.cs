@@ -10,43 +10,38 @@ namespace UnitTest
 {
     [TestClass]
     public class UnitStore
-    {
+    { 
         [TestMethod]
-        public void TestStore()
+        public void TestStore1()
         {
-            MyRepository respo = new MyRepository();
-                     
-            Publish pub = new Publish() { Name = "Bloger", Address = new Address() { Flat = "64", Street = "ABC", City = "Hong Kong" } };
-            User user = new User() { Name = "Peter", BID = 235f, Birthday = DateTime.Now };
+            MyRepository db = new MyRepository();
 
-            Book book = new Book()
-            {
-                ISBN = "JTSEWAGEASg-3457242",
-                Release = DateTime.Now,
-                Publish = pub,
-                User = user
-            };      
+            User user = new User() { Balance = 200.00d, Age = 26, Birthday = DateTime.Now, Name = "Stephen Ieong", IsPermit = true };
 
-            respo.Store(user);             
-              
-            Assert.IsTrue(user.Id > 0);
+            Product p = new Product() { BID = "4523462347", Name = "Pencil", Price = 5.00d };
+
+            db.Store(user);
+            db.Store(p);
+
+            Assert.IsNotNull(user);
         }
 
         [TestMethod]
         public void TestStore2()
         {
             MyRepository respo = new MyRepository();
-            //db.Create<Order>();
 
-            User user = new User() { Name = "Stephen", BID = 345346.3245d, IsPermit = true, Birthday = DateTime.Now };
-   
-            Order order = respo.Collect<Order>().First<Order>();
+            User user = respo.Collect<User>().First<User>();
 
-            order.User = user;
+            Product p = respo.Collect<Product>().Where("name").Eq("Pencil").First<Product>();
 
-            respo.Store(order);
-          
-            Assert.IsNotNull(order);
+            Order order = new Order() { PackageID = "23523145",  User = user, Date = DateTime.Now, Shipping = new Address() { City = "TKO", Street = "Po Lam", Flat = "Metro City" } };
+
+            OrderItem item = new OrderItem() { Order = order, Item = p, Quantity = 2, CreateDate = DateTime.Now };
+      
+            respo.Store(item);      
+ 
+            Assert.IsTrue(user.Id > 0);
         }
 
         [TestMethod]
@@ -54,30 +49,17 @@ namespace UnitTest
         {
             MyRepository respo = new MyRepository();
 
-            respo.Create<OrderItem>();
-            respo.Create<Order>();
-            respo.Create<User>();
+            User user = respo.Collect<Order>().First<User>();
 
-            Order order = new Order() { User = new User() { Name = "Peter", BID = 234.564d }, Date = DateTime.Now };
+            if (user != null)
+            {
+                user.Balance = 24.5d;
+                
+                respo.Store(user);
+            }
 
-            OrderItem item = new OrderItem() { Name = "Ruler", Order = order, Quantity = 3 };
-
-            respo.Store(item);      
- 
-            Assert.IsTrue(item.Id > 0);
+            Assert.IsNotNull(user);
         }
 
-        [TestMethod]
-        public void TestStore4()
-        {
-            MyRepository respo = new MyRepository();
-
-            respo.Remove<OrderItem>();
-            respo.Create<OrderItem>();
-          
-            int a = 1;
-
-            Assert.IsTrue(a > 0);
-        }
     }
 }

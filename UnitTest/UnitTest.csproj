@@ -71,6 +71,7 @@
     <Compile Include="UnitCUID.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnitTake.cs" />
+    <Compile Include="UnitClear.cs" />
     <Compile Include="UnitTransaction.cs" />
     <Compile Include="Sample.cs" />
     <Compile Include="UnitCount.cs" />

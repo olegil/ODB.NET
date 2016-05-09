@@ -15,15 +15,10 @@ namespace UnitTest
         public void TestCount()
         {
             MyRepository respo = new MyRepository();
-
-            User user = new User() { BID = 2345F, Name = "Chan Peter" };
-
-            respo.Store(user);
-
-            int n = 0; // respo.Count<User>(); 
+                      
+            int n = respo.Count<User>().Where("Name").Eq("Peter").Single(); 
   
             Assert.IsTrue(n > 0);
-
         }
     }
 }

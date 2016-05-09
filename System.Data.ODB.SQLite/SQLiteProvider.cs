@@ -23,14 +23,18 @@ namespace System.Data.ODB.SQLite
         {
             Type type = TypeSystem.GetElementType(expression.Type);
 
+            OdbDiagram dg = new OdbDiagram(this.Db.Depth);
+
+            dg.Analyze(type);
+
             SQLiteVisitor visitor = new SQLiteVisitor(expression);
-            visitor.Level = this.Db.Depth; 
+            visitor.Diagram = dg;
 
             IDataReader sr = this.Db.ExecuteReader(visitor.ToString(), visitor.GetParamters());
 
             if (DataType.OdbEntity.IsAssignableFrom(type))
             {
-                return Activator.CreateInstance(typeof(OdbReader<>).MakeGenericType(type), new object[] { sr, this.Db.Depth });
+                return Activator.CreateInstance(typeof(OdbReader<>).MakeGenericType(type), new object[] { sr, visitor.Diagram });
             }
 
             return null;            
@@ -38,8 +42,13 @@ namespace System.Data.ODB.SQLite
 
         public override string GetSQL(Expression expression)
         {
+            Type type = TypeSystem.GetElementType(expression.Type);
+
+            OdbDiagram dg = new OdbDiagram(this.Db.Depth);
+            dg.Analyze(type);
+
             SQLiteVisitor visitor = new SQLiteVisitor(expression);
-            visitor.Level = this.Db.Depth;
+            visitor.Diagram = dg;
 
             return visitor.ToString();
         } 

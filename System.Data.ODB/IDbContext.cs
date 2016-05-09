@@ -14,7 +14,9 @@ namespace System.Data.ODB
         int Depth { get; set; }
 
         IQuery Query();
-     
+
+        IQuery Select<T>() where T : IEntity;
+
         void ExecuteCreate<T>() where T : IEntity;
         void ExecuteDrop<T>() where T : IEntity;
         void ExecutePersist<T>(T t) where T : IEntity;      

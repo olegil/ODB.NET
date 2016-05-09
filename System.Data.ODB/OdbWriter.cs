@@ -16,9 +16,11 @@ namespace System.Data.ODB
             this.level = db.Depth;
         }
 
-        public int Write<T>(T t) where T : IEntity
+        public long Write<T>(T t) where T : IEntity
         {
             Type type = t.GetType();
+
+            string table = OdbMapping.GetTableName(type);
 
             IQuery query = this._db.Query();
 
@@ -48,13 +50,11 @@ namespace System.Data.ODB
                         if (this.level > 1)
                         {
                             if (b != null)
-                            {
-                                IEntity entry = b as IEntity;
-
+                            {                                 
                                 this.level--;
 
                                 //return id
-                                b = this.Write(entry);
+                                b = this.Write(b as IEntity);
 
                                 this.level++;
                             }
@@ -96,15 +96,15 @@ namespace System.Data.ODB
                     cols[i] = cols[i] + "=" + ps[i];
                 }
 
-                query.Update<T>().Set(cols.ToArray()).Where(ColPk.Name).Eq(ColPk.GetValue(t));
+                query.Update(table).Set(cols.ToArray()).Where(ColPk.Name).Eq(ColPk.GetValue(t));
 
                 query.Execute();
 
-                return (int)t.Id;
+                return t.Id;
             }
             else
             {
-                query.Insert<T>(cols.ToArray()).Values(ps.ToArray());
+                query.Insert(table, cols.ToArray()).Values(ps.ToArray());
 
                 return query.ExecuteReturnId();
             }

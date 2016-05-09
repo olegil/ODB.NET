@@ -5,11 +5,10 @@ namespace System.Data.ODB
 { 
     public interface IQuery 
     {      
-        IQuery Insert<T>(string[] cols) where T : IEntity;
+        IQuery Insert(string table, string[] cols);
         IQuery Values(string[] cols);             
-        IQuery Update<T>() where T : IEntity;
-        IQuery Delete<T>() where T : IEntity;
-        IQuery Select<T>() where T : IEntity;
+        IQuery Update(string table);
+        IQuery Delete<T>() where T : IEntity;        
         IQuery Select(string[] cols);
         IQuery From<T>() where T : IEntity;
         IQuery From(string table, string alias = "");
@@ -42,13 +41,15 @@ namespace System.Data.ODB
         IQuery Append(string str);
         List<IDbDataParameter> Parameters { get; set; }
 
+        OdbDiagram Diagram { get; set; }
+
         DataSet Result();
         T First<T>() where T : IEntity;
         List<T> ToList<T>() where T : IEntity;
         int Execute();
-        int ExecuteReturnId();       
-        void Reset();
-
+        long ExecuteReturnId();
+        int Single();
+     
         string ToString();
     }
 }

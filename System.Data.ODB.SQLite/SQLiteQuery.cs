@@ -58,7 +58,12 @@ namespace System.Data.ODB.SQLite
 
             return default(T);
         }
-         
+
+        public override int Single()
+        {
+            return (int)this.Db.ExecuteScalar<long>(this.ToString(), this.Parameters.ToArray());
+        }
+
         public override string ToString()
         {
             string sql = this._sb.ToString();
@@ -76,11 +81,11 @@ namespace System.Data.ODB.SQLite
             return sql;
         }
 
-        public override int ExecuteReturnId()
+        public override long ExecuteReturnId()
         {
             this.Execute();
 
-            return (int)(this.Db.Connection as SQLiteConnection).LastInsertRowId;
+            return (this.Db.Connection as SQLiteConnection).LastInsertRowId;
         }
     }
 }

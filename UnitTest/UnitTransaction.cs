@@ -19,7 +19,7 @@ namespace UnitTest
 
             for(int i = 0; i < 10; i++)
             {
-                User user = new User() { Name = "Chan", BID = 645.75f };
+                User user = new User() { Name = "Chan", Balance = 645.75f };
 
                 db.Store(user);
             }

@@ -25,7 +25,9 @@ namespace System.Data.ODB
 
             if (objAttrs.Length > 0)
             {
-                return objAttrs[0] as ColumnAttribute;
+                ColumnAttribute colAttr = objAttrs[0] as ColumnAttribute;
+                 
+                return colAttr;
             }
 
             return new ColumnAttribute();
@@ -46,6 +48,11 @@ namespace System.Data.ODB
                     if (colAttr.IsForeignkey && string.IsNullOrEmpty(colAttr.Name))
                     {
                         name = propes[i].Name + "Id";
+                    }
+
+                    if (DataType.OdbEntity.IsAssignableFrom(propes[i].PropertyType))
+                    {
+                        colAttr.IsForeignkey = true;
                     }
 
                     yield return new OdbColumn(name,  propes[i], colAttr);

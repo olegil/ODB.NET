@@ -17,10 +17,8 @@ namespace System.Data.ODB.MSSQL
             this.Db = db;
         }
 
-        public override IQuery Insert<T>(string[] cols)
-        {
-            string table = OdbMapping.GetTableName(typeof(T));
-
+        public override IQuery Insert(string table, string[] cols)
+        { 
             this._sb.Append("INSERT INTO ");
             this._sb.Append(Enclosed(table));
 
@@ -52,6 +50,11 @@ namespace System.Data.ODB.MSSQL
                 return list[0];
 
             return default(T);
+        }
+
+        public override int Single()
+        {
+            return this.Db.ExecuteScalar<int>(this.ToString(), this.Parameters.ToArray());
         }
 
         public override IQuery Skip(int start)
@@ -92,12 +95,12 @@ namespace System.Data.ODB.MSSQL
                 return sql.Insert(7, "TOP(" + this._take + ") ");
             }
 
-            return this._sb.ToString(); 
+            return sql; 
         }
 
-        public override int ExecuteReturnId()
+        public override long ExecuteReturnId()
         { 
-            return (int)this.Db.ExecuteScalar<long>(this.ToString(), this.Parameters.ToArray());
+            return this.Db.ExecuteScalar<long>(this.ToString(), this.Parameters.ToArray());
         }
     }
 }

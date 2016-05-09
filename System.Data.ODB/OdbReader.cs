@@ -11,12 +11,15 @@ namespace System.Data.ODB
         private bool disposed = false;
 
         public int Level { get; private set; }
+        public OdbDiagram Diagram { get; set; }
       
-        public OdbReader(IDataReader reader, int depth)
+        public OdbReader(IDataReader reader, OdbDiagram diagram)
         {
             this.sr = reader;
 
-            this.Level = depth;
+            this.Diagram = diagram;
+
+            this.Level = diagram.Depth;
         }
 
         protected virtual void Dispose(bool disposing)
@@ -47,7 +50,7 @@ namespace System.Data.ODB
 
             while (this.sr.Read())
             {
-                object b = this.getEntity(type, 0);               
+                object b = this.getEntity(type);               
                 
                 yield return (T)b;
             }
@@ -55,52 +58,48 @@ namespace System.Data.ODB
             this.Dispose();          
         }
 
-        private object getEntity(Type type, int index)
+        private object getEntity(Type type)
         { 
-            object instance = Activator.CreateInstance(type);  
+            object instance = Activator.CreateInstance(type);
 
-            foreach (PropertyInfo pi in type.GetProperties())
+            string table = OdbMapping.GetTableName(type);
+
+            string alias = this.Diagram.GetAlias(table);
+
+            if (alias == "")
+                throw new OdbException("");
+
+            foreach (OdbColumn col in OdbMapping.GetColumn(type))              
             {
-                ColumnAttribute colAttr = OdbMapping.GetColAttribute(pi);
-
-                if (!colAttr.NotMapped)
-                {
-                    if (!colAttr.IsForeignkey)
-                    {
-                        string colName = string.IsNullOrEmpty(colAttr.Name) ? pi.Name : colAttr.Name;
-                        string col = "T" + index + "." + colName;
-
-                        object value = this.sr[col] == DBNull.Value ? null : this.sr[col];
-
-                        pi.SetValue(instance, value, null);
-                    }
-                    else
-                    {  
-                        if (this.Level > 1)
-                        {
-                            this.Level--;
-
-                            int next = index + 1;
-
-                            object b = this.getEntity(pi.PropertyType, next);
-
-                            this.Level++;
+                ColumnAttribute colAttr = col.Attribute;
  
-                            if ((b as IEntity).Id != 0)
-                                pi.SetValue(instance, b, null);
-                            else
-                                pi.SetValue(instance, null, null);
-                        }
-                    }                                    
-                }                  
-               
-                if (pi.Name == "IsPersisted")
-                {
-                    pi.SetValue(instance, true, null);
+                if (!colAttr.IsForeignkey)
+                {                   
+                    string colName = alias + "." + col.Name;
+
+                    object value = this.sr[colName] == DBNull.Value ? null : this.sr[colName];
+
+                    col.Set(instance as IEntity, value);
                 }
+                else
+                {  
+                    if (this.Level > 1)
+                    {
+                        this.Level--; 
+
+                        object b = this.getEntity(col.GetColumnType());
+
+                        this.Level++;
+ 
+                        if ((b as IEntity).Id != 0)
+                            col.Set(instance as IEntity, b);
+                        else
+                            col.Set(instance as IEntity, null);
+                    }
+                }    
             }
 
-            //type.GetProperty("IsPersisted").SetValue(instance, true, null);
+            type.GetProperty("IsPersisted").SetValue(instance, true, null);
 
             return instance;
         }

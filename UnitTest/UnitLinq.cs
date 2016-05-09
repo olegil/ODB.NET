@@ -13,16 +13,16 @@ namespace UnitTest
         [TestMethod]
         public void TestExpression()
         {
-            MyRepository respo = new MyRepository();
+            MyRepository db = new MyRepository();
 
-            var query = from u in respo.Orders
-                        where u.User.Name.Length > 3 && u.PackageID.Trim() == "23523145"
-                        orderby u.User.Age ascending
-                        select u.User;
+            var query = from o in db.Orders
+                        where o.User.Id == 1
+                        orderby o.Id ascending
+                        select o;
 
-            var users = query.ToList();
+            var list = query.ToList();
  
-            Assert.IsTrue(users.Count > 0);
+            Assert.IsTrue(list.Count > 0);
         }        
 
         [TestMethod]

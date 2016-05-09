@@ -15,7 +15,7 @@ namespace System.Data.ODB
         public int Depth { get; set; }
 
         private bool disposed = false;
-        
+                 
         public OdbContext(IDbConnection Connection) : this(Connection, 1)
         {             
         }
@@ -99,6 +99,34 @@ namespace System.Data.ODB
               
         public abstract IQuery Query();
 
+        public virtual IQuery Select<T>() where T : IEntity
+        {
+            OdbDiagram dg = new OdbDiagram(this.Depth);
+
+            Type type = typeof(T);
+
+            dg.Analyze(type);
+
+            OdbTable table = dg.Table[0];
+
+            IQuery q = this.Query();
+
+            q.Diagram = dg;
+
+            q.Select(dg.Colums).From(table.Name, table.Alias);
+
+            int i = 1;
+
+            foreach (KeyValuePair<string, string> tc in dg.ForigeKey)
+            {
+                OdbTable tab = dg.Table[i++];
+
+                q.LeftJoin(tab.Name).As(tab.Alias).On(tc.Key).Equal(tc.Value);
+            }
+
+            return q;
+        }
+
         /// <summary>
         /// Create Table
         /// </summary>
@@ -161,13 +189,13 @@ namespace System.Data.ODB
         /// <typeparam name="T"></typeparam>
         /// <param name="q"></param>
         /// <returns></returns>
-        public virtual IList<T> ExecuteList<T>(IQuery q) where T : IEntity
+        public virtual IList<T> ExecuteList<T>(IQuery query) where T : IEntity
         {
-            using (IDataReader rdr = this.ExecuteReader(q.ToString(), q.Parameters.ToArray()))
+            using (IDataReader rdr = this.ExecuteReader(query.ToString(), query.Parameters.ToArray()))
             {
                 IList<T> list = new List<T>();
 
-                using (OdbReader<T> edr = new OdbReader<T>(rdr, this.Depth))
+                using (OdbReader<T> edr = new OdbReader<T>(rdr, query.Diagram))
                 {
                     foreach (T t in edr)
                     {

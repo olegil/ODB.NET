@@ -1,4 +1,4 @@
-﻿using System.Linq;
+﻿using System;
 using System.Linq.Expressions;
 
 namespace System.Data.ODB.Linq
@@ -14,27 +14,15 @@ namespace System.Data.ODB.Linq
         {
             if (m.Expression != null)
             {
-                string alias = this.getAlias(m.Expression.Type);
+                string name = OdbMapping.GetTableName(m.Expression.Type);
+             
+                string alias = this.Diagram.GetAlias(name);
 
                 this.SqlBuilder.Append(Enclosed(alias) + "." + Enclosed(m.Member.Name));
             }
 
             return m;
-        }
-
-        private string getAlias(Type type)
-        {
-            string name = OdbMapping.GetTableName(type);
-
-            OdbTable table = this.Diagram.Table.Where(t => t.Name == name).FirstOrDefault();
-
-            if (table != null)
-            {
-                return table.Alias;
-            }
-
-            return "";
-        }
+        } 
 
         public override string ToString()
         {

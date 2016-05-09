@@ -20,7 +20,9 @@ namespace System.Data.ODB.SQLite
 
             if (DataType.OdbEntity.IsAssignableFrom(type))
             {
+                string cols = string.Join(",", this.Diagram.Colums.ToArray());
 
+                this.SqlBuilder.Append(cols);
             }
             else
             {

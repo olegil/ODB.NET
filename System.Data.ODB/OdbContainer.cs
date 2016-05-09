@@ -33,7 +33,6 @@ namespace System.Data.ODB
         { 
             return this.DbConext.ExecuteDelete(t); 
         }   
-        #endregion
-         
+        #endregion         
     }
 }

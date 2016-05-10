@@ -7,9 +7,7 @@ namespace System.Data.ODB
     public class ColumnAttribute : Attribute
     {        
         public string Name { get; set; }
-        public int Length { get; set; }
-        public bool IsPrimaryKey { get; set;}
-        public bool IsForeignkey { get; set; }
+        public int Length { get; set; }       
         public bool IsAuto { get; set; }
         public bool IsNullable { get; set; }      
         public bool NotMapped { get; set; }
@@ -17,9 +15,7 @@ namespace System.Data.ODB
         public ColumnAttribute()
         {
             Name = "";
-            IsAuto = false;
-            IsForeignkey = false;
-            IsPrimaryKey = false;
+            IsAuto = false;               
             IsNullable = true;
             NotMapped = false;
             Length = 0;

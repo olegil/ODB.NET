@@ -13,16 +13,17 @@ namespace UnitTest
         [TestMethod]
         public void TestExpression()
         {
+            OdbConfig.Depth = 2;
+
             MyRepository db = new MyRepository();
 
             var query = from o in db.Orders
-                        where o.User.Id == 1
-                        orderby o.Id ascending
-                        select o;
+                        where o.Id == 1                        
+                        select o.User;
 
-            var list = query.ToList();
+            string sql = query.ToString(); 
  
-            Assert.IsTrue(list.Count > 0);
+            Assert.IsTrue(sql.Length > 0);
         }        
 
         [TestMethod]

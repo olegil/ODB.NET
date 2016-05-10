@@ -10,9 +10,7 @@ namespace System.Data.ODB
     {
         IDbConnection Connection { get; set; }
         IDbTransaction Transaction { get; set; }
-        
-        int Depth { get; set; }
-
+       
         IQuery Query();
 
         IQuery Select<T>() where T : IEntity;

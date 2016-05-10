@@ -8,9 +8,10 @@ namespace System.Data.ODB
     { 
         public Dictionary<string, string> ForigeKey { get; private set; }
         public List<OdbTable> Table { get; set; }
-        private List<string> _cols; 
 
-        public string[] Colums
+        private List<string> _cols;
+
+        public string[] Columns
         {
             get
             {
@@ -18,53 +19,46 @@ namespace System.Data.ODB
             }
         }
 
-        public int Depth { get; private set; }
-        private int n;
+        private int level;
 
-        public OdbDiagram(int depth)
-        {
-            this.Depth = depth;
-
+        public OdbDiagram()
+        {           
             this.ForigeKey = new Dictionary<string, string>();
 
             this.Table = new List<OdbTable>();
 
             this._cols = new List<string>();
 
-            this.n = 0;
+            this.level = 1;
         }
 
         public virtual void Analyze(Type type)
         {
-            OdbTable table = new OdbTable() { Name = OdbMapping.GetTableName(type), Level = this.n };
+            OdbTable table = new OdbTable() { Name = OdbMapping.GetTableName(type), Level = this.Table.Count };
 
             this.Table.Add(table);
            
             foreach (OdbColumn col in OdbMapping.GetColumn(type))
             {
-                ColumnAttribute attr = col.Attribute;
-   
                 string colName = Enclosed(table.Alias) + "." + Enclosed(col.Name);
 
-                if (!attr.IsForeignkey)
+                if (!col.IsForeignkey)
                 {
                     this._cols.Add(colName + " AS " + Enclosed(table.Alias + "." + col.Name));
                 }
                 else  
                 {
-                    if (this.Depth > 1)
-                    {
-                        this.n++;
-
-                        this.Depth--;
+                    if (this.level < OdbConfig.Depth)
+                    { 
+                        this.level++;
  
-                        string joinKey = Enclosed("T" + n) + "." + Enclosed("Id");
+                        string joinKey = Enclosed("T" + this.Table.Count) + "." + Enclosed("Id");
 
                         this.ForigeKey.Add(colName, joinKey);
 
-                        this.Analyze(col.GetColumnType());
+                        this.Analyze(col.GetMapType());
  
-                        this.Depth++;
+                        this.level--;
                     }                     
                 }                      
             }

@@ -39,23 +39,33 @@ namespace System.Data.ODB
 
             for (int i = 0; i < propes.Length; i++)
             {
-                ColumnAttribute colAttr = GetColAttribute(propes[i]);
+                PropertyInfo prop = propes[i];
+                ColumnAttribute colAttr = GetColAttribute(prop);
 
                 if (!colAttr.NotMapped)
                 {
-                    string name = string.IsNullOrEmpty(colAttr.Name) ? propes[i].Name : colAttr.Name;
+                    OdbColumn col = new OdbColumn();
 
-                    if (colAttr.IsForeignkey && string.IsNullOrEmpty(colAttr.Name))
+                    col.Property = prop;
+                    col.Attribute = colAttr;
+                    col.Name = string.IsNullOrEmpty(colAttr.Name) ? prop.Name : colAttr.Name;
+
+                    if (prop.Name == "Id")
                     {
-                        name = propes[i].Name + "Id";
+                        col.IsPrimaryKey = true;
                     }
-
-                    if (DataType.OdbEntity.IsAssignableFrom(propes[i].PropertyType))
+                    else
                     {
-                        colAttr.IsForeignkey = true;
-                    }
+                        if (DataType.OdbEntity.IsAssignableFrom(prop.PropertyType))
+                        {
+                            col.IsForeignkey = true;
 
-                    yield return new OdbColumn(name,  propes[i], colAttr);
+                            if (string.IsNullOrEmpty(colAttr.Name))
+                                col.Name += "Id";
+                        }
+                    }               
+
+                    yield return col;
                 }
             }
         }

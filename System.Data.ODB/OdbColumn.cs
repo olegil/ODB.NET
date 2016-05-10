@@ -6,18 +6,17 @@ namespace System.Data.ODB
 {
     public class OdbColumn
     {
-        public string Name { get; private set; }
-        public PropertyInfo Property { get; private set; }
-        public ColumnAttribute Attribute { get; private set; }
-        
-        public OdbColumn(string name, PropertyInfo prop, ColumnAttribute attr)
-        {
-            this.Name = name;
-            this.Property = prop;
-            this.Attribute = attr;
+        public string Name { get; set; }
+        public PropertyInfo Property { get; set; }
+        public ColumnAttribute Attribute { get; set; }
+        public bool IsForeignkey { get; set; }
+        public bool IsPrimaryKey { get; set; }
+
+        public OdbColumn()
+        {            
         }    
 
-        public Type GetColumnType()
+        public Type GetMapType()
         {
             return this.Property.PropertyType;
         }
@@ -32,9 +31,9 @@ namespace System.Data.ODB
             return this.Property.GetValue(t, null);
         }
 
-        public void Set(IEntity t, object b)
+        public void SetValue(IEntity t, object b)
         {
-            this.Property.SetValue(t, b, null);
+            this.Property.SetValue(t, b, null);            
         }
     }
 }

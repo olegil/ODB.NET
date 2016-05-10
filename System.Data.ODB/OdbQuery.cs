@@ -336,6 +336,6 @@ namespace System.Data.ODB
             return this.Db.ExecuteNonQuery(this.ToString(), this.Parameters.ToArray());
         }
 
-        public abstract long ExecuteReturnId();
+        public abstract int ExecuteReturnId();
     }
 }

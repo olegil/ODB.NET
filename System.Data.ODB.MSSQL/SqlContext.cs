@@ -6,7 +6,7 @@ namespace System.Data.ODB.MSSQL
 {
     public class SqlContext : OdbContext
     {
-        public SqlContext(IDbConnection conn, int depth) : base(conn, depth)
+        public SqlContext(IDbConnection conn) : base(conn)
         {
         }
                
@@ -23,9 +23,7 @@ namespace System.Data.ODB.MSSQL
 
             this.ExecuteNonQuery(string.Format(sql, table, table));
         }
-
-      
-
+         
         public override DataSet ExecuteDataSet(string sql, params IDbDataParameter[] commandParameters)
         {
             //create a command and prepare it for execution
@@ -73,17 +71,17 @@ namespace System.Data.ODB.MSSQL
                     sql += "(MAX)";
             }
 
-            if (attr.IsAuto)
+            if (attr.IsAuto || col.IsPrimaryKey)
             {
                 sql += " IDENTITY(1,1)";
             }
 
-            if (attr.IsPrimaryKey)
+            if (col.IsPrimaryKey)
             {
                 sql += " PRIMARY KEY";
             }
 
-            if (attr.IsNullable && !attr.IsForeignkey)
+            if (attr.IsNullable && !col.IsForeignkey && !col.IsPrimaryKey)
             {
                 sql += " NULL";
             }

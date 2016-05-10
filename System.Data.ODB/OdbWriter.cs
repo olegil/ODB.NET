@@ -13,10 +13,10 @@ namespace System.Data.ODB
         public OdbWriter(IDbContext db)
         {
             this._db = db;
-            this.level = db.Depth;
+            this.level = 1;
         }
 
-        public long Write<T>(T t) where T : IEntity
+        public int Write<T>(T t) where T : IEntity
         {
             Type type = t.GetType();
 
@@ -28,36 +28,38 @@ namespace System.Data.ODB
 
             List<string> cols = new List<string>();
             List<string> ps = new List<string>();
-
-            OdbColumn ColPk = null;
-
+ 
             //begin foreach
             foreach (OdbColumn col in OdbMapping.GetColumn(type))
             {
                 ColumnAttribute attr = col.Attribute;
 
-                if (!attr.IsAuto)
+                if (!attr.IsAuto && !col.IsPrimaryKey)
                 {
                     object b = col.GetValue(t);
 
-                    if (!attr.IsForeignkey)
+                    if (!col.IsForeignkey)
                     {
                         if (b == null)
                             b = DBNull.Value;
                     }
                     else
                     {
-                        if (this.level > 1)
+                        if (this.level < OdbConfig.Depth)
                         {
                             if (b != null)
                             {                                 
-                                this.level--;
+                                this.level++;
 
                                 //return id
                                 b = this.Write(b as IEntity);
 
-                                this.level++;
+                                this.level--;
                             }
+                        }
+                        else
+                        {
+                            b = null;
                         }
                     }
 
@@ -75,28 +77,18 @@ namespace System.Data.ODB
                     cols.Add("[" + col.Name + "]");
 
                     n++;
-                }
-
-                if (attr.IsPrimaryKey)
-                {
-                    ColPk = col;
-                }
+                } 
             }
-            //end
+            //end 
 
-            if (ColPk == null)
-            {
-                throw new OdbException("No Key.");
-            }
-
-            if (t.IsPersisted)
+            if (t.Id != 0)
             {
                 for (int i = 0; i < cols.Count; i++)
                 {
                     cols[i] = cols[i] + "=" + ps[i];
                 }
 
-                query.Update(table).Set(cols.ToArray()).Where(ColPk.Name).Eq(ColPk.GetValue(t));
+                query.Update(table).Set(cols.ToArray()).Where("Id").Eq(t.Id);
 
                 query.Execute();
 

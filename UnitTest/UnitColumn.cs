@@ -9,12 +9,14 @@ namespace UnitTest
     {
         [TestMethod]
         public void TestColumns()
-        { 
-            OdbDiagram col = new OdbDiagram(3);
+        {
+            OdbConfig.Depth = 3;
+
+            OdbDiagram col = new OdbDiagram();
 
             col.Analyze(typeof(User));
 
-            Assert.IsTrue(col.Colums.Length > 0);
+            Assert.IsTrue(col.Columns.Length > 0);
         }
     }
 }

@@ -81,11 +81,11 @@ namespace System.Data.ODB.SQLite
             return sql;
         }
 
-        public override long ExecuteReturnId()
+        public override int ExecuteReturnId()
         {
             this.Execute();
 
-            return (this.Db.Connection as SQLiteConnection).LastInsertRowId;
+            return (int)(this.Db.Connection as SQLiteConnection).LastInsertRowId;
         }
     }
 }

@@ -15,7 +15,8 @@ namespace UnitTest
             db.Clear<OrderItem>();
             db.Clear<Address>();
 
-           // respo.Clear<User>();
+            db.Clear<User>();
+            db.Clear<Product>();
 
             int a = 0;
 

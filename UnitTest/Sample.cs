@@ -6,8 +6,9 @@ using System.Data.SQLite;
 
 namespace UnitTest
 {   
-    public class User : OdbEntity
+    public class User : IEntity
     { 
+        public int Id { get; set; }
         public double Balance { get; set; }         
         public bool IsPermit { get; set; }
         public int Age { get; set; }
@@ -15,21 +16,17 @@ namespace UnitTest
         public DateTime Birthday { get; set; } 
     }
       
-    public class Address : OdbEntity
-    {  
+    public class Address : IEntity
+    {
+        public int Id { get; set; }
         public string Flat { get; set; }        
         public string Street { get; set; } 
         public string City { get; set; }
     }    
 
-    public class Role : OdbEntity
+    public class Order : IEntity
     {
-        [Column]
-        public string Name { get; set; }      
-    }
-
-    public class Order : OdbEntity
-    {        
+        public int Id { get; set; }
         public User User { get; set; }
         public string PackageID { get; set; } 
         public string Remark { get; set; }                 
@@ -38,16 +35,18 @@ namespace UnitTest
         public Address Shipping { get; set; }
     }
 
-    public class OrderItem : OdbEntity
+    public class OrderItem : IEntity
     {
+        public int Id { get; set; }
         public Order Order { get; set; }        
         public Product Item { get; set; }
         public int Quantity { get; set; }
         public DateTime CreateDate { get; set; }  
     }
      
-    public class Product : OdbEntity
+    public class Product : IEntity
     {
+        public int Id { get; set; }
         public string Name { get; set; }
         public double Price { get; set; }
         public string BID { get; set; }
@@ -59,7 +58,7 @@ namespace UnitTest
         public QueryTable<OrderItem> OrderItems { get; set; }
         public QueryTable<Order> Orders { get; set; }
 
-        public MyRepository() : base(new System.Data.ODB.SQLite.SQLiteContext(new SQLiteConnection(string.Format(Command.SqliteconnStr, "test1.db3")), 3))
+        public MyRepository() : base(new System.Data.ODB.SQLite.SQLiteContext(new SQLiteConnection(string.Format(Command.SqliteconnStr, "test1.db3"))))
         {         
             SQLiteProvider provider = new SQLiteProvider(this.DbConext);
 

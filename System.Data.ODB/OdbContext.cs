@@ -11,19 +11,12 @@ namespace System.Data.ODB
     {
         public IDbConnection Connection { get; set; }
         public IDbTransaction Transaction { get; set; }
- 
-        public int Depth { get; set; }
-
+  
         private bool disposed = false;
-                 
-        public OdbContext(IDbConnection Connection) : this(Connection, 1)
-        {             
-        }
-
-        public OdbContext(IDbConnection Connection, int depth)
+     
+        public OdbContext(IDbConnection Connection)
         {
-            this.Connection = Connection;
-            this.Depth = depth;
+            this.Connection = Connection; 
         }
 
         protected virtual void Dispose(bool disposing)
@@ -101,7 +94,7 @@ namespace System.Data.ODB
 
         public virtual IQuery Select<T>() where T : IEntity
         {
-            OdbDiagram dg = new OdbDiagram(this.Depth);
+            OdbDiagram dg = new OdbDiagram();
 
             Type type = typeof(T);
 
@@ -113,7 +106,7 @@ namespace System.Data.ODB
 
             q.Diagram = dg;
 
-            q.Select(dg.Colums).From(table.Name, table.Alias);
+            q.Select(dg.Columns).From(table.Name, table.Alias);
 
             int i = 1;
 
@@ -144,9 +137,9 @@ namespace System.Data.ODB
 
             foreach (OdbColumn col in OdbMapping.GetColumn(type))
             { 
-                if (col.Attribute.IsForeignkey)
+                if (col.IsForeignkey)
                 {   
-                    this.Create(col.GetColumnType());
+                    this.Create(col.GetMapType());
                 }
  
                 cols.Add(this.SqlDefine(col));                 
@@ -172,9 +165,9 @@ namespace System.Data.ODB
         {
             foreach (OdbColumn col in OdbMapping.GetColumn(type))
             {
-                if (col.Attribute.IsForeignkey)
+                if (col.IsForeignkey)
                 {
-                    this.Drop(col.GetColumnType());
+                    this.Drop(col.GetMapType());
                 } 
             } 
 

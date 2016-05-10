@@ -10,16 +10,17 @@ namespace System.Data.ODB
 
         private bool disposed = false;
 
-        public int Level { get; private set; }
         public OdbDiagram Diagram { get; set; }
-      
+
+        private int level;
+          
         public OdbReader(IDataReader reader, OdbDiagram diagram)
         {
             this.sr = reader;
 
             this.Diagram = diagram;
 
-            this.Level = diagram.Depth;
+            this.level = 1;
         }
 
         protected virtual void Dispose(bool disposing)
@@ -67,39 +68,38 @@ namespace System.Data.ODB
             string alias = this.Diagram.GetAlias(table);
 
             if (alias == "")
-                throw new OdbException("");
+                throw new OdbException("Not found table");
 
             foreach (OdbColumn col in OdbMapping.GetColumn(type))              
-            {
-                ColumnAttribute colAttr = col.Attribute;
- 
-                if (!colAttr.IsForeignkey)
+            { 
+                if (!col.IsForeignkey)
                 {                   
                     string colName = alias + "." + col.Name;
 
                     object value = this.sr[colName] == DBNull.Value ? null : this.sr[colName];
 
-                    col.Set(instance as IEntity, value);
+                    if (col.IsPrimaryKey)
+                        value = Convert.ToInt32(value);
+
+                    col.SetValue(instance as IEntity, value);
                 }
                 else
                 {  
-                    if (this.Level > 1)
+                    if (this.level < OdbConfig.Depth)
                     {
-                        this.Level--; 
+                        this.level++; 
 
-                        object b = this.getEntity(col.GetColumnType());
+                        object b = this.getEntity(col.GetMapType());
 
-                        this.Level++;
+                        this.level--;
  
                         if ((b as IEntity).Id != 0)
-                            col.Set(instance as IEntity, b);
-                        else
-                            col.Set(instance as IEntity, null);
+                            col.SetValue(instance as IEntity, b);
                     }
                 }    
             }
 
-            type.GetProperty("IsPersisted").SetValue(instance, true, null);
+            //type.GetProperty("IsPersisted").SetValue(instance, true, null);
 
             return instance;
         }

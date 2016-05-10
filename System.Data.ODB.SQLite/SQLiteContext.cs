@@ -6,7 +6,7 @@ namespace System.Data.ODB.SQLite
 {
     public class SQLiteContext : OdbContext
     {
-        public SQLiteContext(IDbConnection conn, int depth) : base(conn, depth)
+        public SQLiteContext(IDbConnection conn) : base(conn)
         {
         }
 
@@ -66,21 +66,26 @@ namespace System.Data.ODB.SQLite
         public override string SqlDefine(OdbColumn col)
         {
             string dbtype = this.TypeMapping(col.GetDbType());
-            string sql = "[" + col.Name + "] " + dbtype;
+            string sql = "[" + col.Name + "]";
 
             ColumnAttribute attr = col.Attribute;
 
-            if (attr.IsPrimaryKey)
+            if (col.IsPrimaryKey)
             {
-                sql += " PRIMARY KEY";
+                sql += " INTEGER PRIMARY KEY";
+            }
+            else
+            {
+                sql += dbtype;
+
             }
 
-            if (attr.IsAuto)
+            if (attr.IsAuto || col.IsPrimaryKey)
             {
                 sql += " AUTOINCREMENT";
             }
 
-            if (attr.IsNullable && !attr.IsForeignkey)
+            if (attr.IsNullable && !col.IsForeignkey && !col.IsPrimaryKey)
             {
                 sql += " NULL";
             }

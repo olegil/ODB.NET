@@ -98,9 +98,9 @@ namespace System.Data.ODB.MSSQL
             return sql; 
         }
 
-        public override long ExecuteReturnId()
+        public override int ExecuteReturnId()
         { 
-            return this.Db.ExecuteScalar<long>(this.ToString(), this.Parameters.ToArray());
+            return this.Db.ExecuteScalar<int>(this.ToString(), this.Parameters.ToArray());
         }
     }
 }

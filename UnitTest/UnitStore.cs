@@ -31,6 +31,8 @@ namespace UnitTest
         {
             MyRepository respo = new MyRepository();
 
+            OdbConfig.Depth = 3;
+
             User user = respo.Collect<User>().First<User>();
 
             Product p = respo.Collect<Product>().Where("name").Eq("Pencil").First<Product>();
@@ -49,16 +51,11 @@ namespace UnitTest
         {
             MyRepository respo = new MyRepository();
 
-            User user = respo.Collect<Order>().First<User>();
+            OdbConfig.Depth = 2;
 
-            if (user != null)
-            {
-                user.Balance = 24.5d;
-                
-                respo.Store(user);
-            }
-
-            Assert.IsNotNull(user);
+            OrderItem o = respo.Collect<OrderItem>().First<OrderItem>();
+ 
+            Assert.IsNotNull(o.Order);
         }
 
     }

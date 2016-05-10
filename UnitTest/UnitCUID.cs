@@ -19,7 +19,7 @@ namespace UnitTest
                     
             db.Store(user);
   
-            Assert.IsTrue(user.Id > 0);
+            Assert.IsTrue(user.Id == 0);
         }
 
         [TestMethod]
@@ -49,22 +49,11 @@ namespace UnitTest
             int a = 0;
 
             if (user != null)
-            {
-                
+            {                
                 a = respo.Delete(user);
             }
  
             Assert.IsTrue(a > 0);
-        }
-
-        [TestMethod]
-        public void TestDelete2()
-        {
-            MyRepository respo = new MyRepository();
-
-            bool ret = respo.Clear<User>();          
-
-            Assert.IsTrue(ret);
         }
     }
 }

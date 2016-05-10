@@ -39,11 +39,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IDbContext.cs" />
+    <Compile Include="OdbConfig.cs" />
     <Compile Include="OdbContext.cs" />
     <Compile Include="OdbException.cs" />
     <Compile Include="OdbTable.cs" />
     <Compile Include="OdbDiagram.cs" />
-    <Compile Include="OdbEntity.cs" />
     <Compile Include="ColumnAttribute.cs" />
     <Compile Include="OdbColumn.cs" />
     <Compile Include="DataType.cs" />

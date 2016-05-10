@@ -10,8 +10,7 @@ namespace System.Data.ODB
     {
         public string Name { get; set; }
         public int Level { get; set; } 
-        public List<string> Columns { get; set; }
-
+         
         public string Alias
         {
             get
@@ -21,8 +20,7 @@ namespace System.Data.ODB
         }
 
         public OdbTable()
-        {
-            this.Columns = new List<string>();
+        { 
         }            
     }
 }

@@ -217,7 +217,11 @@ namespace System.Data.ODB.SQLite
             IQueryable q = c.Value as IQueryable;
 
             if (q != null)
-            { 
+            {
+                this.Diagram = new OdbDiagram();
+
+                this.Diagram.Analyze(q.ElementType);
+                                
                 OdbTable table = this.Diagram.Table[0]; 
 
                 this.SqlBuilder.Append(" FROM ");
@@ -319,7 +323,7 @@ namespace System.Data.ODB.SQLite
 
             if (sql.IndexOf("SELECT") < 0)
             {
-                string select = "SELECT " + string.Join(",", this.Diagram.Colums);
+                string select = "SELECT " + string.Join(",", this.Diagram.Columns);
 
                 sql = sql.Insert(0, select);
             }

@@ -16,9 +16,9 @@ namespace UnitTest
         {
             MyRepository respo = new MyRepository();
  
-            List<Order> list = respo.Collect<Order>().ToList<Order>();
+            IQuery q = respo.Collect<Order>();
   
-            Assert.IsTrue(list.Count > 0);
+            Assert.IsNotNull(q);
         }
 
         [TestMethod]
@@ -40,9 +40,10 @@ namespace UnitTest
         [TestMethod]
         public void TestFirst()
         {
+            OdbConfig.Depth = 2;
             MyRepository respo = new MyRepository();
 
-            User user = respo.Collect<User>().First<User>();
+            User user = respo.Collect<Order>().First<User>();
 
             Assert.IsTrue(user != null);
         }

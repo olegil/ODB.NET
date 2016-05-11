@@ -19,8 +19,12 @@ namespace System.Data.ODB.SQLite
             Type type = m.Type;
 
             if (DataType.OdbEntity.IsAssignableFrom(type))
-            {
-                string cols = string.Join(",", this.Diagram.Columns);
+            {               
+                OdbTable table = this.Diagram.FindTable(type);
+
+                OdbTree tree = this.Diagram.CreateTree();
+
+                string cols = string.Join(",", tree.GetNodeColumns(table));
 
                 this.SqlBuilder.Append(cols);
             }

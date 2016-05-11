@@ -14,6 +14,7 @@ namespace UnitTest
         public int Age { get; set; }
         public string Name { get; set; }         
         public DateTime Birthday { get; set; } 
+        public Address Shipping { get; set; }
     }
       
     public class Address : IEntity
@@ -31,8 +32,7 @@ namespace UnitTest
         public string PackageID { get; set; } 
         public string Remark { get; set; }                 
         public decimal Total { get; set; }
-        public DateTime Date { get; set; }              
-        public Address Shipping { get; set; }
+        public DateTime Date { get; set; }     
     }
 
     public class OrderItem : IEntity

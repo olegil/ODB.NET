@@ -8,19 +8,34 @@ namespace System.Data.ODB
 {
     public class OdbTable
     {
-        public string Name { get; set; }
-        public int Level { get; set; } 
+        public int Id { get; set; }  
+               
+        public string Name { get; private set; }
+
+        public Type EntiType { get; set; }
          
+        public int Parent { get; set; }
+                         
+        public List<OdbColumn> Columns { get; set; }
+
         public string Alias
         {
             get
             {
-                return "T" + this.Level;
+                return "T" + this.Id;
             }
         }
 
-        public OdbTable()
-        { 
-        }            
+        public OdbTable(Type type)
+        {
+            this.Id = 0;
+            this.Parent = -1;
+
+            this.EntiType = type;
+
+            this.Name = OdbMapping.GetTableName(type);
+
+            this.Columns = new List<OdbColumn>();
+        }                  
     }
 }

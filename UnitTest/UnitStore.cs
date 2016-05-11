@@ -14,9 +14,12 @@ namespace UnitTest
         [TestMethod]
         public void TestStore1()
         {
+            OdbConfig.Depth = 2;
+
             MyRepository db = new MyRepository();
 
-            User user = new User() { Balance = 200.00d, Age = 26, Birthday = DateTime.Now, Name = "Stephen Ieong", IsPermit = true };
+            Address ship = new Address() { City = "TKO", Street = "Po Lam", Flat = "Metro City" };
+            User user = new User() { Balance = 200.00d, Age = 26, Birthday = DateTime.Now, Name = "Stephen Ieong", IsPermit = true, Shipping = ship };
 
             Product p = new Product() { BID = "4523462347", Name = "Pencil", Price = 5.00d };
 
@@ -37,7 +40,7 @@ namespace UnitTest
 
             Product p = respo.Collect<Product>().Where("name").Eq("Pencil").First<Product>();
 
-            Order order = new Order() { PackageID = "23523145",  User = user, Date = DateTime.Now, Shipping = new Address() { City = "TKO", Street = "Po Lam", Flat = "Metro City" } };
+            Order order = new Order() { PackageID = "23523145",  User = user, Date = DateTime.Now };
 
             OrderItem item = new OrderItem() { Order = order, Item = p, Quantity = 2, CreateDate = DateTime.Now };
       

@@ -33,6 +33,18 @@ namespace System.Data.ODB
             return new ColumnAttribute();
         }
 
+        public static OdbTable CreateTable(Type type)
+        {
+            OdbTable table = new OdbTable(type);
+
+            foreach (OdbColumn col in GetColumn(type))
+            {
+                table.Columns.Add(col);
+            }
+            
+            return table;
+        }
+
         public static IEnumerable<OdbColumn> GetColumn(Type type)
         {
             PropertyInfo[] propes = type.GetProperties();
@@ -61,13 +73,13 @@ namespace System.Data.ODB
                             col.IsForeignkey = true;
 
                             if (string.IsNullOrEmpty(colAttr.Name))
-                                col.Name += "Id";
+                                col.Name = prop.PropertyType.Name + "Id";
                         }
                     }               
 
                     yield return col;
                 }
             }
-        }
+        } 
     }
 }

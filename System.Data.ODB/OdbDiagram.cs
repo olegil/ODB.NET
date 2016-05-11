@@ -4,79 +4,73 @@ using System.Reflection;
 
 namespace System.Data.ODB
 {
-    public class OdbDiagram
-    { 
-        public Dictionary<string, string> ForigeKey { get; private set; }
-        public List<OdbTable> Table { get; set; }
-
-        private List<string> _cols;
-
-        public string[] Columns
-        {
-            get
-            {
-                return this._cols.ToArray();
-            }
-        }
-
+    public class OdbDiagram 
+    {
+        private OdbTable root; 
+        public List<OdbTable> Nodes { get; set; }
+       
         private int level;
 
-        public OdbDiagram()
-        {           
-            this.ForigeKey = new Dictionary<string, string>();
-
-            this.Table = new List<OdbTable>();
-
-            this._cols = new List<string>();
-
-            this.level = 1;
-        }
-
-        public virtual void Analyze(Type type)
+        public OdbDiagram(OdbTable rootNode)
         {
-            OdbTable table = new OdbTable() { Name = OdbMapping.GetTableName(type), Level = this.Table.Count };
-
-            this.Table.Add(table);
+            this.root = rootNode;
            
-            foreach (OdbColumn col in OdbMapping.GetColumn(type))
+            this.Nodes = new List<OdbTable>();
+
+            this.Nodes.Add(root);
+
+            this.level = 1; 
+        }
+ 
+        public void Visit()
+        {
+            this.visitTree(this.root);
+        }
+        
+        private void visitTree(OdbTable node)
+        { 
+            foreach (OdbColumn col in node.Columns)
             {
-                string colName = Enclosed(table.Alias) + "." + Enclosed(col.Name);
+                if (col.IsForeignkey && this.level < OdbConfig.Depth)
+                { 
+                    this.level++;
 
-                if (!col.IsForeignkey)
-                {
-                    this._cols.Add(colName + " AS " + Enclosed(table.Alias + "." + col.Name));
-                }
-                else  
-                {
-                    if (this.level < OdbConfig.Depth)
-                    { 
-                        this.level++;
+                    OdbTable childNode = OdbMapping.CreateTable(col.GetMapType());
+
+                    childNode.Id = this.Nodes.Count;
+                    childNode.Parent = node.Id;
+
+                    this.Nodes.Add(childNode);
  
-                        string joinKey = Enclosed("T" + this.Table.Count) + "." + Enclosed("Id");
-
-                        this.ForigeKey.Add(colName, joinKey);
-
-                        this.Analyze(col.GetMapType());
+                    this.visitTree(childNode);
  
-                        this.level--;
-                    }                     
+                    this.level--;                                        
                 }                      
             }
         }
 
-        public string GetAlias(string name)
+        public OdbTree CreateTree()
         {
-            OdbTable table = this.Table.Find(delegate (OdbTable t) { return t.Name == name; });
+            OdbTree tree = new OdbTree(this.Nodes);
 
-            if (table != null)
-            {
-                return table.Alias;
-            }
+            return tree;
+        }
+        
+        public OdbTable FindTable(string name)
+        {
+            OdbTable table = this.Nodes.Find(delegate (OdbTable t) { return t.Name == name; });
 
-            return "";
+            return table;         
         }
 
-        private static string Enclosed(string str)
+        public OdbTable FindTable(Type type)
+        {
+            string name = OdbMapping.GetTableName(type);
+
+            return this.FindTable(name);
+        }
+
+        public static string Enclosed(string str)
         {
             return "[" + str + "]"; 
         }

@@ -218,24 +218,21 @@ namespace System.Data.ODB.SQLite
 
             if (q != null)
             {
-                this.Diagram = new OdbDiagram();
+                OdbTable table = OdbMapping.CreateTable(q.ElementType);
 
-                this.Diagram.Analyze(q.ElementType);
-                                
-                OdbTable table = this.Diagram.Table[0]; 
+                this.Diagram = new OdbDiagram(table);
 
+                this.Diagram.Visit();
+ 
                 this.SqlBuilder.Append(" FROM ");
                 this.SqlBuilder.Append(Enclosed(table.Name));
                 this.SqlBuilder.Append(" AS " + table.Alias);
 
-                int n = 1;
+                OdbTree tree = this.Diagram.CreateTree();
 
-                foreach (KeyValuePair<string, string> tc in this.Diagram.ForigeKey)
-                {
-                    OdbTable tab = this.Diagram.Table[n++];
+                string joinText = tree.GetChildNodes(table);
 
-                    this.SqlBuilder.Append(" LEFT JOIN " + Enclosed(tab.Name) + " AS " + tab.Alias + " ON " + tc.Key + " = " + tc.Value);
-                }
+                this.SqlBuilder.Append(joinText);
             }
             else if (c.Value == null)
             {
@@ -249,7 +246,7 @@ namespace System.Data.ODB.SQLite
             }
 
             return c;
-        }
+        } 
 
         protected override Expression VisitMemberAccess(MemberExpression m)
         {
@@ -323,9 +320,15 @@ namespace System.Data.ODB.SQLite
 
             if (sql.IndexOf("SELECT") < 0)
             {
-                string select = "SELECT " + string.Join(",", this.Diagram.Columns);
+                Type type = TypeSystem.GetElementType(this._expression.Type);
 
-                sql = sql.Insert(0, select);
+                OdbTable table = this.Diagram.FindTable(type);
+
+                OdbTree tree = this.Diagram.CreateTree();
+
+                string cols = string.Join(",", tree.GetNodeColumns(table));
+ 
+                sql = sql.Insert(0, "SELECT " + cols);
             }
 
             return sql;

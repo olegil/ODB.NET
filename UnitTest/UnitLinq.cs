@@ -13,7 +13,7 @@ namespace UnitTest
         [TestMethod]
         public void TestExpression()
         {
-            OdbConfig.Depth = 2;
+            OdbConfig.Depth = 3;
 
             MyRepository db = new MyRepository();
 
@@ -27,39 +27,24 @@ namespace UnitTest
         }        
 
         [TestMethod]
-        public void TestLinq()
+        public void TestString()
         {
+            OdbConfig.Depth = 2;
             MyRepository respo = new MyRepository();
 
             var query = from u in respo.Users
                         where u.Name.Contains("hen") || u.Name.Length > 2 || u.Name.Trim() == "avsd" || u.Name != null && u.Name.ToLower() == "haweg" || u.Name.Equals("gasdhasdh")
-                        select u; 
+                        select u.Shipping; 
 
             string sql = query.ToString();
 
-            List<User> list = query.ToList();
- 
-            Assert.IsTrue(list.Count > 0);
-        }
+            var list = query.ToList();
+
+            Assert.IsNotNull(list);
+        } 
 
         [TestMethod]
-        public void TestString()
-        {
-            MyRepository respo = new MyRepository();
-
-            var query = from u in respo.Users
-                        where u.Name.IndexOf('C') > 0 || u.Name == "abc"
-                        select u;
-
-            string sql = query.ToString();
-
-            List<User> list = query.ToList();
- 
-            Assert.IsTrue(list.Count > 0);
-        }
-
-        [TestMethod]
-        public void TestLingSelect()
+        public void TestLingList()
         {
             MyRepository respo = new MyRepository();
 

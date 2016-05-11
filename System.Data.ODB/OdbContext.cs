@@ -94,29 +94,22 @@ namespace System.Data.ODB
 
         public virtual IQuery Select<T>() where T : IEntity
         {
-            OdbDiagram dg = new OdbDiagram();
-
             Type type = typeof(T);
 
-            dg.Analyze(type);
+            OdbTable table = OdbMapping.CreateTable(type);
 
-            OdbTable table = dg.Table[0];
+            OdbDiagram dg = new OdbDiagram(table);
+            dg.Visit();
 
+            OdbTree tree = dg.CreateTree();
+                        
             IQuery q = this.Query();
 
             q.Diagram = dg;
 
-            q.Select(dg.Columns).From(table.Name, table.Alias);
-
-            int i = 1;
-
-            foreach (KeyValuePair<string, string> tc in dg.ForigeKey)
-            {
-                OdbTable tab = dg.Table[i++];
-
-                q.LeftJoin(tab.Name).As(tab.Alias).On(tc.Key).Equal(tc.Value);
-            }
-
+            q.Select(tree.GetNodeColumns(table)).From(table.Name, table.Alias);
+            q.Append(tree.GetChildNodes(table));
+ 
             return q;
         }
 

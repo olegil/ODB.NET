@@ -51,6 +51,7 @@
     <Compile Include="IDbContainer.cs" />
     <Compile Include="IEntity.cs" />
     <Compile Include="IQuery.cs" />
+    <Compile Include="OdbTree.cs" />
     <Compile Include="OdbWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="OdbMapping.cs" />

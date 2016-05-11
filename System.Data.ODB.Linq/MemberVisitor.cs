@@ -16,9 +16,9 @@ namespace System.Data.ODB.Linq
             {
                 string name = OdbMapping.GetTableName(m.Expression.Type);
              
-                string alias = this.Diagram.GetAlias(name);
+                OdbTable table = this.Diagram.FindTable(name);
 
-                this.SqlBuilder.Append(Enclosed(alias) + "." + Enclosed(m.Member.Name));
+                this.SqlBuilder.Append(Enclosed(table.Alias) + "." + Enclosed(m.Member.Name));
             }
 
             return m;

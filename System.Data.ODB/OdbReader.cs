@@ -63,18 +63,18 @@ namespace System.Data.ODB
         { 
             object instance = Activator.CreateInstance(type);
 
-            string table = OdbMapping.GetTableName(type);
+            string name = OdbMapping.GetTableName(type);
 
-            string alias = this.Diagram.GetAlias(table);
+            OdbTable table = this.Diagram.FindTable(name);
 
-            if (alias == "")
+            if (table == null)
                 throw new OdbException("Not found table");
 
-            foreach (OdbColumn col in OdbMapping.GetColumn(type))              
+            foreach (OdbColumn col in table.Columns)              
             { 
                 if (!col.IsForeignkey)
                 {                   
-                    string colName = alias + "." + col.Name;
+                    string colName = table.Alias + "." + col.Name;
 
                     object value = this.sr[colName] == DBNull.Value ? null : this.sr[colName];
 

@@ -10,15 +10,20 @@ namespace System.Data.ODB
         public int Length { get; set; }       
         public bool IsAuto { get; set; }
         public bool IsNullable { get; set; }      
-        public bool NotMapped { get; set; }
-       
+        public bool IsOmitted { get; set; }
+        public bool IsKey { get; set; }
+        public bool IsModel { get; set; }
+
         public ColumnAttribute()
         {
             Name = "";
+            Length = 0;
+
             IsAuto = false;               
             IsNullable = true;
-            NotMapped = false;
-            Length = 0;
+            IsOmitted = false;
+            IsKey = false;
+            IsModel = false;            
         }
     }
 }

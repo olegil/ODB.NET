@@ -8,13 +8,13 @@ namespace System.Data.ODB
 {
     public class OdbTree
     {
-        private List<OdbTable> _list;
+        private Dictionary<string, OdbTable> _list;
 
         private List<string> _cols;
 
         private StringBuilder sb;
 
-        public OdbTree(List<OdbTable> list)
+        public OdbTree(Dictionary<string, OdbTable> list)
         {
             this._list = list;
 
@@ -31,7 +31,7 @@ namespace System.Data.ODB
                 this._cols.Add(col + " AS " + OdbDiagram.Enclosed(root.Alias + "." + c.Name));
             }
 
-            foreach(OdbTable child in this._list)
+            foreach(OdbTable child in this._list.Values)
             {
                 if (child.Parent == root.Id)
                 {  
@@ -44,7 +44,7 @@ namespace System.Data.ODB
 
         public string GetChildNodes(OdbTable root)
         {             
-            foreach (OdbTable child in this._list)
+            foreach (OdbTable child in this._list.Values)
             {
                 if (child.Parent == root.Id)
                 {

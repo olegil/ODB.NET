@@ -43,7 +43,7 @@ namespace UnitTest
             OdbConfig.Depth = 2;
             MyRepository respo = new MyRepository();
 
-            User user = respo.Collect<Order>().First<User>();
+            User user = respo.Collect<User>().First<User>();
 
             Assert.IsTrue(user != null);
         }

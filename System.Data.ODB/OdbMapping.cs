@@ -54,7 +54,7 @@ namespace System.Data.ODB
                 PropertyInfo prop = propes[i];
                 ColumnAttribute colAttr = GetColAttribute(prop);
 
-                if (!colAttr.NotMapped)
+                if (!colAttr.IsOmitted)
                 {
                     OdbColumn col = new OdbColumn();
 
@@ -64,17 +64,19 @@ namespace System.Data.ODB
 
                     if (prop.Name == "Id")
                     {
-                        col.IsPrimaryKey = true;
+                        col.Attribute.IsKey = true;
+                        col.Attribute.IsAuto = true;
                     }
                     else
                     {
                         if (DataType.OdbEntity.IsAssignableFrom(prop.PropertyType))
                         {
-                            col.IsForeignkey = true;
+                            col.Attribute.IsModel = true;
 
+                            //class_name_Id
                             if (string.IsNullOrEmpty(colAttr.Name))
                                 col.Name = prop.PropertyType.Name + "Id";
-                        }
+                        }                       
                     }               
 
                     yield return col;

@@ -7,23 +7,25 @@ namespace System.Data.ODB
     public class OdbDiagram 
     {
         private OdbTable root; 
-        public List<OdbTable> Nodes { get; set; }
+        public Dictionary<string, OdbTable> Nodes { get; set; }
        
         private int level;
 
         public OdbDiagram(OdbTable rootNode)
         {
             this.root = rootNode;
-           
-            this.Nodes = new List<OdbTable>();
 
-            this.Nodes.Add(root);
+            this.Nodes = new Dictionary<string, OdbTable>();
 
             this.level = 1; 
         }
  
         public void Visit()
         {
+            this.Nodes.Clear();
+
+            this.Nodes.Add(this.root.Name, this.root);
+
             this.visitTree(this.root);
         }
         
@@ -31,7 +33,7 @@ namespace System.Data.ODB
         { 
             foreach (OdbColumn col in node.Columns)
             {
-                if (col.IsForeignkey && this.level < OdbConfig.Depth)
+                if (col.Attribute.IsModel && this.level < OdbConfig.Depth)
                 { 
                     this.level++;
 
@@ -40,7 +42,7 @@ namespace System.Data.ODB
                     childNode.Id = this.Nodes.Count;
                     childNode.Parent = node.Id;
 
-                    this.Nodes.Add(childNode);
+                    this.Nodes.Add(childNode.Name, childNode);
  
                     this.visitTree(childNode);
  
@@ -50,17 +52,16 @@ namespace System.Data.ODB
         }
 
         public OdbTree CreateTree()
-        {
-            OdbTree tree = new OdbTree(this.Nodes);
-
-            return tree;
+        { 
+            return new OdbTree(this.Nodes);
         }
         
         public OdbTable FindTable(string name)
         {
-            OdbTable table = this.Nodes.Find(delegate (OdbTable t) { return t.Name == name; });
+            if (this.Nodes.ContainsKey(name))
+                return this.Nodes[name];
 
-            return table;         
+            return null;         
         }
 
         public OdbTable FindTable(Type type)

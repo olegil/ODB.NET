@@ -70,7 +70,7 @@ namespace System.Data.ODB.SQLite
 
             ColumnAttribute attr = col.Attribute;
 
-            if (col.IsPrimaryKey)
+            if (attr.IsKey)
             {
                 sql += " INTEGER PRIMARY KEY";
             }
@@ -80,12 +80,12 @@ namespace System.Data.ODB.SQLite
 
             }
 
-            if (attr.IsAuto || col.IsPrimaryKey)
+            if (attr.IsAuto)
             {
                 sql += " AUTOINCREMENT";
             }
 
-            if (attr.IsNullable && !col.IsForeignkey && !col.IsPrimaryKey)
+            if (attr.IsNullable && !attr.IsModel && !attr.IsKey)
             {
                 sql += " NULL";
             }

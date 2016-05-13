@@ -71,17 +71,17 @@ namespace System.Data.ODB.MSSQL
                     sql += "(MAX)";
             }
 
-            if (attr.IsAuto || col.IsPrimaryKey)
+            if (attr.IsAuto)
             {
                 sql += " IDENTITY(1,1)";
             }
 
-            if (col.IsPrimaryKey)
+            if (attr.IsKey)
             {
                 sql += " PRIMARY KEY";
             }
 
-            if (attr.IsNullable && !col.IsForeignkey && !col.IsPrimaryKey)
+            if (attr.IsNullable && !attr.IsModel && !attr.IsKey)
             {
                 sql += " NULL";
             }

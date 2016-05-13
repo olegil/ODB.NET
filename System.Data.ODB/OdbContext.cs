@@ -130,7 +130,7 @@ namespace System.Data.ODB
 
             foreach (OdbColumn col in OdbMapping.GetColumn(type))
             { 
-                if (col.IsForeignkey)
+                if (col.Attribute.IsModel)
                 {   
                     this.Create(col.GetMapType());
                 }
@@ -158,7 +158,7 @@ namespace System.Data.ODB
         {
             foreach (OdbColumn col in OdbMapping.GetColumn(type))
             {
-                if (col.IsForeignkey)
+                if (col.Attribute.IsModel)
                 {
                     this.Drop(col.GetMapType());
                 } 

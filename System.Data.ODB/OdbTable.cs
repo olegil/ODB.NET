@@ -8,14 +8,10 @@ namespace System.Data.ODB
 {
     public class OdbTable
     {
-        public int Id { get; set; }  
-               
+        public int Id { get; set; }                 
         public string Name { get; private set; }
-
-        public Type EntiType { get; set; }
-         
         public int Parent { get; set; }
-                         
+        public Type EntiType { get; set; }                           
         public List<OdbColumn> Columns { get; set; }
 
         public string Alias
@@ -32,7 +28,6 @@ namespace System.Data.ODB
             this.Parent = -1;
 
             this.EntiType = type;
-
             this.Name = OdbMapping.GetTableName(type);
 
             this.Columns = new List<OdbColumn>();

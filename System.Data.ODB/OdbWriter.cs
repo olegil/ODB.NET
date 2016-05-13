@@ -34,11 +34,11 @@ namespace System.Data.ODB
             {
                 ColumnAttribute attr = col.Attribute;
 
-                if (!attr.IsAuto && !col.IsPrimaryKey)
+                if (!attr.IsAuto)
                 {
                     object b = col.GetValue(t);
 
-                    if (!col.IsForeignkey)
+                    if (!attr.IsModel)
                     {
                         if (b == null)
                             b = DBNull.Value;

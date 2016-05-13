@@ -72,13 +72,13 @@ namespace System.Data.ODB
 
             foreach (OdbColumn col in table.Columns)              
             { 
-                if (!col.IsForeignkey)
+                if (!col.Attribute.IsModel)
                 {                   
                     string colName = table.Alias + "." + col.Name;
 
                     object value = this.sr[colName] == DBNull.Value ? null : this.sr[colName];
 
-                    if (col.IsPrimaryKey)
+                    if (col.Attribute.IsKey)
                         value = Convert.ToInt32(value);
 
                     col.SetValue(instance as IEntity, value);

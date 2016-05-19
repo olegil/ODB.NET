@@ -51,7 +51,7 @@ namespace System.Data.ODB
                     string table = OdbDiagram.Enclosed(child.Name) + " AS " + child.Alias;
 
                     string key = OdbDiagram.Enclosed(child.Alias) + "." + OdbDiagram.Enclosed("Id");
-                    string val = OdbDiagram.Enclosed(root.Alias) + "." + OdbDiagram.Enclosed(child.Name + "Id");
+                    string val = OdbDiagram.Enclosed(root.Alias) + "." + OdbDiagram.Enclosed(child.Foreignkey);
 
                     this.sb.Append(" LEFT JOIN " + table + " ON " + key + " = " + val);
 

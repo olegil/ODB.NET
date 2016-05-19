@@ -10,7 +10,11 @@ namespace System.Data.ODB
     {
         IDbConnection Connection { get; set; }
         IDbTransaction Transaction { get; set; }
-       
+
+        void StartTrans();
+        void CommitTrans();
+        void RollBack();
+
         IQuery Query();
 
         IQuery Select<T>() where T : IEntity;

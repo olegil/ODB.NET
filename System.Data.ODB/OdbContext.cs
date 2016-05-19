@@ -56,7 +56,7 @@ namespace System.Data.ODB
         
         #region Transaction
 
-        public void StartTrans()
+        public virtual void StartTrans()
         {
             if (this.Connection.State != ConnectionState.Open)
                 this.Connection.Open();
@@ -64,7 +64,7 @@ namespace System.Data.ODB
             this.Transaction = this.Connection.BeginTransaction(); 
         }
 
-        public void CommitTrans()
+        public virtual void CommitTrans()
         {
             try
             {
@@ -76,7 +76,7 @@ namespace System.Data.ODB
             }
         }
 
-        public void RollBack()
+        public virtual void RollBack()
         {
             try
             {
@@ -128,7 +128,7 @@ namespace System.Data.ODB
         { 
             List<string> cols = new List<string>();
 
-            foreach (OdbColumn col in OdbMapping.GetColumn(type))
+            foreach (OdbColumn col in OdbMapping.GetColumns(type))
             { 
                 if (col.Attribute.IsModel)
                 {   
@@ -156,7 +156,7 @@ namespace System.Data.ODB
 
         private void Drop(Type type)
         {
-            foreach (OdbColumn col in OdbMapping.GetColumn(type))
+            foreach (OdbColumn col in OdbMapping.GetColumns(type))
             {
                 if (col.Attribute.IsModel)
                 {

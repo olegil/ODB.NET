@@ -19,7 +19,7 @@ namespace UnitTest
         {
             MyRepository respo = new MyRepository();
                        
-            respo.Create<OrderItem>();
+            respo.Create<Event>();
         
             int a = 1;
             Assert.IsTrue(a == 1);        

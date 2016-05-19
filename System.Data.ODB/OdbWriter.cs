@@ -30,7 +30,7 @@ namespace System.Data.ODB
             List<string> ps = new List<string>();
  
             //begin foreach
-            foreach (OdbColumn col in OdbMapping.GetColumn(type))
+            foreach (OdbColumn col in OdbMapping.GetColumns(type))
             {
                 ColumnAttribute attr = col.Attribute;
 

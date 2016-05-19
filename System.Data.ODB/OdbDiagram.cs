@@ -41,6 +41,7 @@ namespace System.Data.ODB
 
                     childNode.Id = this.Nodes.Count;
                     childNode.Parent = node.Id;
+                    childNode.Foreignkey = col.Name; 
 
                     this.Nodes.Add(childNode.Name, childNode);
  

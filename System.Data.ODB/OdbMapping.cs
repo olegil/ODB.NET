@@ -37,7 +37,7 @@ namespace System.Data.ODB
         {
             OdbTable table = new OdbTable(type);
 
-            foreach (OdbColumn col in GetColumn(type))
+            foreach (OdbColumn col in GetColumns(type))
             {
                 table.Columns.Add(col);
             }
@@ -45,7 +45,7 @@ namespace System.Data.ODB
             return table;
         }
 
-        public static IEnumerable<OdbColumn> GetColumn(Type type)
+        public static IEnumerable<OdbColumn> GetColumns(Type type)
         {
             PropertyInfo[] propes = type.GetProperties();
 

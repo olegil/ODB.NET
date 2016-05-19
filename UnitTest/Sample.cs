@@ -52,36 +52,72 @@ namespace UnitTest
         public string BID { get; set; }
     }
 
-    public class MyRepository : OdbContainer
+    public class Event : IEntity
+    {
+        public int Id { get; set; }
+        public int No { get; set; }
+        public string Name { get; set; }
+        public DateTime Date { get; set; }
+        public string Time { get; set; }
+        public string Venue { get; set; }
+    }
+
+    public class MyRepository 
     {
         public QueryTable<User> Users { get; set; }
         public QueryTable<OrderItem> OrderItems { get; set; }
         public QueryTable<Order> Orders { get; set; }
 
-        public MyRepository() : base(new System.Data.ODB.SQLite.SQLiteContext(new SQLiteConnection(string.Format(Command.SqliteconnStr, "test1.db3"))))
+        private IDbContext Db;
+
+        public MyRepository()  
         {         
-            SQLiteProvider provider = new SQLiteProvider(this.DbConext);
+            this.Db = new SQLiteDataContext(new SQLiteConnection(string.Format(Command.SqliteconnStr, "test1.db3")));
+
+            SQLiteProvider provider = new SQLiteProvider(this.Db);
 
             this.Users = provider.Create<User>();
             this.OrderItems = provider.Create<OrderItem>();
             this.Orders = provider.Create<Order>();
         }
 
+        #region ORM        
+        public virtual void Create<T>() where T : IEntity
+        {
+            this.Db.ExecuteCreate<T>();
+        }
+
+        public virtual void Remove<T>() where T : IEntity
+        {
+            this.Db.ExecuteDrop<T>();
+        }
+
+        public virtual void Store<T>(T t) where T : IEntity
+        {
+            this.Db.ExecutePersist(t);
+        }
+
+        public virtual int Delete<T>(T t) where T : IEntity
+        {
+            return this.Db.ExecuteDelete(t);
+        }
+        #endregion
+
         public bool Clear<T>() where T : IEntity
         {
-            int n = this.DbConext.Query().Delete<T>().Execute();
+            int n = this.Db.Query().Delete<T>().Execute();
 
             return n > 0;
         }
 
         public IQuery Collect<T>() where T : IEntity
         {
-            return this.DbConext.Select<T>();
+            return this.Db.Select<T>();
         }
 
         public IQuery Count<T>() where T : IEntity
         {
-            return this.DbConext.Query().Count("Id").From<T>();
+            return this.Db.Query().Count("Id").From<T>();
         }
     }
 }

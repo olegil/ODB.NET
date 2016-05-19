@@ -11,7 +11,9 @@ namespace System.Data.ODB
         public int Id { get; set; }                 
         public string Name { get; private set; }
         public int Parent { get; set; }
-        public Type EntiType { get; set; }                           
+        public string Foreignkey { get; set; }
+        public Type EntiType { get; set; }      
+           
         public List<OdbColumn> Columns { get; set; }
 
         public string Alias

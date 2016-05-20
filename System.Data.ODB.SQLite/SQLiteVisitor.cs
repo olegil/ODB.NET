@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Reflection;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Data.SQLite;
@@ -269,7 +270,23 @@ namespace System.Data.ODB.SQLite
             }
             else
             {
-                this.Visit(m.Expression);
+                object container = ((ConstantExpression)m.Expression).Value;
+
+                var member = m.Member;
+
+                if (member is FieldInfo)
+                {
+                    object value = ((FieldInfo)member).GetValue(container);
+
+                    this.Visit(Expression.Constant(value));
+                }
+
+                if (member is PropertyInfo)
+                {
+                    object value = ((PropertyInfo)member).GetValue(container, null);
+
+                    this.Visit(Expression.Constant(value));
+                }                
             }
           
             return m;

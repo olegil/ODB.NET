@@ -19,7 +19,7 @@ namespace UnitTest
             string name = "hen";
 
             var query = from o in db.Orders
-                        where o.User.Name.Contains(name)    
+                        where o.User.Name.Contains("stephen")    
                         select o;
 
             var list = query.ToList();

@@ -12,27 +12,29 @@ namespace UnitTest
     {         
         [TestMethod]
         public void TestExpression()
-        {
-            OdbConfig.Depth = 3;
-
+        {            
             MyRepository db = new MyRepository();
 
-            var query = from o in db.Orders
-                        where o.Id == 1                        
-                        select o.User;
+            int a = 1;
+            string name = "hen";
 
-            string sql = query.ToString(); 
- 
-            Assert.IsTrue(sql.Length > 0);
+            var query = from o in db.Orders
+                        where o.User.Name.Contains(name)    
+                        select o;
+
+            var list = query.ToList();
+
+            Assert.IsTrue(list.Count > 0);
         }        
 
         [TestMethod]
         public void TestString()
-        {
-            OdbConfig.Depth = 2;
-            MyRepository respo = new MyRepository();
+        {           
+            MyRepository db = new MyRepository();
 
-            var query = from u in respo.Users
+            db.SetDepth(2);
+
+            var query = from u in db.Users
                         where u.Name.Contains("hen") || u.Name.Length > 2 || u.Name.Trim() == "avsd" || u.Name != null && u.Name.ToLower() == "haweg" || u.Name.Equals("gasdhasdh")
                         select u.Shipping; 
 
@@ -49,12 +51,10 @@ namespace UnitTest
             MyRepository respo = new MyRepository();
 
             var query = respo.Users.Where(p => p.Name.Substring(3, 2) == "Chan");
-                        
-            //string sql = query.ToString();
 
-            var list = query.ToList();
+            var user = query.First();
  
-            Assert.IsTrue(list.Count > 0);
+            Assert.IsNotNull(user);
         }
     }
 }

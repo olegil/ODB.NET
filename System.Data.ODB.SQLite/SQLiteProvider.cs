@@ -5,7 +5,7 @@ namespace System.Data.ODB.SQLite
 {
     public class SQLiteProvider : QueryProvider
     { 
-        public SQLiteProvider(IDbContext db) : base(db)
+        public SQLiteProvider(IContext db) : base(db)
         {
         } 
 

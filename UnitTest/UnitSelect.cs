@@ -39,11 +39,12 @@ namespace UnitTest
 
         [TestMethod]
         public void TestFirst()
-        {
-            OdbConfig.Depth = 2;
-            MyRepository respo = new MyRepository();
+        { 
+            MyRepository db = new MyRepository();
 
-            User user = respo.Collect<User>().First<User>();
+            db.SetDepth(2);
+
+            User user = db.Collect<User>().First<User>();
 
             Assert.IsTrue(user != null);
         }
@@ -51,9 +52,11 @@ namespace UnitTest
         [TestMethod]
         public void TestLike()
         { 
-            MyRepository respo = new MyRepository();
+            MyRepository db = new MyRepository();
 
-            IQuery q = respo.Collect<User>().Where("Name").Like("Peter");
+            db.SetDepth(2);
+
+            IQuery q = db.Collect<User>().Where("Name").Like("Peter");
 
             List<User> list = q.ToList<User>();
              

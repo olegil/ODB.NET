@@ -260,14 +260,18 @@ namespace System.Data.ODB.SQLite
                 this.Visit(m.Expression);
                 this.SqlBuilder.Append(")");
             }
-            else
+            else if (m.Expression.NodeType != ExpressionType.Constant)
             {
                 MemberVisitor mv = new MemberVisitor(m);
                 mv.Diagram = this.Diagram;
 
                 this.SqlBuilder.Append(mv.ToString());
             }
-
+            else
+            {
+                this.Visit(m.Expression);
+            }
+          
             return m;
         }
 

@@ -12,6 +12,8 @@ namespace System.Data.ODB
 
         public OdbDiagram Diagram { get; set; }
 
+        public int Depth { get; set; }
+
         private int level;
           
         public OdbReader(IDataReader reader, OdbDiagram diagram)
@@ -20,6 +22,7 @@ namespace System.Data.ODB
 
             this.Diagram = diagram;
 
+            this.Depth = 1;
             this.level = 1;
         }
 
@@ -85,7 +88,7 @@ namespace System.Data.ODB
                 }
                 else
                 {  
-                    if (this.level < OdbConfig.Depth)
+                    if (this.level < this.Depth)
                     {
                         this.level++; 
 

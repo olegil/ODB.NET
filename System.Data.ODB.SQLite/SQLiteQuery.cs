@@ -7,7 +7,7 @@ namespace System.Data.ODB.SQLite
 {
     public class SQLiteQuery : OdbQuery        
     {      
-        public SQLiteQuery(IDbContext db) 
+        public SQLiteQuery(IContext db) 
         {
             this.Db = db;
         }

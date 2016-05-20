@@ -33,7 +33,7 @@ namespace System.Data.ODB
         { 
             foreach (OdbColumn col in node.Columns)
             {
-                if (col.Attribute.IsModel && this.level < OdbConfig.Depth)
+                if (col.Attribute.IsModel)
                 { 
                     this.level++;
 

@@ -8,9 +8,9 @@ namespace System.Data.ODB
     public class OdbWriter
     {
         private int level;
-        private IDbContext _db;
+        private IContext _db;
 
-        public OdbWriter(IDbContext db)
+        public OdbWriter(IContext db)
         {
             this._db = db;
             this.level = 1;
@@ -45,7 +45,7 @@ namespace System.Data.ODB
                     }
                     else
                     {
-                        if (this.level < OdbConfig.Depth)
+                        if (this.level < this._db.Depth)
                         {
                             if (b != null)
                             {                                 
@@ -59,7 +59,11 @@ namespace System.Data.ODB
                         }
                         else
                         {
-                            b = null;
+                            //if not update
+                            if (b != null)
+                            {
+                                b = (b as IEntity).Id;
+                            }                        
                         }
                     }
 

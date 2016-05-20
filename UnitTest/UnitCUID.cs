@@ -50,7 +50,7 @@ namespace UnitTest
 
             if (user != null)
             {                
-                a = respo.Delete(user);
+                respo.Delete(user);
             }
  
             Assert.IsTrue(a > 0);

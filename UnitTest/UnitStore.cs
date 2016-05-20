@@ -13,10 +13,10 @@ namespace UnitTest
     { 
         [TestMethod]
         public void TestStore1()
-        {
-            OdbConfig.Depth = 2;
-
+        { 
             MyRepository db = new MyRepository();
+                        
+            db.SetDepth(2);
 
             Address ship = new Address() { City = "TKO", Street = "Po Lam", Flat = "Metro City" };
             User user = new User() { Balance = 200.00d, Age = 26, Birthday = DateTime.Now, Name = "Stephen Ieong", IsPermit = true, Shipping = ship };
@@ -34,17 +34,17 @@ namespace UnitTest
         {
             MyRepository respo = new MyRepository();
 
-            OdbConfig.Depth = 3;
+            respo.SetDepth(2);
 
             User user = respo.Collect<User>().First<User>();
 
             Product p = respo.Collect<Product>().Where("name").Eq("Pencil").First<Product>();
 
-            Order order = new Order() { PackageID = "23523145",  User = user, Date = DateTime.Now };
+            Order order = new Order() { PackageID = "34523728",  User = user, Date = DateTime.Now };
 
             OrderItem item = new OrderItem() { Order = order, Item = p, Quantity = 2, CreateDate = DateTime.Now };
       
-            respo.Store(item);      
+            respo.Store(order);      
  
             Assert.IsTrue(user.Id > 0);
         }
@@ -54,7 +54,7 @@ namespace UnitTest
         {
             MyRepository respo = new MyRepository();
 
-            OdbConfig.Depth = 2;
+            respo.SetDepth(2);
 
             OrderItem o = respo.Collect<OrderItem>().First<OrderItem>();
  

@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 
 namespace System.Data.ODB
 {
-    public abstract class OdbContext : IDbContext, IDisposable
+    public abstract class OdbContext : IContext
     {
+        public int Depth { get; set; }
+
         public IDbConnection Connection { get; set; }
         public IDbTransaction Transaction { get; set; }
   
@@ -16,7 +18,9 @@ namespace System.Data.ODB
      
         public OdbContext(IDbConnection Connection)
         {
-            this.Connection = Connection; 
+            this.Connection = Connection;
+
+            this.Depth = 1;
         }
 
         protected virtual void Dispose(bool disposing)
@@ -181,14 +185,22 @@ namespace System.Data.ODB
             {
                 IList<T> list = new List<T>();
 
-                using (OdbReader<T> edr = new OdbReader<T>(rdr, query.Diagram))
+                OdbReader<T> odr = new OdbReader<T>(rdr, query.Diagram);
+
+                odr.Depth = this.Depth;
+
+                try
                 {
-                    foreach (T t in edr)
+                    foreach (T t in odr)
                     {
                         list.Add(t);
                     }
                 }
-
+                catch
+                {
+                    throw;
+                }
+                
                 return list;
             }
         }

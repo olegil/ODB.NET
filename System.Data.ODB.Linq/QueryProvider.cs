@@ -5,9 +5,9 @@ namespace System.Data.ODB.Linq
 {
     public abstract class QueryProvider : IQueryProvider
     {
-        protected IDbContext Db { get; set; } 
+        protected IContext Db { get; set; } 
 
-        protected QueryProvider(IDbContext db)
+        protected QueryProvider(IContext db)
         {
             this.Db = db; 
         }

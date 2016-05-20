@@ -8,7 +8,7 @@ namespace System.Data.ODB
     {
         protected StringBuilder _sb;
 
-        protected IDbContext Db;
+        protected IContext Db;
 
         public List<IDbDataParameter> Parameters { get; set; }
 

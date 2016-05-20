@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace System.Data.ODB.Linq
@@ -12,7 +13,7 @@ namespace System.Data.ODB.Linq
   
         protected override Expression VisitMemberAccess(MemberExpression m)
         {
-            if (m.Expression != null)
+            if (m.NodeType != ExpressionType.Constant)
             {
                 string name = OdbMapping.GetTableName(m.Expression.Type);
              
@@ -20,10 +21,10 @@ namespace System.Data.ODB.Linq
 
                 this.SqlBuilder.Append(Enclosed(table.Alias) + "." + Enclosed(m.Member.Name));
             }
-
+          
             return m;
-        } 
-
+        }
+               
         public override string ToString()
         {
             if (this.Diagram == null)

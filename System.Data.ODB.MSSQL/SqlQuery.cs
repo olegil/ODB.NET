@@ -12,7 +12,7 @@ namespace System.Data.ODB.MSSQL
         private int _skip = 0;
         private int _take = 0;
 
-        public SqlQuery(IDbContext db)  
+        public SqlQuery(IContext db)  
         {
             this.Db = db;
         }

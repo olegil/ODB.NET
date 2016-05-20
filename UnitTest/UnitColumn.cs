@@ -9,9 +9,7 @@ namespace UnitTest
     {
         [TestMethod]
         public void TestColumns()
-        {
-            OdbConfig.Depth = 3;
-
+        {             
             OdbTable table = OdbMapping.CreateTable(typeof(User));
 
             OdbDiagram dg = new OdbDiagram(table);
@@ -26,9 +24,7 @@ namespace UnitTest
 
         [TestMethod]
         public void TestJoinTable()
-        {
-            OdbConfig.Depth = 3;
-
+        { 
             OdbTable table = OdbMapping.CreateTable(typeof(User));
 
             OdbDiagram dg = new OdbDiagram(table);

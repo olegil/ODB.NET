@@ -62,62 +62,38 @@ namespace UnitTest
         public string Venue { get; set; }
     }
 
-    public class MyRepository 
+    public class MyRepository : OdbContainer
     {
         public QueryTable<User> Users { get; set; }
         public QueryTable<OrderItem> OrderItems { get; set; }
         public QueryTable<Order> Orders { get; set; }
-
-        private IDbContext Db;
-
+ 
         public MyRepository()  
         {         
-            this.Db = new SQLiteDataContext(new SQLiteConnection(string.Format(Command.SqliteconnStr, "test1.db3")));
+            this.Context = new SQLiteDataContext(new SQLiteConnection(string.Format(Command.SqliteconnStr, "test1.db3")));
 
-            SQLiteProvider provider = new SQLiteProvider(this.Db);
+            SQLiteProvider provider = new SQLiteProvider(this.Context);
 
             this.Users = provider.Create<User>();
             this.OrderItems = provider.Create<OrderItem>();
             this.Orders = provider.Create<Order>();
         }
-
-        #region ORM        
-        public virtual void Create<T>() where T : IEntity
-        {
-            this.Db.ExecuteCreate<T>();
-        }
-
-        public virtual void Remove<T>() where T : IEntity
-        {
-            this.Db.ExecuteDrop<T>();
-        }
-
-        public virtual void Store<T>(T t) where T : IEntity
-        {
-            this.Db.ExecutePersist(t);
-        }
-
-        public virtual int Delete<T>(T t) where T : IEntity
-        {
-            return this.Db.ExecuteDelete(t);
-        }
-        #endregion
-
+    
         public bool Clear<T>() where T : IEntity
         {
-            int n = this.Db.Query().Delete<T>().Execute();
+            int n = this.Context.Query().Delete<T>().Execute();
 
             return n > 0;
         }
 
         public IQuery Collect<T>() where T : IEntity
         {
-            return this.Db.Select<T>();
+            return this.Context.Select<T>();
         }
 
         public IQuery Count<T>() where T : IEntity
         {
-            return this.Db.Query().Count("Id").From<T>();
+            return this.Context.Query().Count("Id").From<T>();
         }
     }
 }

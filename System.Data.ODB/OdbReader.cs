@@ -16,13 +16,14 @@ namespace System.Data.ODB
 
         private int level;
           
-        public OdbReader(IDataReader reader, OdbDiagram diagram)
+        public OdbReader(IDataReader reader, OdbDiagram diagram, int depth)
         {
             this.sr = reader;
 
             this.Diagram = diagram;
 
-            this.Depth = 1;
+            this.Depth = depth;
+
             this.level = 1;
         }
 
@@ -102,7 +103,7 @@ namespace System.Data.ODB
                 }    
             }
 
-            //type.GetProperty("IsPersisted").SetValue(instance, true, null);
+            //type.GetProperty("ModelState").SetValue(instance, true, null);
 
             return instance;
         }

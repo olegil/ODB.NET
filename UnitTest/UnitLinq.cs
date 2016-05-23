@@ -15,12 +15,13 @@ namespace UnitTest
         {            
             MyRepository db = new MyRepository();
 
-            int a = 1;
+            db.SetDepth(2);
+             
             string name = "hen";
 
             var query = from o in db.Orders
-                        where o.User.Name.Contains("stephen")    
-                        select o;
+                        where o.User.Name.Contains(name)    
+                        select o.User;
 
             var list = query.ToList();
 
@@ -43,18 +44,26 @@ namespace UnitTest
             var list = query.ToList();
 
             Assert.IsNotNull(list);
-        } 
+        }
 
         [TestMethod]
         public void TestLingList()
         {
-            MyRepository respo = new MyRepository();
+            MyRepository db = new MyRepository();
 
-            var query = respo.Users.Where(p => p.Name.Substring(3, 2) == "Chan");
+            string name = "asdf";
 
-            var user = query.First();
+            int a = 1;
+
+            User user = new User() { Name = "Peter", Shipping = new Address() { Street = "HK" } };
+
+            var query = from o in db.Orders
+                        where o.User.Name == user.Shipping.Street || o.User.Age > a
+                        select o; 
+
+            var rs = query.ToList().FirstOrDefault();
  
-            Assert.IsNotNull(user);
+            Assert.IsNotNull(rs);
         }
     }
 }

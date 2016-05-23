@@ -19,11 +19,11 @@ namespace UnitTest
             db.SetDepth(2);
 
             Address ship = new Address() { City = "TKO", Street = "Po Lam", Flat = "Metro City" };
-            User user = new User() { Balance = 200.00d, Age = 26, Birthday = DateTime.Now, Name = "Stephen Ieong", IsPermit = true, Shipping = ship };
+            User user = new User() { Balance = 200.00d, Age = 26, Birthday = DateTime.Now, Name = "Peter Chan", IsPermit = true, Shipping = ship };
 
             Product p = new Product() { BID = "4523462347", Name = "Pencil", Price = 5.00d };
 
-            db.Store(user);
+          //  db.Store(user);
             db.Store(p);
 
             Assert.IsNotNull(user);
@@ -34,17 +34,19 @@ namespace UnitTest
         {
             MyRepository respo = new MyRepository();
 
-            respo.SetDepth(2);
+            respo.SetDepth(3);
 
             User user = respo.Collect<User>().First<User>();
 
-            Product p = respo.Collect<Product>().Where("name").Eq("Pencil").First<Product>();
+            user.ModelState = false;
 
-            Order order = new Order() { PackageID = "34523728",  User = user, Date = DateTime.Now };
+            Order order = new Order() { PackageID = "832578-w7",  User = user, Date = DateTime.Now };
+
+            Product p = respo.Collect<Product>().Where("name").Eq("Pencil").First<Product>();
 
             OrderItem item = new OrderItem() { Order = order, Item = p, Quantity = 2, CreateDate = DateTime.Now };
       
-            respo.Store(order);      
+            respo.Store(item);      
  
             Assert.IsTrue(user.Id > 0);
         }
@@ -56,10 +58,15 @@ namespace UnitTest
 
             respo.SetDepth(2);
 
-            OrderItem o = respo.Collect<OrderItem>().First<OrderItem>();
- 
-            Assert.IsNotNull(o.Order);
-        }
+            User user = respo.Collect<User>().First<User>();
 
+            Address address = new Address() { City = "NT", Street = "Po Lam Road" };
+
+            user.Shipping = address;
+
+            respo.Store(user);
+
+            Assert.IsNotNull(user);
+        }
     }
 }

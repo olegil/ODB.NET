@@ -85,7 +85,7 @@ namespace System.Data.ODB.SQLite
                 sql += " AUTOINCREMENT";
             }
 
-            if (attr.IsNullable && !attr.IsModel && !attr.IsKey)
+            if (attr.IsNullable && !attr.IsKey)
             {
                 sql += " NULL";
             }

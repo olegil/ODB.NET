@@ -42,6 +42,7 @@
     <Compile Include="IContext.cs" />
     <Compile Include="OdbContainer.cs" />
     <Compile Include="OdbContext.cs" />
+    <Compile Include="OdbEntity.cs" />
     <Compile Include="OdbException.cs" />
     <Compile Include="OdbTable.cs" />
     <Compile Include="OdbDiagram.cs" />

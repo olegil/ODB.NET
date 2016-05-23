@@ -7,20 +7,15 @@ using System.Threading.Tasks;
 namespace System.Data.ODB
 {
     public class OdbContainer : IContainer, IDisposable
-    {
-        protected IContext Context;
-
+    {         
         private bool disposed = false;
 
+        protected IContext Context;
+        
         public OdbContainer()
         {
         }
-
-        public OdbContainer(IContext context)
-        {
-            this.Context = context;
-        }
-
+               
         protected virtual void Dispose(bool disposing)
         {
             if (!this.disposed)

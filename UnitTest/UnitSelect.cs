@@ -42,11 +42,11 @@ namespace UnitTest
         { 
             MyRepository db = new MyRepository();
 
-            db.SetDepth(2);
+            db.SetDepth(3);
 
-            User user = db.Collect<User>().First<User>();
+            OrderItem order = db.Collect<OrderItem>().First<OrderItem>(); 
 
-            Assert.IsTrue(user != null);
+            Assert.IsTrue(order != null);
         }
 
         [TestMethod]

@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 namespace System.Data.ODB.SQLite
 {
     public class SQLiteProvider : QueryProvider
-    { 
+    {         
         public SQLiteProvider(IContext db) : base(db)
         {
         } 
@@ -22,17 +22,22 @@ namespace System.Data.ODB.SQLite
         public override object Execute(Expression expression)
         {
             Type type = TypeSystem.GetElementType(expression.Type);
-  
+
             SQLiteVisitor visitor = new SQLiteVisitor(expression);
-        
-            IDataReader sr = this.Db.ExecuteReader(visitor.ToString(), visitor.GetParamters());
+
+            IDataReader dataReader = this.Db.ExecuteReader(visitor.ToString(), visitor.GetParamters());
 
             if (DataType.OdbEntity.IsAssignableFrom(type))
             {
-                return Activator.CreateInstance(typeof(OdbReader<>).MakeGenericType(type), new object[] { sr, visitor.Diagram });
+                return Activator.CreateInstance(typeof(OdbReader<>).MakeGenericType(type), new object[] { dataReader, visitor.Diagram, this.Db.Depth });
             }
+            else
+            {
+                DataTable dt = new DataTable();
+                dt.Load(dataReader);
 
-            return null;            
+                return dt;
+            }
         }
 
         public override string GetSQL(Expression expression)

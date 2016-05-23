@@ -6,62 +6,63 @@ using System.Data.SQLite;
 
 namespace UnitTest
 {   
-    public class User : IEntity
-    { 
-        public int Id { get; set; }
+    public class User : OdbEntity
+    {  
         public double Balance { get; set; }         
         public bool IsPermit { get; set; }
         public int Age { get; set; }
         public string Name { get; set; }         
-        public DateTime Birthday { get; set; } 
+        public DateTime Birthday { get; set; }
+ 
         public Address Shipping { get; set; }
     }
       
-    public class Address : IEntity
-    {
-        public int Id { get; set; }
+    public class Address : OdbEntity
+    { 
         public string Flat { get; set; }        
         public string Street { get; set; } 
         public string City { get; set; }
     }    
 
-    public class Order : IEntity
-    {
-        public int Id { get; set; }
-        public User User { get; set; }
+    public class Order : OdbEntity
+    {  
         public string PackageID { get; set; } 
         public string Remark { get; set; }                 
         public decimal Total { get; set; }
-        public DateTime Date { get; set; }     
+        public DateTime Date { get; set; }
+
+        [Column(IsNullable = false)]
+        public User User { get; set; }
     }
 
-    public class OrderItem : IEntity
-    {
-        public int Id { get; set; }
-        public Order Order { get; set; }        
+    public class OrderItem : OdbEntity
+    { 
+        [Column(IsNullable = false)]
+        public Order Order { get; set; }
+
+        [Column(IsNullable = false)]
         public Product Item { get; set; }
+
         public int Quantity { get; set; }
         public DateTime CreateDate { get; set; }  
     }
      
-    public class Product : IEntity
-    {
-        public int Id { get; set; }
+    public class Product : OdbEntity
+    { 
         public string Name { get; set; }
         public double Price { get; set; }
         public string BID { get; set; }
     }
 
-    public class Event : IEntity
-    {
-        public int Id { get; set; }
+    public class Event : OdbEntity
+    { 
         public int No { get; set; }
         public string Name { get; set; }
         public DateTime Date { get; set; }
         public string Time { get; set; }
         public string Venue { get; set; }
     }
-
+ 
     public class MyRepository : OdbContainer
     {
         public QueryTable<User> Users { get; set; }
@@ -76,7 +77,7 @@ namespace UnitTest
 
             this.Users = provider.Create<User>();
             this.OrderItems = provider.Create<OrderItem>();
-            this.Orders = provider.Create<Order>();
+            this.Orders = provider.Create<Order>();                        
         }
     
         public bool Clear<T>() where T : IEntity

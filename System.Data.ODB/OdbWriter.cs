@@ -18,6 +18,11 @@ namespace System.Data.ODB
 
         public int Write<T>(T t) where T : IEntity
         {
+            if (t.Id == 0 && t.ModelState == false)
+            {
+                throw new OdbException("Entity ModelState can not be set false.");
+            }
+
             Type type = t.GetType();
 
             string table = OdbMapping.GetTableName(type);
@@ -50,21 +55,13 @@ namespace System.Data.ODB
                             if (b != null)
                             {                                 
                                 this.level++;
-
+                            
                                 //return id
                                 b = this.Write(b as IEntity);
-
+                                
                                 this.level--;
                             }
-                        }
-                        else
-                        {
-                            //if not update
-                            if (b != null)
-                            {
-                                b = (b as IEntity).Id;
-                            }                        
-                        }
+                        }                         
                     }
 
                     string name = "@p" + n;
@@ -85,25 +82,32 @@ namespace System.Data.ODB
             }
             //end 
 
-            if (t.Id != 0)
+            if (t.ModelState)
             {
-                for (int i = 0; i < cols.Count; i++)
+                if (t.Id != 0)
                 {
-                    cols[i] = cols[i] + "=" + ps[i];
+                    for (int i = 0; i < cols.Count; i++)
+                    {
+                        cols[i] = cols[i] + "=" + ps[i];
+                    }
+
+                    query.Update(table).Set(cols.ToArray()).Where("Id").Eq(t.Id);
+
+                    query.Execute();
+
+                    return t.Id;
                 }
+                else
+                {
+                    query.Insert(table, cols.ToArray()).Values(ps.ToArray());
 
-                query.Update(table).Set(cols.ToArray()).Where("Id").Eq(t.Id);
-
-                query.Execute();
-
-                return t.Id;
+                    return query.ExecuteReturnId();
+                }
             }
             else
             {
-                query.Insert(table, cols.ToArray()).Values(ps.ToArray());
-
-                return query.ExecuteReturnId();
-            }
+                return t.Id;               
+            }                    
         }
     }
 }

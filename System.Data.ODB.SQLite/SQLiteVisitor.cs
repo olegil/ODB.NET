@@ -29,9 +29,9 @@ namespace System.Data.ODB.SQLite
 
                 SelectVisitor se = new SelectVisitor(lambda.Body);
                 se.Diagram = this.Diagram;
-
+                             
+                this.SqlBuilder.Insert(0, se.ToString());
                 this.SqlBuilder.Insert(0, "SELECT ");
-                this.SqlBuilder.Insert(7, se.ToString());                
             }
             else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
             {
@@ -261,37 +261,43 @@ namespace System.Data.ODB.SQLite
                 this.Visit(m.Expression);
                 this.SqlBuilder.Append(")");
             }
-            else if (m.Expression.NodeType != ExpressionType.Constant)
-            {
-                MemberVisitor mv = new MemberVisitor(m);
-                mv.Diagram = this.Diagram;
+            else if ((m.Member as FieldInfo) != null)
+            { 
+                var fieldInfo = m.Member as FieldInfo;
+                var constant = m.Expression as ConstantExpression;
 
-                this.SqlBuilder.Append(mv.ToString());
-            }
-            else
-            {
-                object container = ((ConstantExpression)m.Expression).Value;
-
-                var member = m.Member;
-
-                if (member is FieldInfo)
+                if (fieldInfo != null & constant != null)
                 {
-                    object value = ((FieldInfo)member).GetValue(container);
+                    object value = fieldInfo.GetValue(constant.Value);
+
+                    this.Visit(Expression.Constant(value));
+                } 
+            }
+            else if ((m.Member as PropertyInfo) != null)
+            {
+                try
+                {
+                    var mx = (MemberExpression)m.Expression;
+
+                    var constant = (ConstantExpression)mx.Expression;
+
+                    var fieldInfoValue = ((FieldInfo)mx.Member).GetValue(constant.Value);
+                    object value = ((PropertyInfo)m.Member).GetValue(fieldInfoValue, null);
 
                     this.Visit(Expression.Constant(value));
                 }
+                catch
+                { 
+                    MemberVisitor mv = new MemberVisitor(m);
+                    mv.Diagram = this.Diagram;
 
-                if (member is PropertyInfo)
-                {
-                    object value = ((PropertyInfo)member).GetValue(container, null);
-
-                    this.Visit(Expression.Constant(value));
-                }                
+                    this.SqlBuilder.Append(mv.ToString());
+                }
             }
-          
+
             return m;
         }
-
+         
         private string Bind(int index, object b)
         {
             string name = "@p" + index;

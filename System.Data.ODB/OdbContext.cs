@@ -13,16 +13,16 @@ namespace System.Data.ODB
 
         public IDbConnection Connection { get; set; }
         public IDbTransaction Transaction { get; set; }
-  
+
         private bool disposed = false;
      
-        public OdbContext(IDbConnection Connection)
+        public OdbContext(IDbConnection connection)
         {
-            this.Connection = Connection;
+            this.Connection = connection;
 
             this.Depth = 1;
         }
-
+ 
         protected virtual void Dispose(bool disposing)
         {
             if (!this.disposed)
@@ -185,10 +185,8 @@ namespace System.Data.ODB
             {
                 IList<T> list = new List<T>();
 
-                OdbReader<T> odr = new OdbReader<T>(rdr, query.Diagram);
-
-                odr.Depth = this.Depth;
-
+                OdbReader<T> odr = new OdbReader<T>(rdr, query.Diagram, this.Depth);
+ 
                 try
                 {
                     foreach (T t in odr)
@@ -271,9 +269,7 @@ namespace System.Data.ODB
                 return rdr;
             }
             catch
-            {
-                this.Connection.Close();
-
+            { 
                 throw;
             }
         } 

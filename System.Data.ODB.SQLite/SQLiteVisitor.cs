@@ -275,29 +275,58 @@ namespace System.Data.ODB.SQLite
             }
             else if ((m.Member as PropertyInfo) != null)
             {
-                try
-                {
-                    var mx = (MemberExpression)m.Expression;
-
-                    var constant = (ConstantExpression)mx.Expression;
-
-                    var fieldInfoValue = ((FieldInfo)mx.Member).GetValue(constant.Value);
-                    object value = ((PropertyInfo)m.Member).GetValue(fieldInfoValue, null);
-
-                    this.Visit(Expression.Constant(value));
-                }
-                catch
+                MemberExpression mx = m;
+                string name = m.Member.Name;
+                
+                while (mx.Expression is MemberExpression)
                 { 
+                    mx = mx.Expression as MemberExpression;
+                    name = mx.Member.Name + "." + name;
+                }
+
+                if (mx.Expression.NodeType == ExpressionType.Parameter)
+                {
                     MemberVisitor mv = new MemberVisitor(m);
                     mv.Diagram = this.Diagram;
 
                     this.SqlBuilder.Append(mv.ToString());
                 }
+                else if (mx.Expression.NodeType == ExpressionType.Constant)
+                {
+                    var constant = (ConstantExpression)mx.Expression;
+
+                    var obj = ((FieldInfo)mx.Member).GetValue(constant.Value);
+
+                    //object value = ((PropertyInfo)m.Member).GetValue(fieldInfoValue, null);
+
+                    var value = GetMemberValue(obj, name);
+
+                    this.Visit(Expression.Constant(value));
+                }                 
             }
 
             return m;
         }
-         
+
+        public static object GetMemberValue(object obj, string propertyName)
+        {
+            var _propertyNames = propertyName.Split('.');
+
+            for (var i = 1; i < _propertyNames.Length; i++)
+            {
+                if (obj != null)
+                {
+                    var _propertyInfo = obj.GetType().GetProperty(_propertyNames[i]);
+                    if (_propertyInfo != null)
+                        obj = _propertyInfo.GetValue(obj);
+                    else
+                        obj = null;
+                }
+            }
+
+            return obj;
+        }
+
         private string Bind(int index, object b)
         {
             string name = "@p" + index;

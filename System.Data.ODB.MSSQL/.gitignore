@@ -2,5 +2,5 @@
 *.pdb
 *.cache
 *.txt
- bin/
- obj/
+bin/
+obj/

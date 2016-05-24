@@ -241,6 +241,7 @@ namespace System.Data.ODB.SQLite
             }
             else
             {
+
                 string name = this.Bind(this._index++, c.Value);
 
                 this.SqlBuilder.Append(name);
@@ -261,7 +262,7 @@ namespace System.Data.ODB.SQLite
                 this.Visit(m.Expression);
                 this.SqlBuilder.Append(")");
             }
-            else if ((m.Member as FieldInfo) != null)
+            else if (m.Member is FieldInfo)
             { 
                 var fieldInfo = m.Member as FieldInfo;
                 var constant = m.Expression as ConstantExpression;
@@ -273,7 +274,7 @@ namespace System.Data.ODB.SQLite
                     this.Visit(Expression.Constant(value));
                 } 
             }
-            else if ((m.Member as PropertyInfo) != null)
+            else if (m.Member is PropertyInfo)
             {
                 MemberExpression mx = m;
                 string name = m.Member.Name;
@@ -284,8 +285,10 @@ namespace System.Data.ODB.SQLite
                     name = mx.Member.Name + "." + name;
                 }
 
+                //check root expression type
                 if (mx.Expression.NodeType == ExpressionType.Parameter)
                 {
+                    //dont get root
                     MemberVisitor mv = new MemberVisitor(m);
                     mv.Diagram = this.Diagram;
 
@@ -302,7 +305,7 @@ namespace System.Data.ODB.SQLite
                     var value = GetMemberValue(obj, name);
 
                     this.Visit(Expression.Constant(value));
-                }                 
+                }
             }
 
             return m;
@@ -310,18 +313,19 @@ namespace System.Data.ODB.SQLite
 
         public static object GetMemberValue(object obj, string propertyName)
         {
-            var _propertyNames = propertyName.Split('.');
+            var propertys = propertyName.Split('.');
 
-            for (var i = 1; i < _propertyNames.Length; i++)
+             //skip first
+            int i = 1;
+
+            while(obj != null && i < propertys.Length)
             {
-                if (obj != null)
-                {
-                    var _propertyInfo = obj.GetType().GetProperty(_propertyNames[i]);
-                    if (_propertyInfo != null)
-                        obj = _propertyInfo.GetValue(obj);
-                    else
-                        obj = null;
-                }
+                var pi = obj.GetType().GetProperty(propertys[i++]);
+
+                if (pi != null)
+                    obj = pi.GetValue(obj);
+                else
+                    obj = null;
             }
 
             return obj;

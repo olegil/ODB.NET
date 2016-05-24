@@ -60,9 +60,7 @@ namespace UnitTest
 
             User user = respo.Collect<User>().First<User>();
 
-            Address address = new Address() { City = "NT", Street = "Po Lam Road" };
-
-            user.Shipping = address;
+            user.Shipping.ModelState = false;
 
             respo.Store(user);
 

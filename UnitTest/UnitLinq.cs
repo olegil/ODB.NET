@@ -51,14 +51,14 @@ namespace UnitTest
         {
             MyRepository db = new MyRepository();
 
-            string name = "asdf";
+            string name = "hen";
 
             int a = 1;
 
             User user = new User() { Name = "Peter", Shipping = new Address() { Street = "HK" } };
 
             var query = from o in db.Orders
-                        where o.Remark == name || o.User.Age > a
+                        where o.User.Name == name || o.User.Age > a
                         select o; 
 
             var rs = query.ToList().FirstOrDefault();

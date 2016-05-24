@@ -41,7 +41,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.SQLite">
-      <HintPath>D:\Code\sqlite\System.Data.SQLite.dll</HintPath>
+      <HintPath>..\..\..\Dev\SQLite\Net4\System.Data.SQLite.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Choose>
@@ -97,9 +97,6 @@
       <Project>{229d7b4e-1718-4c93-9d69-ec68938a9731}</Project>
       <Name>System.Data.ODB</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

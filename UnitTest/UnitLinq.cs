@@ -57,9 +57,9 @@ namespace UnitTest
 
             User user = new User() { Name = "Peter", Shipping = new Address() { Street = "HK" } };
 
-            var query = from o in db.Orders
-                        where o.User.Name == name || o.User.Age > a
-                        select o; 
+            var query = from o in db.Users
+                        where o.Name == name || o.Age > a
+                        select new ViewModel() { Name = o.Name }; 
 
             var rs = query.ToList().FirstOrDefault();
  

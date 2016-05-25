@@ -91,6 +91,19 @@ namespace System.Data.ODB.SQLite
             return nex;
         }
 
+        protected override Expression VisitMemberInit(MemberInitExpression init)
+        {
+            NewExpression n = this.VisitNew(init.NewExpression);
+            IEnumerable<MemberBinding> bindings = this.VisitBindingList(init.Bindings);
+
+            if (n != init.NewExpression || bindings != init.Bindings)
+            {
+                return Expression.MemberInit(n, bindings);
+            }
+
+            return init;
+        }
+
         protected virtual IEnumerable<string> VisitMemberList(ReadOnlyCollection<Expression> original)
         { 
             for (int i = 0, n = original.Count; i < n; i++)

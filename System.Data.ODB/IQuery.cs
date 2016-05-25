@@ -43,7 +43,7 @@ namespace System.Data.ODB
 
         OdbDiagram Diagram { get; set; }
 
-        DataSet Result();
+        DataTable Result();
         T First<T>() where T : IEntity;
         List<T> ToList<T>() where T : IEntity;
         int Execute();

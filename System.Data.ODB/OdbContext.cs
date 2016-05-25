@@ -252,9 +252,7 @@ namespace System.Data.ODB
 
             return cmd;
         }
-         
-        public abstract DataSet ExecuteDataSet(string sql, params IDbDataParameter[] cmdParms);
- 
+     
         public IDataReader ExecuteReader(string sql, params IDbDataParameter[] cmdParms)
         {
             //create a command 

@@ -307,11 +307,18 @@ namespace System.Data.ODB
             return this;
         }
   
-        public abstract T First<T>() where T : IEntity;        
+        public abstract T First<T>() where T : IEntity;
 
-        public DataSet Result()
+        public DataTable Result()
         {
-            return this.Db.ExecuteDataSet(this.ToString(), this.Parameters.ToArray());
+            using (IDataReader rdr = this.Db.ExecuteReader(this.ToString(), this.Parameters.ToArray()))
+            {
+                DataTable dt = new DataTable();
+
+                dt.Load(rdr);
+
+                return dt;
+            }
         }
  
         public List<T> ToList<T>() where T : IEntity

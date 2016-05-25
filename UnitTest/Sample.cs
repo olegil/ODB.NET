@@ -62,6 +62,11 @@ namespace UnitTest
         public string Time { get; set; }
         public string Venue { get; set; }
     }
+
+    public class ViewModel
+    {
+        public string Name { get; set; }
+    }
  
     public class MyRepository : OdbContainer
     {

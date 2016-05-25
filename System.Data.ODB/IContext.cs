@@ -28,7 +28,6 @@ namespace System.Data.ODB
    
         int ExecuteNonQuery(string sql, params IDbDataParameter[] cmdParms);
         IDataReader ExecuteReader(string sql, params IDbDataParameter[] cmdParms);
-        DataSet ExecuteDataSet(string sql, params IDbDataParameter[] cmdParms);
         T ExecuteScalar<T>(string sql, params IDbDataParameter[] cmdParms);
 
         IDbDataParameter CreateParameter();

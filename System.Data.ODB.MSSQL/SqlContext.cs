@@ -22,39 +22,7 @@ namespace System.Data.ODB.MSSQL
             string sql = "IF OBJECT_ID('[{0}]', 'U') IS NOT NULL DROP TABLE [{1}];";
 
             this.ExecuteNonQuery(string.Format(sql, table, table));
-        }
-         
-        public override DataSet ExecuteDataSet(string sql, params IDbDataParameter[] commandParameters)
-        {
-            //create a command and prepare it for execution
-            IDbCommand cmd = SetCommand(this.Connection, this.Transaction, sql, commandParameters);
-
-            //create the DataAdapter & DataSet 
-            SqlDataAdapter da = new SqlDataAdapter(cmd as SqlClient.SqlCommand);
-
-            DataSet ds = new DataSet();
-
-            try
-            {
-                //fill the DataSet using default values for DataTable names
-                da.Fill(ds);
-
-                cmd.Parameters.Clear();
-            }
-            catch
-            {
-                this.Connection.Close();
-
-                throw;
-            }
-            finally
-            {
-                da.Dispose();
-            }
-
-            //return the dataset
-            return ds;
-        }
+        }               
 
         public override string SqlDefine(OdbColumn col)
         {

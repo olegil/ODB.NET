@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PredicateBuilder.cs" />
     <Compile Include="IOdbVisitor.cs" />
     <Compile Include="MemberVisitor.cs" />
     <Compile Include="TypeSystem.cs" />

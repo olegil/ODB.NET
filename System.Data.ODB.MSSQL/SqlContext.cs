@@ -44,12 +44,12 @@ namespace System.Data.ODB.MSSQL
                 sql += " IDENTITY(1,1)";
             }
 
-            if (attr.IsKey)
+            if (attr.IsPrimaryKey)
             {
                 sql += " PRIMARY KEY";
             }
 
-            if (attr.IsNullable && !attr.IsModel && !attr.IsKey)
+            if (attr.IsNullable && !attr.IsPrimaryKey && !attr.IsForeignKey)
             {
                 sql += " NULL";
             }

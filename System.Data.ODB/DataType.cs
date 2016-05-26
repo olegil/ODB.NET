@@ -20,6 +20,7 @@ namespace System.Data.ODB
         public static readonly Type Char = typeof(char);
         public static readonly Type Bool = typeof(bool);
         public static readonly Type DateTime = typeof(DateTime);
+        public static readonly Type NullableDateTime = typeof(DateTime?);
         public static readonly Type Guid = typeof(Guid);
         public static readonly Type OdbEntity = typeof(IEntity);
     }

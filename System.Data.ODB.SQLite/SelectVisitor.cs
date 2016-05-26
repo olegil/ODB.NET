@@ -14,19 +14,27 @@ namespace System.Data.ODB.SQLite
             this._expression = expression; 
         }
 
+        protected override Expression VisitParameter(ParameterExpression p)
+        {
+            if (DataType.OdbEntity.IsAssignableFrom(p.Type))
+            {
+                string[] cols = this.GetColumns(p.Type);
+
+                this.SqlBuilder.Append(string.Join(",", cols));
+            }
+
+            return p;
+        }
+
         protected override Expression VisitMemberAccess(MemberExpression m)
         {
             Type type = m.Type;
 
             if (DataType.OdbEntity.IsAssignableFrom(type))
-            {               
-                OdbTable table = this.Diagram.FindTable(type);
+            {
+                string[] cols = this.GetColumns(type);
 
-                OdbTree tree = this.Diagram.CreateTree();
-
-                string cols = string.Join(",", tree.GetNodeColumns(table));
-
-                this.SqlBuilder.Append(cols);
+                this.SqlBuilder.Append(string.Join(",", cols));
             }
             else
             {
@@ -113,6 +121,15 @@ namespace System.Data.ODB.SQLite
 
                 yield return mv.ToString();
             }          
+        }
+
+        private string[] GetColumns(Type type)
+        {
+            OdbTable table = this.Diagram.FindTable(type);
+
+            OdbTree tree = this.Diagram.CreateTree();
+
+            return tree.GetNodeColumns(table);
         }
 
         public override string ToString()

@@ -35,13 +35,13 @@ namespace System.Data.ODB.SQLite
         public override string SqlDefine(OdbColumn col)
         {
             string dbtype = this.TypeMapping(col.GetDbType());
-            string sql = "[" + col.Name + "]";
+            string sql = "[" + col.Name + "] ";
 
             ColumnAttribute attr = col.Attribute;
 
-            if (attr.IsKey)
+            if (attr.IsPrimaryKey)
             {
-                sql += " INTEGER PRIMARY KEY";
+                sql += "INTEGER PRIMARY KEY";
             }
             else
             {
@@ -54,7 +54,7 @@ namespace System.Data.ODB.SQLite
                 sql += " AUTOINCREMENT";
             }
 
-            if (attr.IsNullable && !attr.IsKey)
+            if (attr.IsNullable && !attr.IsPrimaryKey && !attr.IsForeignKey)
             {
                 sql += " NULL";
             }

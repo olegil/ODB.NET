@@ -6,11 +6,11 @@ using System.Resources;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("SQLite.Net ORM")]
-[assembly: AssemblyDescription("Database Object-Relational Mapping")]
+[assembly: AssemblyTitle("System.Data.ODB.SQLite")]
+[assembly: AssemblyDescription("Object-Relational Database Mapper")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("PPM")]
-[assembly: AssemblyProduct("SQLite.Net ORM")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("System.Data.ODB.SQLite")]
 [assembly: AssemblyCopyright("Stephen Yeung")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -33,6 +33,6 @@ using System.Resources;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("3.1.0.0")]
-[assembly: AssemblyFileVersion("3.1.0.0")]
+[assembly: AssemblyVersion("1.5.0.0")]
+[assembly: AssemblyFileVersion("1.5.0.0")]
 [assembly: NeutralResourcesLanguageAttribute("en-US")]

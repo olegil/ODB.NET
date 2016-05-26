@@ -64,7 +64,7 @@ namespace System.Data.ODB
 
                     if (prop.Name == "Id")
                     {
-                        col.Attribute.IsKey = true;
+                        col.Attribute.IsPrimaryKey = true;
                         col.Attribute.IsAuto = true;
                     }
                     else

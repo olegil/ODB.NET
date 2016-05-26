@@ -47,7 +47,7 @@ namespace UnitTest
         }
 
         [TestMethod]
-        public void TestLingList()
+        public void TestPredicate()
         {
             MyRepository db = new MyRepository();
 
@@ -55,11 +55,15 @@ namespace UnitTest
 
             int a = 1;
 
-            User user = new User() { Name = "Peter", Shipping = new Address() { Street = "HK" } };
+            User user = new User() { Name = "Peter", Age = 12, Shipping = new Address() { Street = "HK" } };
 
-            var query = from o in db.Users
-                        where o.Name == name || o.Age > a
-                        select new ViewModel() { Name = o.Name }; 
+            var predicate = PredicateBuilder.True<User>();
+
+            predicate = predicate.And(u => u.Name == name);
+            predicate = predicate.And(u => u.Age > a);
+            predicate = predicate.And(u => u.Shipping.Street == user.Shipping.Street);
+
+            var query = db.Users.Where(predicate);                      
 
             var rs = query.ToList().FirstOrDefault();
  

@@ -66,7 +66,7 @@ namespace System.Data.ODB
             {
                 return DbType.Boolean;
             }
-            else if (t == DataType.DateTime) 
+            else if (t == DataType.DateTime || t == DataType.NullableDateTime) 
             {
                 return DbType.DateTime;
             }

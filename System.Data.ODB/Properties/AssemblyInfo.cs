@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("System.Data.ORM")]
-[assembly: AssemblyDescription("Database Object-Relational Mapping")]
+[assembly: AssemblyTitle("System.Data.ODB")]
+[assembly: AssemblyDescription("Object-Relational Database Mapper")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("PPM")]
-[assembly: AssemblyProduct("System.Data.ORM")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("System.Data.ODB")]
 [assembly: AssemblyCopyright("Stephen Yeung")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

@@ -19,7 +19,7 @@ namespace UnitTest
         {
             MyRepository respo = new MyRepository();
                        
-            respo.Create<OrderItem>();
+            respo.Create<User>();
         
             int a = 1;
             Assert.IsTrue(a == 1);        
@@ -30,10 +30,10 @@ namespace UnitTest
         {
             MyRepository respo = new MyRepository();
 
-            respo.Remove<OrderItem>();
-            respo.Remove<Order>();
+           // respo.Remove<OrderItem>();
+           // respo.Remove<Order>();
             respo.Remove<User>();
-            respo.Remove<Address>();
+           // respo.Remove<Address>();
 
             int a = 1;
             Assert.IsTrue(a == 1);

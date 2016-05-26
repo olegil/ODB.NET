@@ -82,7 +82,7 @@ namespace System.Data.ODB
 
                     object value = this.sr[colName] == DBNull.Value ? null : this.sr[colName];
 
-                    if (col.Attribute.IsKey)
+                    if (col.Attribute.IsPrimaryKey)
                         value = Convert.ToInt32(value);
 
                     col.SetValue(instance as IEntity, value);

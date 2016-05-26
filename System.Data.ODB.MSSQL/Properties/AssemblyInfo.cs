@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("System.Data.ODB.MSSQL")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Object-Relational Database Mapper")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("System.Data.ODB.MSSQL")]
-[assembly: AssemblyCopyright("Copyright ©  2016")]
+[assembly: AssemblyCopyright("Stephen Yeung")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

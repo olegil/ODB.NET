@@ -12,7 +12,7 @@ namespace UnitTest
         public bool IsPermit { get; set; }
         public int Age { get; set; }
         public string Name { get; set; }         
-        public DateTime Birthday { get; set; }
+        public DateTime? Birthday { get; set; }
  
         public Address Shipping { get; set; }
     }
@@ -31,20 +31,20 @@ namespace UnitTest
         public decimal Total { get; set; }
         public DateTime Date { get; set; }
 
-        [Column(IsNullable = false)]
+        [Column(IsForeignKey = true)]
         public User User { get; set; }
     }
 
     public class OrderItem : OdbEntity
-    { 
-        [Column(IsNullable = false)]
+    {
+        public int Quantity { get; set; }
+        public DateTime CreateDate { get; set; }
+
+        [Column(IsForeignKey = true)]
         public Order Order { get; set; }
 
-        [Column(IsNullable = false)]
+        [Column(IsForeignKey = true)]
         public Product Item { get; set; }
-
-        public int Quantity { get; set; }
-        public DateTime CreateDate { get; set; }  
     }
      
     public class Product : OdbEntity

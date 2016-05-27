@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("System.Data.ODB")]
-[assembly: AssemblyCopyright("Stephen Yeung")]
+[assembly: AssemblyCopyright("Stephen Yeung @2016 Hong Kong")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

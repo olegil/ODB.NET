@@ -6,27 +6,34 @@ namespace System.Data.ODB
 {
     public class OdbDiagram 
     {
-        private OdbTable root; 
+        public int Depth { get; set; }
+        public OdbTable Root { get; set; } 
         public Dictionary<string, OdbTable> Nodes { get; set; }
-       
+
+        private StringBuilder _sb;
+        private List<string> _cols;
+
         private int level;
 
-        public OdbDiagram(OdbTable rootNode)
+        public OdbDiagram(Type type, int depth)
         {
-            this.root = rootNode;
+            this.Depth = depth; 
 
-            this.Nodes = new Dictionary<string, OdbTable>();
+            this.Root = OdbMapping.CreateTable(type);
+            this.Root.Diagram = this;
 
-            this.level = 1; 
+            this.Nodes = new Dictionary<string, OdbTable>(); 
         }
  
         public void Visit()
         {
             this.Nodes.Clear();
 
-            this.Nodes.Add(this.root.Name, this.root);
+            this.Nodes.Add(this.Root.Name, this.Root);
 
-            this.visitTree(this.root);
+            this.level = 1;
+
+            this.visitTree(this.Root);
         }
         
         private void visitTree(OdbTable node)
@@ -34,29 +41,29 @@ namespace System.Data.ODB
             foreach (OdbColumn col in node.Columns)
             {
                 if (col.Attribute.IsModel)
-                { 
-                    this.level++;
+                {
+                    if (this.level < this.Depth)
+                    {
+                        this.level++;
 
-                    OdbTable childNode = OdbMapping.CreateTable(col.GetMapType());
+                        OdbTable childNode = OdbMapping.CreateTable(col.GetMapType());
 
-                    childNode.Id = this.Nodes.Count;
-                    childNode.Parent = node.Id;
-                    childNode.Foreignkey = col.Name; 
+                        childNode.Id = this.Nodes.Count;
+                        childNode.Parent = node.Id;
+                        childNode.Foreignkey = col.Name;
 
-                    this.Nodes.Add(childNode.Name, childNode);
- 
-                    this.visitTree(childNode);
- 
-                    this.level--;                                        
+                        childNode.Diagram = this;
+
+                        this.Nodes.Add(childNode.Name, childNode);
+
+                        this.visitTree(childNode);
+
+                        this.level--;
+                    }                    
                 }                      
             }
         }
-
-        public OdbTree CreateTree()
-        { 
-            return new OdbTree(this.Nodes);
-        }
-        
+                      
         public OdbTable FindTable(string name)
         {
             if (this.Nodes.ContainsKey(name))
@@ -70,6 +77,60 @@ namespace System.Data.ODB
             string name = OdbMapping.GetTableName(type);
 
             return this.FindTable(name);
+        }
+
+        public string GetChildNodes(OdbTable root)
+        {
+            this._sb = new StringBuilder();
+
+            this.getNodes(root);
+
+            return this._sb.ToString();          
+        }
+
+        private void getNodes(OdbTable root)
+        {
+            foreach (OdbTable child in this.Nodes.Values)
+            {
+                if (child.Parent == root.Id)
+                {
+                    string table = Enclosed(child.Name) + " AS " + child.Alias;
+
+                    string key = Enclosed(child.Alias) + "." + Enclosed("Id");
+                    string val = Enclosed(root.Alias) + "." + Enclosed(child.Foreignkey);
+
+                    this._sb.Append(" LEFT JOIN " + table + " ON " + key + " = " + val);
+
+                    this.getNodes(child);
+                }
+            }
+        }
+
+        public string[] GetColumns(OdbTable root)
+        {
+            this._cols = new List<string>();
+
+            this.getColumns(root);
+
+            return this._cols.ToArray();
+        }
+
+        private void getColumns(OdbTable root)
+        {
+            foreach (OdbColumn c in root.Columns)
+            {
+                string col = OdbDiagram.Enclosed(root.Alias) + "." + OdbDiagram.Enclosed(c.Name);
+
+                this._cols.Add(col + " AS " + OdbDiagram.Enclosed(root.Alias + "." + c.Name));
+            }
+
+            foreach (OdbTable child in this.Nodes.Values)
+            {
+                if (child.Parent == root.Id)
+                {
+                    this.getColumns(child);
+                }
+            } 
         }
 
         public static string Enclosed(string str)

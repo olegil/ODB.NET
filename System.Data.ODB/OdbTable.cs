@@ -8,13 +8,15 @@ namespace System.Data.ODB
 {
     public class OdbTable
     {
-        public int Id { get; set; }                 
-        public string Name { get; private set; }
+        public int Id { get; set; }  
+        public string Name { get; set; }
         public int Parent { get; set; }
         public string Foreignkey { get; set; }
-        public Type EntiType { get; set; }      
+        public Type EntityType { get; set; }      
            
         public List<OdbColumn> Columns { get; set; }
+
+        public OdbDiagram Diagram { get; set; }
 
         public string Alias
         {
@@ -22,17 +24,26 @@ namespace System.Data.ODB
             {
                 return "T" + this.Id;
             }
-        }
+        }         
 
         public OdbTable(Type type)
         {
             this.Id = 0;
             this.Parent = -1;
-
-            this.EntiType = type;
-            this.Name = OdbMapping.GetTableName(type);
+            this.EntityType = type;         
+            this.Name = OdbMapping.GetTableName(this.EntityType);
 
             this.Columns = new List<OdbColumn>();
-        }                  
+        }     
+
+        public string GetChilds()
+        {
+            return Diagram.GetChildNodes(this);
+        }
+
+        public string[] GetAllColums()
+        {
+            return Diagram.GetColumns(this);
+        }
     }
 }

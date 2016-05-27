@@ -1,6 +1,4 @@
-﻿using System.Text;
-using System.Linq.Expressions;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data.SQLite;
 
 namespace System.Data.ODB.SQLite

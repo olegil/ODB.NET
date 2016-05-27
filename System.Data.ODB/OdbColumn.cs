@@ -8,7 +8,7 @@ namespace System.Data.ODB
     {
         public string Name { get; set; }
         public PropertyInfo Property { get; set; }
-        public ColumnAttribute Attribute { get; set; }
+        public OdbAttribute Attribute { get; set; }
 
 
         public OdbColumn()

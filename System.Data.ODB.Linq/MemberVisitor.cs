@@ -1,14 +1,11 @@
-﻿using System;
-using System.Linq;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 
 namespace System.Data.ODB.Linq
 {
     public class MemberVisitor : OdbVisitor
     {   
-        public MemberVisitor(Expression expression) : base()
-        { 
-            this._expression = expression;      
+        public MemberVisitor(Expression expression) : base(expression)
+        {              
         }
   
         protected override Expression VisitMemberAccess(MemberExpression m)
@@ -28,7 +25,7 @@ namespace System.Data.ODB.Linq
         public override string ToString()
         {
             if (this.Diagram == null)
-                throw new OdbException("No Table diagram."); 
+                throw new OdbException("No Table."); 
  
             this.SqlBuilder.Length = 0;
 

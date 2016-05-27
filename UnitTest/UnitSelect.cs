@@ -16,9 +16,11 @@ namespace UnitTest
         {
             MyRepository respo = new MyRepository();
  
-            IQuery q = respo.Collect<Order>();
-  
-            Assert.IsNotNull(q);
+            IQuery q = respo.Collect<User>();
+
+            User user = q.First<User>();
+
+            Assert.IsNotNull(user);
         }
 
         [TestMethod]

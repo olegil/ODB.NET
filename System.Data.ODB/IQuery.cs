@@ -1,4 +1,4 @@
-﻿using System; 
+﻿using System.Data; 
 using System.Collections.Generic;
 
 namespace System.Data.ODB
@@ -42,10 +42,12 @@ namespace System.Data.ODB
         List<IDbDataParameter> Parameters { get; set; }
 
         OdbDiagram Diagram { get; set; }
-
+        IDataReader Read();
         DataTable Result();
+
         T First<T>() where T : IEntity;
         List<T> ToList<T>() where T : IEntity;
+
         int Execute();
         int ExecuteReturnId();
         int Single();

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.ODB.SQLite", "System.Data.ODB.SQLite\System.Data.ODB.SQLite.csproj", "{C7BBBE3B-D59B-4EE8-BB85-903B4B7BB8F2}"
 EndProject

@@ -99,20 +99,16 @@ namespace System.Data.ODB
         public virtual IQuery Select<T>() where T : IEntity
         {
             Type type = typeof(T);
-
-            OdbTable table = OdbMapping.CreateTable(type);
-
-            OdbDiagram dg = new OdbDiagram(table);
+ 
+            OdbDiagram dg = new OdbDiagram(type, this.Depth);
             dg.Visit();
-
-            OdbTree tree = dg.CreateTree();
-                        
+                    
             IQuery q = this.Query();
 
             q.Diagram = dg;
 
-            q.Select(tree.GetNodeColumns(table)).From(table.Name, table.Alias);
-            q.Append(tree.GetChildNodes(table));
+            q.Select(dg.Root.GetAllColums()).From(dg.Root.Name, dg.Root.Alias);
+            q.Append(dg.Root.GetChilds());
  
             return q;
         }
@@ -185,7 +181,7 @@ namespace System.Data.ODB
             {
                 IList<T> list = new List<T>();
 
-                OdbReader<T> odr = new OdbReader<T>(rdr, query.Diagram, this.Depth);
+                OdbEntityReader<T> odr = new OdbEntityReader<T>(rdr, query.Diagram);
  
                 try
                 {

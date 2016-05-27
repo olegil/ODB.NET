@@ -12,12 +12,10 @@ namespace UnitTest
         {             
             OdbTable table = OdbMapping.CreateTable(typeof(User));
 
-            OdbDiagram dg = new OdbDiagram(table);
-            dg.Visit();
+            OdbDiagram dg = new OdbDiagram(typeof(User), 1);
+            dg.Visit(); 
 
-            OdbTree tree = dg.CreateTree();
-
-            string[] cols = tree.GetNodeColumns(table);
+            string[] cols = dg.Root.GetAllColums();
  
             Assert.IsTrue(cols.Length > 0);
         }
@@ -27,12 +25,10 @@ namespace UnitTest
         { 
             OdbTable table = OdbMapping.CreateTable(typeof(User));
 
-            OdbDiagram dg = new OdbDiagram(table);
+            OdbDiagram dg = new OdbDiagram(typeof(User), 2);
             dg.Visit();
-
-            OdbTree tree = dg.CreateTree();
-
-            string s = tree.GetChildNodes(table);
+        
+            string s = dg.Root.GetChilds();
 
             Assert.IsTrue(s.Length > 0);
         }

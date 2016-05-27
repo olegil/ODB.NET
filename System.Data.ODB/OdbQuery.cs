@@ -309,9 +309,14 @@ namespace System.Data.ODB
   
         public abstract T First<T>() where T : IEntity;
 
+        public IDataReader Read()
+        {
+            return this.Db.ExecuteReader(this.ToString(), this.Parameters.ToArray());
+        }
+
         public DataTable Result()
         {
-            using (IDataReader rdr = this.Db.ExecuteReader(this.ToString(), this.Parameters.ToArray()))
+            using (IDataReader rdr = this.Read())
             {
                 DataTable dt = new DataTable();
 

@@ -1,30 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.Serialization;
 
 namespace System.Data.ODB
 {
-    public class OdbReader<T> : IEnumerable<T>, IDisposable where T : IEntity
+    public class OdbReader<T> : IEnumerable<T>, IDisposable
     {
-        private IDataReader sr;
+        protected IDataReader sr;
 
         private bool disposed = false;
 
-        public OdbDiagram Diagram { get; set; }
-
-        public int Depth { get; set; }
-
-        private int level;
-          
-        public OdbReader(IDataReader reader, OdbDiagram diagram, int depth)
+        public OdbReader(IDataReader reader)
         {
-            this.sr = reader;
-
-            this.Diagram = diagram;
-
-            this.Depth = depth;
-
-            this.level = 1;
+            this.sr = reader; 
         }
 
         protected virtual void Dispose(bool disposing)
@@ -51,59 +40,28 @@ namespace System.Data.ODB
 
         public IEnumerator<T> GetEnumerator()
         {
-            Type type = typeof(T); 
+            Type type = typeof(T);
 
             while (this.sr.Read())
             {
-                object b = this.getEntity(type);               
-                
+                object b = this.GetEntity(type);
+
                 yield return (T)b;
             }
 
-            this.Dispose();          
+            this.Dispose();
         }
 
-        private object getEntity(Type type)
-        { 
-            object instance = Activator.CreateInstance(type);
+        public virtual object GetEntity(Type type)
+        {
+            object instance = FormatterServices.GetUninitializedObject(type);
 
-            string name = OdbMapping.GetTableName(type);
+            PropertyInfo[] list = type.GetProperties();
 
-            OdbTable table = this.Diagram.FindTable(name);
-
-            if (table == null)
-                throw new OdbException("Not found table");
-
-            foreach (OdbColumn col in table.Columns)              
-            { 
-                if (!col.Attribute.IsModel)
-                {                   
-                    string colName = table.Alias + "." + col.Name;
-
-                    object value = this.sr[colName] == DBNull.Value ? null : this.sr[colName];
-
-                    if (col.Attribute.IsPrimaryKey)
-                        value = Convert.ToInt32(value);
-
-                    col.SetValue(instance as IEntity, value);
-                }
-                else
-                {  
-                    if (this.level < this.Depth)
-                    {
-                        this.level++; 
-
-                        object b = this.getEntity(col.GetMapType());
-
-                        this.level--;
- 
-                        if ((b as IEntity).Id != 0)
-                            col.SetValue(instance as IEntity, b);
-                    }
-                }    
+            for(int i = 0; i < list.Length; i++)
+            {
+                list[i].SetValue(instance, this.sr[list[i].Name]);
             }
-
-            //type.GetProperty("ModelState").SetValue(instance, true, null);
 
             return instance;
         }
@@ -111,6 +69,6 @@ namespace System.Data.ODB
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
-        } 
+        }
     }
 }

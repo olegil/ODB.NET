@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Reflection;
+﻿using System;
 using System.Data.SQLite;
 
 namespace System.Data.ODB.SQLite
@@ -14,7 +13,7 @@ namespace System.Data.ODB.SQLite
         {
             return new SQLiteQuery(this);
         }
-
+               
         public override void Create(string table, string[] cols)
         {
             string sql = "CREATE TABLE IF NOT EXISTS [" + table + "] (\r\n" + string.Join(",\r\n", cols) + "\r\n);";
@@ -37,7 +36,7 @@ namespace System.Data.ODB.SQLite
             string dbtype = this.TypeMapping(col.GetDbType());
             string sql = "[" + col.Name + "] ";
 
-            ColumnAttribute attr = col.Attribute;
+            OdbAttribute attr = col.Attribute;
 
             if (attr.IsPrimaryKey)
             {

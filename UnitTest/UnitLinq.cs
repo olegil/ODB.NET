@@ -69,5 +69,23 @@ namespace UnitTest
  
             Assert.IsNotNull(rs);
         }
+
+        [TestMethod]
+        public void TestAnonymous()
+        {
+            MyRepository db = new MyRepository();
+
+            db.SetDepth(2);
+
+            string name = "hen";
+
+            var query = from o in db.Users
+                        where o.Name.Contains(name)
+                        select new ViewModel { Name = o.Name };
+
+            var list = query.ToList();
+
+            Assert.IsTrue(list.Count > 0);
+        }
     }
 }

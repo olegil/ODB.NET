@@ -8,15 +8,11 @@ using System.Data.ODB.Linq;
 namespace System.Data.ODB.SQLite
 {
     public class SQLiteVisitor : OdbVisitor, IOdbVisitor
-    {  
-        private List<IDbDataParameter> _parmas;
+    {          
         private string _limit = "";       
-        private int _index = 0;
-
-        public SQLiteVisitor(Expression expression) : base()
-        {
-            this._expression = expression;                       
-            this._parmas = new List<IDbDataParameter>(); 
+ 
+        public SQLiteVisitor(Expression expression) : base(expression)
+        {  
         }
          
         protected override Expression VisitMethodCall(MethodCallExpression m)
@@ -151,105 +147,7 @@ namespace System.Data.ODB.SQLite
 
             return m;
         }
-
-        protected override Expression VisitUnary(UnaryExpression u)
-        {
-            switch (u.NodeType)
-            {
-                case ExpressionType.Not:
-                    this.SqlBuilder.Append(" NOT ");
-                    this.Visit(u.Operand);
-                    break;
-
-                default:
-                    throw new NotSupportedException(string.Format("The unary operator '{0}' is not supported", u.NodeType));
-            }
-
-            return u;
-        }
-
-        protected override Expression VisitBinary(BinaryExpression b)
-        {
-            this.Visit(b.Left);
-
-            switch (b.NodeType)
-            {
-                case ExpressionType.AndAlso:
-                    this.SqlBuilder.Append(" AND ");
-                    break;
-                case ExpressionType.OrElse:
-                    this.SqlBuilder.Append(" OR ");
-                    break;
-                case ExpressionType.Equal:
-                    if (IsNullConstant(b.Right))
-                        this.SqlBuilder.Append(" IS ");
-                    else
-                        this.SqlBuilder.Append(" = ");
-                    break;
-                case ExpressionType.NotEqual:
-                    if (IsNullConstant(b.Right))
-                        this.SqlBuilder.Append(" IS NOT ");
-                    else
-                        this.SqlBuilder.Append(" <> ");
-                    break;
-                case ExpressionType.LessThan:
-                    this.SqlBuilder.Append(" < ");
-                    break;
-                case ExpressionType.LessThanOrEqual:
-                    this.SqlBuilder.Append(" <= ");
-                    break;
-                case ExpressionType.GreaterThan:
-                    this.SqlBuilder.Append(" > ");
-                    break;
-                case ExpressionType.GreaterThanOrEqual:
-                    this.SqlBuilder.Append(" >= ");
-                    break;
-                default:
-                    throw new NotSupportedException(string.Format("The binary operator '{0}' is not supported", b.NodeType));
-            }
-
-            this.Visit(b.Right);
-
-            return b;
-        }
-
-        protected override Expression VisitConstant(ConstantExpression c)
-        {
-            IQueryable q = c.Value as IQueryable;
-
-            if (q != null)
-            {
-                OdbTable table = OdbMapping.CreateTable(q.ElementType);
-
-                this.Diagram = new OdbDiagram(table);
-
-                this.Diagram.Visit();
- 
-                this.SqlBuilder.Append(" FROM ");
-                this.SqlBuilder.Append(Enclosed(table.Name));
-                this.SqlBuilder.Append(" AS " + table.Alias);
-
-                OdbTree tree = this.Diagram.CreateTree();
-
-                string joinText = tree.GetChildNodes(table);
-
-                this.SqlBuilder.Append(joinText);
-            }
-            else if (c.Value == null)
-            {
-                this.SqlBuilder.Append("NULL");
-            }
-            else
-            {
-
-                string name = this.Bind(this._index++, c.Value);
-
-                this.SqlBuilder.Append(name);
-            }
-
-            return c;
-        } 
-
+         
         protected override Expression VisitMemberAccess(MemberExpression m)
         {
             if (m.Member.DeclaringType == typeof(DateTime) && m.Member.Name == "Now")
@@ -261,77 +159,16 @@ namespace System.Data.ODB.SQLite
                 this.SqlBuilder.Append("LENGTH(");
                 this.Visit(m.Expression);
                 this.SqlBuilder.Append(")");
-            }
-            else if (m.Member is FieldInfo)
-            { 
-                var fieldInfo = m.Member as FieldInfo;
-                var constant = m.Expression as ConstantExpression;
-
-                if (fieldInfo != null & constant != null)
-                {
-                    object value = fieldInfo.GetValue(constant.Value);
-
-                    this.Visit(Expression.Constant(value));
-                } 
-            }
-            else if (m.Member is PropertyInfo)
+            }          
+            else
             {
-                MemberExpression mx = m;
-                string name = m.Member.Name;
-                
-                while (mx.Expression is MemberExpression)
-                { 
-                    mx = mx.Expression as MemberExpression;
-                    name = mx.Member.Name + "." + name;
-                }
-
-                //check root expression type
-                if (mx.Expression.NodeType == ExpressionType.Parameter)
-                {
-                    //dont get root
-                    MemberVisitor mv = new MemberVisitor(m);
-                    mv.Diagram = this.Diagram;
-
-                    this.SqlBuilder.Append(mv.ToString());
-                }
-                else if (mx.Expression.NodeType == ExpressionType.Constant)
-                {
-                    var constant = (ConstantExpression)mx.Expression;
-
-                    var obj = ((FieldInfo)mx.Member).GetValue(constant.Value);
-
-                    //object value = ((PropertyInfo)m.Member).GetValue(fieldInfoValue, null);
-
-                    var value = GetMemberValue(obj, name);
-
-                    this.Visit(Expression.Constant(value));
-                }
+                this.GetMemberValue(m);            
             }
 
             return m;
-        }
+        } 
 
-        public static object GetMemberValue(object obj, string propertyName)
-        {
-            var propertys = propertyName.Split('.');
-
-             //skip first
-            int i = 1;
-
-            while(obj != null && i < propertys.Length)
-            {
-                var pi = obj.GetType().GetProperty(propertys[i++]);
-
-                if (pi != null)
-                    obj = pi.GetValue(obj);
-                else
-                    obj = null;
-            }
-
-            return obj;
-        }
-
-        private string Bind(int index, object b)
+        public override string Bind(int index, object b)
         {
             string name = "@p" + index;
 
@@ -342,7 +179,7 @@ namespace System.Data.ODB.SQLite
             //p.Size = attr.Size;
             p.DbType = OdbSqlType.Convert(b.GetType());
 
-            this._parmas.Add(p);
+            this.Parameters.Add(p);
 
             return name;
         }
@@ -355,17 +192,12 @@ namespace System.Data.ODB.SQLite
 
                 this.SqlBuilder.Append(this._limit);
             }
-        }  
-
-        public IDbDataParameter[] GetParamters()
-        {
-            return this._parmas.ToArray();
-        }
+        }   
          
         public string GetQueryText()
         {
             this.SqlBuilder.Length = 0;
-            this._parmas.Clear();
+            this.Parameters.Clear();
             this._index = 0;
             this._limit = "";
  
@@ -379,16 +211,10 @@ namespace System.Data.ODB.SQLite
             string sql = this.GetQueryText();
 
             if (sql.IndexOf("SELECT") < 0)
-            {
+            { 
                 Type type = TypeSystem.GetElementType(this._expression.Type);
-
-                OdbTable table = this.Diagram.FindTable(type);
-
-                OdbTree tree = this.Diagram.CreateTree();
-
-                string cols = string.Join(",", tree.GetNodeColumns(table));
- 
-                sql = sql.Insert(0, "SELECT " + cols);
+                 
+                sql = sql.Insert(0, "SELECT " + this.GetColumns(type));
             }
 
             return sql;

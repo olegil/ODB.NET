@@ -1,26 +1,21 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Data.ODB.Linq;
 
 namespace System.Data.ODB.SQLite
 {
     public class SelectVisitor : OdbVisitor
     { 
-        public SelectVisitor(Expression expression) : base()
-        {
-            this._expression = expression; 
+        public SelectVisitor(Expression expression) : base(expression)
+        { 
         }
 
         protected override Expression VisitParameter(ParameterExpression p)
         {
-            if (DataType.OdbEntity.IsAssignableFrom(p.Type))
+            if (OdbType.OdbEntity.IsAssignableFrom(p.Type))
             {
-                string[] cols = this.GetColumns(p.Type);
-
-                this.SqlBuilder.Append(string.Join(",", cols));
+                this.SqlBuilder.Append(string.Join(",", this.GetColumns(p.Type)));
             }
 
             return p;
@@ -30,11 +25,9 @@ namespace System.Data.ODB.SQLite
         {
             Type type = m.Type;
 
-            if (DataType.OdbEntity.IsAssignableFrom(type))
-            {
-                string[] cols = this.GetColumns(type);
-
-                this.SqlBuilder.Append(string.Join(",", cols));
+            if (OdbType.OdbEntity.IsAssignableFrom(type))
+            { 
+                this.SqlBuilder.Append(string.Join(",", this.GetColumns(type)));
             }
             else
             {
@@ -121,23 +114,14 @@ namespace System.Data.ODB.SQLite
 
                 yield return mv.ToString();
             }          
-        }
-
-        private string[] GetColumns(Type type)
-        {
-            OdbTable table = this.Diagram.FindTable(type);
-
-            OdbTree tree = this.Diagram.CreateTree();
-
-            return tree.GetNodeColumns(table);
-        }
+        } 
 
         public override string ToString()
         {
             this.SqlBuilder.Length = 0;
            
             if (this.Diagram == null)
-                throw new OdbException("No Table diagram."); 
+                throw new OdbException("No Table."); 
 
             this.Visit(this._expression);
 

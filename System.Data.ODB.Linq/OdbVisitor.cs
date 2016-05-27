@@ -1,450 +1,218 @@
-﻿using System.Text;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Text;
+using System.Data;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace System.Data.ODB.Linq
 {
-    public abstract class OdbVisitor 
+    public abstract class OdbVisitor : ExpressionVisitor
     {
+        protected Expression _expression;
+        public int Depth { get; set; }
+
         public OdbDiagram Diagram { get; set; }
         public StringBuilder SqlBuilder { get; set; }
 
-        protected Expression _expression;
+        public List<IDbDataParameter> Parameters;
+        protected int _index = 0;
 
-        protected OdbVisitor()
+        public OdbVisitor(Expression expr)
         {
-            this.SqlBuilder = new StringBuilder(); 
+            this._expression = expr;
+
+            this.Parameters = new List<IDbDataParameter>();
+            this.SqlBuilder = new StringBuilder();
         }
-               
-        protected virtual Expression Visit(Expression exp)
+
+        protected override Expression VisitBinary(BinaryExpression b)
         {
-            if (exp == null)
-                return exp;
+            this.Visit(b.Left);
 
-            switch (exp.NodeType)
+            switch (b.NodeType)
             {
-                case ExpressionType.Negate:
-                case ExpressionType.NegateChecked:
-                case ExpressionType.Not:
-                case ExpressionType.Convert:
-                case ExpressionType.ConvertChecked:
-                case ExpressionType.ArrayLength:
-                case ExpressionType.Quote:
-                case ExpressionType.TypeAs:
-                    return this.VisitUnary((UnaryExpression)exp);
-
-                case ExpressionType.Add:
-                case ExpressionType.AddChecked:
-                case ExpressionType.Subtract:
-                case ExpressionType.SubtractChecked:
-                case ExpressionType.Multiply:
-                case ExpressionType.MultiplyChecked:
-                case ExpressionType.Divide:
-                case ExpressionType.Modulo:
-                case ExpressionType.And:
                 case ExpressionType.AndAlso:
-                case ExpressionType.Or:
+                    this.SqlBuilder.Append(" AND ");
+                    break;
                 case ExpressionType.OrElse:
-                case ExpressionType.LessThan:
-                case ExpressionType.LessThanOrEqual:
-                case ExpressionType.GreaterThan:
-                case ExpressionType.GreaterThanOrEqual:
+                    this.SqlBuilder.Append(" OR ");
+                    break;
                 case ExpressionType.Equal:
+                    if (IsNullConstant(b.Right))
+                        this.SqlBuilder.Append(" IS ");
+                    else
+                        this.SqlBuilder.Append(" = ");
+                    break;
                 case ExpressionType.NotEqual:
-                case ExpressionType.Coalesce:
-                case ExpressionType.ArrayIndex:
-                case ExpressionType.RightShift:
-                case ExpressionType.LeftShift:
-                case ExpressionType.ExclusiveOr:
-                    return this.VisitBinary((BinaryExpression)exp);
+                    if (IsNullConstant(b.Right))
+                        this.SqlBuilder.Append(" IS NOT ");
+                    else
+                        this.SqlBuilder.Append(" <> ");
+                    break;
+                case ExpressionType.LessThan:
+                    this.SqlBuilder.Append(" < ");
+                    break;
+                case ExpressionType.LessThanOrEqual:
+                    this.SqlBuilder.Append(" <= ");
+                    break;
+                case ExpressionType.GreaterThan:
+                    this.SqlBuilder.Append(" > ");
+                    break;
+                case ExpressionType.GreaterThanOrEqual:
+                    this.SqlBuilder.Append(" >= ");
+                    break;
+                default:
+                    throw new NotSupportedException(string.Format("The binary operator '{0}' is not supported", b.NodeType));
+            }
 
-                case ExpressionType.TypeIs:
-                    return this.VisitTypeIs((TypeBinaryExpression)exp);
+            this.Visit(b.Right);
 
-                case ExpressionType.Conditional:
-                    return this.VisitConditional((ConditionalExpression)exp);
+            return b;
+        } 
 
-                case ExpressionType.Constant:
-                    return this.VisitConstant((ConstantExpression)exp);
-
-                case ExpressionType.Parameter:
-                    return this.VisitParameter((ParameterExpression)exp);
-
-                case ExpressionType.MemberAccess:
-                    return this.VisitMemberAccess((MemberExpression)exp);
-
-                case ExpressionType.Call:
-                    return this.VisitMethodCall((MethodCallExpression)exp);
-
-                case ExpressionType.Lambda:
-                    return this.VisitLambda((LambdaExpression)exp);
-
-                case ExpressionType.New:
-                    return this.VisitNew((NewExpression)exp);
-
-                case ExpressionType.NewArrayInit:
-                case ExpressionType.NewArrayBounds:
-                    return this.VisitNewArray((NewArrayExpression)exp);
-
-                case ExpressionType.Invoke:
-                    return this.VisitInvocation((InvocationExpression)exp);
-
-                case ExpressionType.MemberInit:
-                    return this.VisitMemberInit((MemberInitExpression)exp);
-
-                case ExpressionType.ListInit:
-                    return this.VisitListInit((ListInitExpression)exp);
+        protected override Expression VisitUnary(UnaryExpression u)
+        {
+            switch (u.NodeType)
+            {
+                case ExpressionType.Not:
+                    this.SqlBuilder.Append(" NOT ");
+                    this.Visit(u.Operand);
+                    break;
 
                 default:
-                    throw new Exception(string.Format("Unhandled expression type: '{0}'", exp.NodeType));
-            }
-        }
-
-        protected virtual MemberBinding VisitBinding(MemberBinding binding)
-        {
-            switch (binding.BindingType)
-            {
-                case MemberBindingType.Assignment:
-                    return this.VisitMemberAssignment((MemberAssignment)binding);
-
-                case MemberBindingType.MemberBinding:
-                    return this.VisitMemberMemberBinding((MemberMemberBinding)binding);
-
-                case MemberBindingType.ListBinding:
-                    return this.VisitMemberListBinding((MemberListBinding)binding);
-
-                default:
-                    throw new Exception(string.Format("Unhandled binding type '{0}'", binding.BindingType));
-            }
-        }
-
-        protected virtual ElementInit VisitElementInitializer(ElementInit initializer)
-        {
-            ReadOnlyCollection<Expression> arguments = this.VisitExpressionList(initializer.Arguments);
-
-            if (arguments != initializer.Arguments)
-            {
-                return Expression.ElementInit(initializer.AddMethod, arguments);
-            }
-
-            return initializer;
-        }
-
-        protected virtual Expression VisitUnary(UnaryExpression u)
-        {
-            Expression operand = this.Visit(u.Operand);
-
-            if (operand != u.Operand)
-            {
-                return Expression.MakeUnary(u.NodeType, operand, u.Type, u.Method);
+                    throw new NotSupportedException(string.Format("The unary operator '{0}' is not supported", u.NodeType));
             }
 
             return u;
-        }
+        } 
 
-        protected virtual Expression VisitBinary(BinaryExpression b)
+        protected override Expression VisitConstant(ConstantExpression c)
         {
-            Expression left = this.Visit(b.Left);
-            Expression right = this.Visit(b.Right);
-            Expression conversion = this.Visit(b.Conversion);
+            IQueryable q = c.Value as IQueryable;
 
-            if (left != b.Left || right != b.Right || conversion != b.Conversion)
-            {
-                if (b.NodeType == ExpressionType.Coalesce && b.Conversion != null)
-                    return Expression.Coalesce(left, right, conversion as LambdaExpression);
-                else
-                    return Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
+            if (q != null)
+            { 
+                this.Diagram = new OdbDiagram(q.ElementType, this.Depth);
+
+                this.Diagram.Visit();
+
+                this.SqlBuilder.Append(" FROM ");
+                this.SqlBuilder.Append(Enclosed(this.Diagram.Root.Name));
+                this.SqlBuilder.Append(" AS " + this.Diagram.Root.Alias);
+                
+                string joinText = this.Diagram.Root.GetChilds();
+
+                this.SqlBuilder.Append(joinText);
             }
-
-            return b;
-        }
-
-        protected virtual Expression VisitTypeIs(TypeBinaryExpression b)
-        {
-            Expression expr = this.Visit(b.Expression);
-
-            if (expr != b.Expression)
+            else
             {
-                return Expression.TypeIs(expr, b.TypeOperand);
-            }
-
-            return b;
-        }
-
-        protected virtual Expression VisitConstant(ConstantExpression c)
-        {
-            return c;
-        }
-
-        protected virtual Expression VisitConditional(ConditionalExpression c)
-        {
-            Expression test = this.Visit(c.Test);
-            Expression ifTrue = this.Visit(c.IfTrue);
-            Expression ifFalse = this.Visit(c.IfFalse);
-
-            if (test != c.Test || ifTrue != c.IfTrue || ifFalse != c.IfFalse)
-            {
-                return Expression.Condition(test, ifTrue, ifFalse);
+                this.AddParamter(c);
             }
 
             return c;
         }
 
-        protected virtual Expression VisitParameter(ParameterExpression p)
+        public void GetMemberValue(MemberExpression m)
         {
-            return p;
-        }
-
-        protected virtual Expression VisitMemberAccess(MemberExpression m)
-        {
-            Expression exp = this.Visit(m.Expression);
-
-            if (exp != m.Expression)
+            if (m.Member is FieldInfo)
             {
-                return Expression.MakeMemberAccess(exp, m.Member);
-            }
+                var fieldInfo = m.Member as FieldInfo;
+                var constant = m.Expression as ConstantExpression;
 
-            return m;
-        }
-
-        protected virtual Expression VisitMethodCall(MethodCallExpression m)
-        {
-            Expression obj = this.Visit(m.Object);
-            IEnumerable<Expression> args = this.VisitExpressionList(m.Arguments);
-
-            if (obj != m.Object || args != m.Arguments)
-            {
-                return Expression.Call(obj, m.Method, args);
-            }
-
-            return m;
-        }
-
-        protected virtual ReadOnlyCollection<Expression> VisitExpressionList(ReadOnlyCollection<Expression> original)
-        {
-            List<Expression> list = null;
-
-            for (int i = 0, n = original.Count; i < n; i++)
-            {
-                Expression p = this.Visit(original[i]);
-                if (list != null)
+                if (fieldInfo != null & constant != null)
                 {
-                    list.Add(p);
-                }
-                else if (p != original[i])
-                {
-                    list = new List<Expression>(n);
-                    for (int j = 0; j < i; j++)
-                    {
-                        list.Add(original[j]);
-                    }
-                    list.Add(p);
+                    object value = fieldInfo.GetValue(constant.Value);
+
+                    this.Visit(Expression.Constant(value));
                 }
             }
-
-            if (list != null)
+            else if (m.Member is PropertyInfo)
             {
-                return list.AsReadOnly();
-            }
+                MemberExpression mx = m;
+                string name = m.Member.Name;
 
-            return original;
-        }
-
-        protected virtual MemberAssignment VisitMemberAssignment(MemberAssignment assignment)
-        {
-            Expression e = this.Visit(assignment.Expression);
-
-            if (e != assignment.Expression)
-            {
-                return Expression.Bind(assignment.Member, e);
-            }
-
-            return assignment;
-        }
-
-        protected virtual MemberMemberBinding VisitMemberMemberBinding(MemberMemberBinding binding)
-        {
-            IEnumerable<MemberBinding> bindings = this.VisitBindingList(binding.Bindings);
-
-            if (bindings != binding.Bindings)
-            {
-                return Expression.MemberBind(binding.Member, bindings);
-            }
-
-            return binding;
-        }
-
-        protected virtual MemberListBinding VisitMemberListBinding(MemberListBinding binding)
-        {
-            IEnumerable<ElementInit> initializers = this.VisitElementInitializerList(binding.Initializers);
-
-            if (initializers != binding.Initializers)
-            {
-                return Expression.ListBind(binding.Member, initializers);
-            }
-
-            return binding;
-        }
-
-        protected virtual IEnumerable<MemberBinding> VisitBindingList(ReadOnlyCollection<MemberBinding> original)
-        {
-            List<MemberBinding> list = null;
-
-            for (int i = 0, n = original.Count; i < n; i++)
-            {
-                MemberBinding b = this.VisitBinding(original[i]);
-                if (list != null)
+                while (mx.Expression is MemberExpression)
                 {
-                    list.Add(b);
+                    mx = mx.Expression as MemberExpression;
+                    name = mx.Member.Name + "." + name;
                 }
-                else if (b != original[i])
+
+                //check root expression type
+                if (mx.Expression.NodeType == ExpressionType.Parameter)
                 {
-                    list = new List<MemberBinding>(n);
-                    for (int j = 0; j < i; j++)
-                    {
-                        list.Add(original[j]);
-                    }
-                    list.Add(b);
+                    //dont get root
+                    MemberVisitor mv = new MemberVisitor(m);
+                    mv.Diagram = this.Diagram;
+
+                    this.SqlBuilder.Append(mv.ToString());
+                }
+                else if (mx.Expression.NodeType == ExpressionType.Constant)
+                {
+                    var constant = (ConstantExpression)mx.Expression;
+
+                    var obj = ((FieldInfo)mx.Member).GetValue(constant.Value);
+
+                    //object value = ((PropertyInfo)m.Member).GetValue(fieldInfoValue, null);
+
+                    var value = GetValue(obj, name);
+
+                    this.Visit(Expression.Constant(value));
                 }
             }
-
-            if (list != null)
-                return list;
-
-            return original;
         }
 
-        protected virtual IEnumerable<ElementInit> VisitElementInitializerList(ReadOnlyCollection<ElementInit> original)
+        public static object GetValue(object obj, string propertyName)
         {
-            List<ElementInit> list = null;
+            var propertys = propertyName.Split('.');
 
-            for (int i = 0, n = original.Count; i < n; i++)
+            //skip first
+            int i = 1;
+
+            while (obj != null && i < propertys.Length)
             {
-                ElementInit init = this.VisitElementInitializer(original[i]);
-                if (list != null)
-                {
-                    list.Add(init);
-                }
-                else if (init != original[i])
-                {
-                    list = new List<ElementInit>(n);
-                    for (int j = 0; j < i; j++)
-                    {
-                        list.Add(original[j]);
-                    }
-                    list.Add(init);
-                }
-            }
+                var pi = obj.GetType().GetProperty(propertys[i++]);
 
-            if (list != null)
-                return list;
-
-            return original;
-        }
-
-        protected virtual Expression VisitLambda(LambdaExpression lambda)
-        {
-            Expression body = this.Visit(lambda.Body);
-
-            if (body != lambda.Body)
-            {
-                return Expression.Lambda(lambda.Type, body, lambda.Parameters);
-            }
-
-            return lambda;
-        }
-
-        protected virtual NewExpression VisitNew(NewExpression nex)
-        {
-            IEnumerable<Expression> args = this.VisitExpressionList(nex.Arguments);
-
-            if (args != nex.Arguments)
-            {
-                if (nex.Members != null)
-                    return Expression.New(nex.Constructor, args, nex.Members);
+                if (pi != null)
+                    obj = pi.GetValue(obj);
                 else
-                    return Expression.New(nex.Constructor, args);
+                    obj = null;
             }
 
-            return nex;
+            return obj;
         }
 
-        protected virtual Expression VisitMemberInit(MemberInitExpression init)
-        {
-            NewExpression n = this.VisitNew(init.NewExpression);
-            IEnumerable<MemberBinding> bindings = this.VisitBindingList(init.Bindings);
+        public string GetColumns(Type type)
+        { 
+            OdbTable table = this.Diagram.FindTable(type);
+ 
+            return string.Join(",", table.GetAllColums());
+        }
 
-            if (n != init.NewExpression || bindings != init.Bindings)
+        public void AddParamter(ConstantExpression c)
+        {
+            if (c.Value == null)
             {
-                return Expression.MemberInit(n, bindings);
+                this.SqlBuilder.Append("NULL");
             }
-
-            return init;
-        }
-
-        protected virtual Expression VisitListInit(ListInitExpression init)
-        {
-            NewExpression n = this.VisitNew(init.NewExpression);
-            IEnumerable<ElementInit> initializers = this.VisitElementInitializerList(init.Initializers);
-
-            if (n != init.NewExpression || initializers != init.Initializers)
+            else
             {
-                return Expression.ListInit(n, initializers);
+                string name = this.Bind(this._index++, c.Value);
+
+                this.SqlBuilder.Append(name);
             }
-
-            return init;
         }
 
-        protected virtual Expression VisitNewArray(NewArrayExpression na)
+        public virtual string Bind(int i, object b)
         {
-            IEnumerable<Expression> exprs = this.VisitExpressionList(na.Expressions);
+            string name = "@p" + i; 
 
-            if (exprs != na.Expressions)
-            {
-                if (na.NodeType == ExpressionType.NewArrayInit)
-                {
-                    return Expression.NewArrayInit(na.Type.GetElementType(), exprs);
-                }
-                else {
-                    return Expression.NewArrayBounds(na.Type.GetElementType(), exprs);
-                }
-            }
-
-            return na;
+            return name;
         }
 
-        protected virtual Expression VisitInvocation(InvocationExpression iv)
+        public IDbDataParameter[] GetParamters()
         {
-            IEnumerable<Expression> args = this.VisitExpressionList(iv.Arguments);
-            Expression expr = this.Visit(iv.Expression);
-
-            if (args != iv.Arguments || expr != iv.Expression)
-            {
-                return Expression.Invoke(expr, args);
-            }
-
-            return iv;
-        }
-
-        protected virtual bool IsNullConstant(Expression exp)
-        {
-            return (exp.NodeType == ExpressionType.Constant && ((ConstantExpression)exp).Value == null);
-        }
-
-        protected static Expression StripQuotes(Expression e)
-        {
-            while (e.NodeType == ExpressionType.Quote)
-            {
-                e = (e as UnaryExpression).Operand;
-            }
-
-            return e;
-        }
-        
-        protected static string Enclosed(string str)
-        {
-            return "[" + str + "]";
+            return this.Parameters.ToArray();
         }
     }
 }

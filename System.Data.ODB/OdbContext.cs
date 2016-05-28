@@ -100,15 +100,17 @@ namespace System.Data.ODB
         {
             Type type = typeof(T);
  
-            OdbDiagram dg = new OdbDiagram(type, this.Depth);
-            dg.Visit();
+            OdbDiagram dg = new OdbDiagram(this.Depth);
+            dg.CreateTableList(type);
                     
             IQuery q = this.Query();
 
             q.Diagram = dg;
 
-            q.Select(dg.Root.GetAllColums()).From(dg.Root.Name, dg.Root.Alias);
-            q.Append(dg.Root.GetChilds());
+            OdbTable table = dg.GetTable(type);
+ 
+            q.Select(dg.GetColumns(type)).From(table.Name, table.Alias);
+            q.Append(dg.GetChildNodes(table));
  
             return q;
         }

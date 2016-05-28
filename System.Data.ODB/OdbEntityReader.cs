@@ -18,7 +18,7 @@ namespace System.Data.ODB
         { 
             object instance = Activator.CreateInstance(type);
           
-            OdbTable table = this.dg.FindTable(type);
+            OdbTable table = this.dg.GetTable(type);
 
             if (table == null)
                 throw new OdbException("No table.");

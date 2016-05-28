@@ -19,9 +19,9 @@ namespace UnitTest
              
             string name = "hen";
 
-            var query = from o in db.Orders
-                        where o.User.Name.Contains(name)    
-                        select o.User;
+            var query = from o in db.Users
+                        where o.Name.Contains(name)
+                        select o.Shipping;
 
             var list = query.ToList();
 
@@ -51,19 +51,19 @@ namespace UnitTest
         {
             MyRepository db = new MyRepository();
 
+            db.SetDepth(2);
+
             string name = "hen";
 
             int a = 1;
-
             User user = new User() { Name = "Peter", Age = 12, Shipping = new Address() { Street = "HK" } };
 
             var predicate = PredicateBuilder.True<User>();
 
             predicate = predicate.And(u => u.Name == name);
             predicate = predicate.And(u => u.Age > a);
-            predicate = predicate.And(u => u.Shipping.Street == user.Shipping.Street);
 
-            var query = db.Users.Where(predicate);                      
+            var query = db.Users.Where(predicate).Select(o => o);                      
 
             var rs = query.ToList().FirstOrDefault();
  
@@ -75,13 +75,33 @@ namespace UnitTest
         {
             MyRepository db = new MyRepository();
 
-            db.SetDepth(2);
+            db.SetDepth(3);
+
+            User user = new User() { Name = "hen" };
 
             string name = "hen";
 
-            var query = from o in db.Users
-                        where o.Name.Contains(name)
-                        select new ViewModel { Name = o.Name };
+            var query = from o in db.Orders
+                        where o.User.Name.Contains(user.Name)
+                        select new ViewModel { Name = o.User.Name };
+
+            var list = query.ToList();
+
+            Assert.IsTrue(list.Count > 0);
+        }
+
+        [TestMethod]
+        public void TestExtendion()
+        {
+            MyRepository db = new MyRepository();
+
+            db.SetDepth(3);
+
+            User user = new User() { Name = "hen" };
+
+            string name = "hen";
+
+            var query = db.Users.Where(u => u.Name == name).Select(o => o);
 
             var list = query.ToList();
 

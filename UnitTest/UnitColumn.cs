@@ -9,28 +9,28 @@ namespace UnitTest
     {
         [TestMethod]
         public void TestColumns()
-        {             
-            OdbTable table = OdbMapping.CreateTable(typeof(User));
+        {
+            Type type = typeof(User);
 
-            OdbDiagram dg = new OdbDiagram(typeof(User), 1);
-            dg.Visit(); 
+            OdbDiagram dg = new OdbDiagram(1);
+            dg.CreateTableList(typeof(User));
 
-            string[] cols = dg.Root.GetAllColums();
+            string[] cols = dg.GetColumns(type);
  
             Assert.IsTrue(cols.Length > 0);
         }
 
         [TestMethod]
         public void TestJoinTable()
-        { 
-            OdbTable table = OdbMapping.CreateTable(typeof(User));
+        {
+            Type type = typeof(User);
 
-            OdbDiagram dg = new OdbDiagram(typeof(User), 2);
-            dg.Visit();
-        
-            string s = dg.Root.GetChilds();
+            OdbDiagram dg = new OdbDiagram(2);
+            dg.CreateTableList(typeof(User));
 
-            Assert.IsTrue(s.Length > 0);
+            string[] cols = dg.GetColumns(type);
+
+            Assert.IsTrue(cols.Length > 0);
         }
     }
 }

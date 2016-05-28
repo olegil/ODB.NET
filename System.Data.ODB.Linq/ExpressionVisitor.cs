@@ -434,11 +434,6 @@ namespace System.Data.ODB.Linq
             }
 
             return e;
-        }
-        
-        protected static string Enclosed(string str)
-        {
-            return "[" + str + "]";
-        }
+        }      
     }
 }

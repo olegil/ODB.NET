@@ -22,10 +22,10 @@ namespace System.Data.ODB.SQLite
         public override object Execute(Expression expression)
         {
             Type type = TypeSystem.GetElementType(expression.Type); 
-
+            
             SQLiteVisitor visitor = new SQLiteVisitor(expression);
             visitor.Depth = this.Db.Depth;
-            
+                      
             IDataReader dataReader = this.Db.ExecuteReader(visitor.ToString(), visitor.GetParamters());
 
             if (OdbType.OdbEntity.IsAssignableFrom(type))

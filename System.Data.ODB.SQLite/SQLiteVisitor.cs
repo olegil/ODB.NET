@@ -9,8 +9,8 @@ namespace System.Data.ODB.SQLite
 {
     public class SQLiteVisitor : OdbVisitor, IOdbVisitor
     {          
-        private string _limit = "";       
- 
+        private string _limit = "";   
+
         public SQLiteVisitor(Expression expression) : base(expression)
         {  
         }
@@ -20,20 +20,25 @@ namespace System.Data.ODB.SQLite
             if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Select")
             {
                 this.Visit(m.Arguments[0]);
-
+              
+                this.SqlBuilder.Append(" ^ ");
                 LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
 
-                SelectVisitor se = new SelectVisitor(lambda.Body);
-                se.Diagram = this.Diagram;
-                             
-                this.SqlBuilder.Insert(0, se.ToString());
-                this.SqlBuilder.Insert(0, "SELECT ");
+                if (OdbType.OdbEntity.IsAssignableFrom(lambda.Body.Type))
+                {
+                    this.SqlBuilder.Append(string.Join(",", this.GetColumns(lambda.Body.Type)));
+                }
+
             }
             else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
             {
+                //visit From
                 this.Visit(m.Arguments[0]);
+
                 this.SqlBuilder.Append(" WHERE ");
-                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);               
+                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);         
+                      
+                //visit Where
                 this.Visit(lambda.Body);
             }
             else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Skip")
@@ -160,10 +165,18 @@ namespace System.Data.ODB.SQLite
                 this.Visit(m.Expression);
                 this.SqlBuilder.Append(")");
             }          
+            else if (OdbType.OdbEntity.IsAssignableFrom(m.Type))
+            {
+                this.SqlBuilder.Append(string.Join(",", this.GetColumns(m.Type)));
+            }
+            else if (m.Expression.NodeType == ExpressionType.Constant)
+            {
+                this.Visit(m.Expression);
+            }
             else
             {
-                this.GetMemberValue(m);            
-            }
+                this.VisitMemberValue(m);
+            }        
 
             return m;
         } 
@@ -208,16 +221,22 @@ namespace System.Data.ODB.SQLite
 
         public override string ToString()
         {
-            string sql = this.GetQueryText();
+            string[] statm = this.GetQueryText().Split('^');
 
-            if (sql.IndexOf("SELECT") < 0)
-            { 
+            string sql = "";
+
+            if (statm.Length > 1)
+            {
+                sql = "SELECT " + statm[1] + statm[0];
+            }
+            else
+            {
                 Type type = TypeSystem.GetElementType(this._expression.Type);
-                 
-                sql = sql.Insert(0, "SELECT " + this.GetColumns(type));
+
+                 sql = "SELECT " + this.GetColumns(type) + statm[0];                
             }
 
-            return sql;
+            return sql;        
         }
     } 
 }

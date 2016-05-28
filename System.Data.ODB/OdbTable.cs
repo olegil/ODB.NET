@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace System.Data.ODB
 {
@@ -15,9 +12,7 @@ namespace System.Data.ODB
         public Type EntityType { get; set; }      
            
         public List<OdbColumn> Columns { get; set; }
-
-        public OdbDiagram Diagram { get; set; }
-
+    
         public string Alias
         {
             get
@@ -35,15 +30,5 @@ namespace System.Data.ODB
 
             this.Columns = new List<OdbColumn>();
         }     
-
-        public string GetChilds()
-        {
-            return Diagram.GetChildNodes(this);
-        }
-
-        public string[] GetAllColums()
-        {
-            return Diagram.GetColumns(this);
-        }
     }
 }

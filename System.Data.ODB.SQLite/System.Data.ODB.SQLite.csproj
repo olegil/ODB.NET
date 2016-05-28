@@ -59,11 +59,10 @@
     <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.SQLite">
-      <HintPath>..\..\..\Dev\SQLite\Net4\System.Data.SQLite.dll</HintPath>
+      <HintPath>D:\Code\sqlite\System.Data.SQLite.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SelectVisitor.cs" />
     <Compile Include="SQLiteDataContext.cs" />
     <Compile Include="SQLiteProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

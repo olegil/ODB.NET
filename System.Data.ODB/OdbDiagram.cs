@@ -6,37 +6,37 @@ namespace System.Data.ODB
 {
     public class OdbDiagram 
     {
-        public int Depth { get; set; }
-        public OdbTable Root { get; set; } 
         public Dictionary<string, OdbTable> Nodes { get; set; }
 
+        public int Depth { get; set; }
+        public OdbTable Root { get; private set; } 
+        
         private StringBuilder _sb;
         private List<string> _cols;
 
         private int level;
 
-        public OdbDiagram(Type type, int depth)
+        public OdbDiagram(int depth)
         {
-            this.Depth = depth; 
+            this.Depth = depth;
 
-            this.Root = OdbMapping.CreateTable(type);
-            this.Root.Diagram = this;
-
-            this.Nodes = new Dictionary<string, OdbTable>(); 
+            this.Nodes = new Dictionary<string, OdbTable>();
         }
  
-        public void Visit()
+        public void CreateTableList(Type type)
         {
+            this.Root = OdbMapping.CreateTable(type);
+
             this.Nodes.Clear();
 
             this.Nodes.Add(this.Root.Name, this.Root);
 
             this.level = 1;
 
-            this.visitTree(this.Root);
+            this.findNodes(this.Root);
         }
         
-        private void visitTree(OdbTable node)
+        private void findNodes(OdbTable node)
         { 
             foreach (OdbColumn col in node.Columns)
             {
@@ -52,11 +52,9 @@ namespace System.Data.ODB
                         childNode.Parent = node.Id;
                         childNode.Foreignkey = col.Name;
 
-                        childNode.Diagram = this;
-
                         this.Nodes.Add(childNode.Name, childNode);
 
-                        this.visitTree(childNode);
+                        this.findNodes(childNode);
 
                         this.level--;
                     }                    
@@ -64,7 +62,7 @@ namespace System.Data.ODB
             }
         }
                       
-        public OdbTable FindTable(string name)
+        public OdbTable GetTable(string name)
         {
             if (this.Nodes.ContainsKey(name))
                 return this.Nodes[name];
@@ -72,18 +70,25 @@ namespace System.Data.ODB
             return null;         
         }
 
-        public OdbTable FindTable(Type type)
+        public OdbTable GetTable(Type type)
         {
             string name = OdbMapping.GetTableName(type);
 
-            return this.FindTable(name);
+            return this.GetTable(name);
         }
 
-        public string GetChildNodes(OdbTable root)
+        public string GetChildNodes(Type type)
+        {
+            OdbTable table = this.GetTable(type);
+
+            return this.GetChildNodes(table);        
+        }
+
+        public string GetChildNodes(OdbTable table)
         {
             this._sb = new StringBuilder();
 
-            this.getNodes(root);
+            this.getNodes(table);
 
             return this._sb.ToString();          
         }
@@ -106,11 +111,18 @@ namespace System.Data.ODB
             }
         }
 
-        public string[] GetColumns(OdbTable root)
+        public string[] GetColumns(Type type)
+        {
+            OdbTable table = this.GetTable(type);
+
+            return this.GetColumns(table);
+        }
+
+        public string[] GetColumns(OdbTable table)
         {
             this._cols = new List<string>();
 
-            this.getColumns(root);
+            this.getColumns(table);
 
             return this._cols.ToArray();
         }

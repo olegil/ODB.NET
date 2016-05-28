@@ -41,7 +41,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.SQLite">
-      <HintPath>..\..\..\Dev\SQLite\Net4\System.Data.SQLite.dll</HintPath>
+      <HintPath>D:\Code\sqlite\System.Data.SQLite.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Choose>

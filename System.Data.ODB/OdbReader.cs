@@ -59,7 +59,7 @@ namespace System.Data.ODB
             PropertyInfo[] list = type.GetProperties();
 
             for(int i = 0; i < list.Length; i++)
-            {
+            {                  
                 list[i].SetValue(instance, this.sr[list[i].Name]);
             }
 

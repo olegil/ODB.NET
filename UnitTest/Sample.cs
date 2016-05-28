@@ -66,6 +66,7 @@ namespace UnitTest
     public class ViewModel
     {
         public string Name { get; set; }
+        public int Age { get; set; }
     }
  
     public class MyRepository : OdbContainer

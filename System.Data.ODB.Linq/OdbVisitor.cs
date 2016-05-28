@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
-using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -10,9 +10,10 @@ namespace System.Data.ODB.Linq
     public abstract class OdbVisitor : ExpressionVisitor
     {
         protected Expression _expression;
+
         public int Depth { get; set; }
 
-        public OdbDiagram Diagram { get; set; }
+        public OdbDiagram Diagram { get; set; }     
         public StringBuilder SqlBuilder { get; set; }
 
         public List<IDbDataParameter> Parameters;
@@ -85,23 +86,24 @@ namespace System.Data.ODB.Linq
             }
 
             return u;
-        } 
+        }
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
             IQueryable q = c.Value as IQueryable;
 
             if (q != null)
-            { 
-                this.Diagram = new OdbDiagram(q.ElementType, this.Depth);
+            {
+                this.Diagram = new OdbDiagram(this.Depth);
 
-                this.Diagram.Visit();
+                this.Diagram.CreateTableList(q.ElementType);
+
+                OdbTable table = this.Diagram.GetTable(q.ElementType);
 
                 this.SqlBuilder.Append(" FROM ");
-                this.SqlBuilder.Append(Enclosed(this.Diagram.Root.Name));
-                this.SqlBuilder.Append(" AS " + this.Diagram.Root.Alias);
-                
-                string joinText = this.Diagram.Root.GetChilds();
+                this.SqlBuilder.Append(Enclosed(table.Name) + " AS " + table.Alias);
+                               
+                string joinText = this.Diagram.GetChildNodes(table);
 
                 this.SqlBuilder.Append(joinText);
             }
@@ -113,7 +115,78 @@ namespace System.Data.ODB.Linq
             return c;
         }
 
-        public void GetMemberValue(MemberExpression m)
+        protected override NewExpression VisitNew(NewExpression nex)
+        {
+            List<string> cols = new List<string>();
+
+            int n = 0;
+
+            foreach (string c in this.VisitMemberList(nex.Arguments))
+            {
+                cols.Add(c + " AS " + nex.Members[n++].Name);
+            }
+
+            this.SqlBuilder.Append(string.Join(",", cols.ToArray()));
+
+            return nex;
+        }
+
+        protected override Expression VisitMemberInit(MemberInitExpression init)
+        {
+            NewExpression n = this.VisitNew(init.NewExpression);
+
+            IEnumerable<MemberBinding> bindings = this.VisitBindingList(init.Bindings);            
+
+            return init;
+        }
+
+        protected virtual IEnumerable<string> VisitMemberList(ReadOnlyCollection<Expression> original)
+        {
+            int i = 0;
+
+            while (i < original.Count)           
+            {
+                yield return this.GetMemberName(original[i++] as MemberExpression);
+            }
+        }
+
+        protected override IEnumerable<MemberBinding> VisitBindingList(ReadOnlyCollection<MemberBinding> original)
+        {
+            List<MemberBinding> list = new List<MemberBinding>();
+
+            int i = 0;
+
+            while (i < original.Count)
+            {  
+                MemberBinding b = this.VisitBinding(original[i++]);
+
+                this.SqlBuilder.Append(" AS " + b.Member.Name);
+
+                if (i < original.Count)
+                    this.SqlBuilder.Append(",");
+                 
+                list.Add(b);
+            }
+
+            return list;
+        }
+
+        public virtual string GetMemberName(MemberExpression m)
+        {
+            if (OdbType.OdbEntity.IsAssignableFrom((m.Expression.Type)))
+            {
+                OdbTable table = this.Diagram.GetTable(m.Expression.Type);
+
+                if (table != null)
+                {
+                    return Enclosed(table.Alias) + "." + Enclosed(m.Member.Name);
+                }               
+            }
+            
+            return m.Member.Name;         
+        }
+
+        public void VisitMemberValue(MemberExpression m)
         {
             if (m.Member is FieldInfo)
             {
@@ -142,10 +215,7 @@ namespace System.Data.ODB.Linq
                 if (mx.Expression.NodeType == ExpressionType.Parameter)
                 {
                     //dont get root
-                    MemberVisitor mv = new MemberVisitor(m);
-                    mv.Diagram = this.Diagram;
-
-                    this.SqlBuilder.Append(mv.ToString());
+                    this.SqlBuilder.Append(this.GetMemberName(m));
                 }
                 else if (mx.Expression.NodeType == ExpressionType.Constant)
                 {
@@ -183,10 +253,8 @@ namespace System.Data.ODB.Linq
         }
 
         public string GetColumns(Type type)
-        { 
-            OdbTable table = this.Diagram.FindTable(type);
- 
-            return string.Join(",", table.GetAllColums());
+        {  
+            return string.Join(",", this.Diagram.GetColumns(type));
         }
 
         public void AddParamter(ConstantExpression c)
@@ -213,6 +281,11 @@ namespace System.Data.ODB.Linq
         public IDbDataParameter[] GetParamters()
         {
             return this.Parameters.ToArray();
+        }
+
+        protected static string Enclosed(string str)
+        {
+            return "[" + str + "]";
         }
     }
 }

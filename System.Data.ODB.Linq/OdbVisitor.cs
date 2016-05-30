@@ -147,7 +147,7 @@ namespace System.Data.ODB.Linq
 
             while (i < original.Count)           
             {
-                yield return this.GetMemberName(original[i++] as MemberExpression);
+                yield return this.GetColumnName(original[i++] as MemberExpression);
             }
         }
 
@@ -168,7 +168,7 @@ namespace System.Data.ODB.Linq
             return original;
         }
 
-        public virtual string GetMemberName(MemberExpression m)
+        public virtual string GetColumnName(MemberExpression m)
         {
             if (OdbType.OdbEntity.IsAssignableFrom((m.Expression.Type)))
             {
@@ -212,7 +212,7 @@ namespace System.Data.ODB.Linq
                 if (mx.Expression.NodeType == ExpressionType.Parameter)
                 {
                     //find the prop name
-                    this.SqlBuilder.Append(this.GetMemberName(m));
+                    this.SqlBuilder.Append(this.GetColumnName(m));
                 }
                 else if (mx.Expression.NodeType == ExpressionType.Constant)
                 {

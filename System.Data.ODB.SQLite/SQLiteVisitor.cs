@@ -19,16 +19,16 @@ namespace System.Data.ODB.SQLite
         {
             if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Select")
             {
-                this.Visit(m.Arguments[0]);              
-              
-                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
+                this.Visit(m.Arguments[0]);
+
+                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]); 
 
                 if (lambda.Body.NodeType != ExpressionType.Parameter)
                 {
-                    this.SqlBuilder.Append(" ^ ");
+                    this.SqlBuilder.Append("; ^"); 
 
                     this.Visit(lambda.Body);
-                } 
+                }
             }
             else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
             {
@@ -167,7 +167,7 @@ namespace System.Data.ODB.SQLite
             }                      
             else if (OdbType.OdbEntity.IsAssignableFrom(m.Type))
             {                 
-                this.SqlBuilder.Append(string.Join(",", this.GetColumns(m.Type)));
+                this.SqlBuilder.Append(this.GetColumns(m.Type));
             }
             else 
             {
@@ -215,17 +215,17 @@ namespace System.Data.ODB.SQLite
         {
             string[] statm = this.GetQueryText().Split('^');
 
-            string sql = "";
+            string sql = "SELECT ";
 
             if (statm.Length > 1)
             {
-                sql = "SELECT" + statm[1] + statm[0];
+                sql += statm[1] + statm[0];
             }
             else
             {
                 Type type = TypeSystem.GetElementType(this._expression.Type);
 
-                 sql = "SELECT " + this.GetColumns(type) + statm[0];                
+                sql += this.GetColumns(type) + statm[0];                
             }
 
             return sql;        

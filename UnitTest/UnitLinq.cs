@@ -99,7 +99,7 @@ namespace UnitTest
 
             int id = 1;
 
-            var query = db.Users.Where(u => u.Id == id).Select(o => o.Shipping);
+            var query = db.Users.Where(u => u.Id == id).Select( o => o.Shipping);
 
             var list = query.ToList();
 

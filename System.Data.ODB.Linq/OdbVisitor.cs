@@ -208,10 +208,10 @@ namespace System.Data.ODB.Linq
                     name = mx.Member.Name + "." + name;
                 }
 
-                //check root expression type
+                //check the root expression type
                 if (mx.Expression.NodeType == ExpressionType.Parameter)
                 {
-                    //dont get root
+                    //find the prop name
                     this.SqlBuilder.Append(this.GetMemberName(m));
                 }
                 else if (mx.Expression.NodeType == ExpressionType.Constant)

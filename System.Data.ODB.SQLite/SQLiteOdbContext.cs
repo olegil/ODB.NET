@@ -36,7 +36,7 @@ namespace System.Data.ODB.SQLite
             string dbtype = this.TypeMapping(col.GetDbType());
             string sql = "[" + col.Name + "] ";
 
-            OdbAttribute attr = col.Attribute;
+            ColumnAttribute attr = col.Attribute;
 
             if (attr.IsPrimaryKey)
             {

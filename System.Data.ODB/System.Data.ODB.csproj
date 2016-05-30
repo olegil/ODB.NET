@@ -47,7 +47,7 @@
     <Compile Include="OdbReader.cs" />
     <Compile Include="OdbTable.cs" />
     <Compile Include="OdbDiagram.cs" />
-    <Compile Include="OdbAttribute.cs" />
+    <Compile Include="ColumnAttribute.cs" />
     <Compile Include="OdbColumn.cs" />
     <Compile Include="OdbType.cs" />
     <Compile Include="IEntity.cs" />

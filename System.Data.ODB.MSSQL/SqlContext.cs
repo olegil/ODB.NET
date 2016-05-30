@@ -29,7 +29,7 @@ namespace System.Data.ODB.MSSQL
             string dbtype = this.TypeMapping(col.GetDbType());
             string sql = "[" + col.Name + "] " + dbtype;
 
-            OdbAttribute attr = col.Attribute;
+            ColumnAttribute attr = col.Attribute;
 
             if (dbtype == "NVARCHAR")
             {

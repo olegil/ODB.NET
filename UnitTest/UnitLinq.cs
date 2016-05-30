@@ -20,7 +20,7 @@ namespace UnitTest
             string name = "hen";
 
             var query = from o in db.Users
-                        where o.Name.Contains(name)
+                        where o.Shipping.Street == name
                         select o;
 
             var list = query.ToList();
@@ -80,7 +80,7 @@ namespace UnitTest
             User user = new User() { Name = "hen" };
       
             var query = from o in db.Orders
-                        where o.User.Name.Contains(user.Name)
+                        where o.User.Name == user.Name
                         select new ViewModel { Name = o.User.Name, Age = o.User.Age };
 
             var list = query.ToList();
@@ -97,9 +97,9 @@ namespace UnitTest
 
             User user = new User() { Name = "hen" };
 
-            string name = "hen";
+            int id = 1;
 
-            var query = db.Users;
+            var query = db.Users.Where(u => u.Id == id).Select(o => o.Shipping);
 
             var list = query.ToList();
 

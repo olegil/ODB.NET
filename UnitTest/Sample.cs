@@ -31,7 +31,7 @@ namespace UnitTest
         public decimal Total { get; set; }
         public DateTime Date { get; set; }
 
-        [Odb(IsForeignKey = true)]
+        [Column(IsForeignKey = true)]
         public User User { get; set; }
     }
 
@@ -40,10 +40,10 @@ namespace UnitTest
         public int Quantity { get; set; }
         public DateTime CreateDate { get; set; }
 
-        [Odb(IsForeignKey = true)]
+        [Column(IsForeignKey = true)]
         public Order Order { get; set; }
 
-        [Odb(IsForeignKey = true)]
+        [Column(IsForeignKey = true)]
         public Product Item { get; set; }
     }
      

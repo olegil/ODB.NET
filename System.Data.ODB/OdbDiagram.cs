@@ -131,9 +131,12 @@ namespace System.Data.ODB
         {
             foreach (OdbColumn c in root.Columns)
             {
-                string col = OdbDiagram.Enclosed(root.Alias) + "." + OdbDiagram.Enclosed(c.Name);
+                if (!c.Attribute.IsModel)
+                {
+                    string col = OdbDiagram.Enclosed(root.Alias) + "." + OdbDiagram.Enclosed(c.Name);
 
-                this._cols.Add(col + " AS " + OdbDiagram.Enclosed(root.Alias + "." + c.Name));
+                    this._cols.Add(col + " AS " + OdbDiagram.Enclosed(root.Alias + "." + c.Name));
+                }
             }
 
             foreach (OdbTable child in this.Nodes.Values)

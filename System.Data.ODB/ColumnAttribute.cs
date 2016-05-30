@@ -4,7 +4,7 @@ namespace System.Data.ODB
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field,
                     Inherited = false, AllowMultiple = false)]
-    public class OdbAttribute : Attribute
+    public class ColumnAttribute : Attribute
     {        
         public string Name { get; set; }
         public int Length { get; set; }       
@@ -15,7 +15,7 @@ namespace System.Data.ODB
         public bool IsForeignKey { get; set; }
         public bool IsModel { get; set; }
 
-        public OdbAttribute()
+        public ColumnAttribute()
         {
             Name = "";
             Length = 0;

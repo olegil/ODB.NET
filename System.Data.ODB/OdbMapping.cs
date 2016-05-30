@@ -19,18 +19,18 @@ namespace System.Data.ODB
             return type.Name;
         }
 
-        public static OdbAttribute GetColAttribute(PropertyInfo pi)
+        public static ColumnAttribute GetColAttribute(PropertyInfo pi)
         {
-            object[] objAttrs = pi.GetCustomAttributes(typeof(OdbAttribute), true);
+            object[] objAttrs = pi.GetCustomAttributes(typeof(ColumnAttribute), true);
 
             if (objAttrs.Length > 0)
             {
-                OdbAttribute colAttr = objAttrs[0] as OdbAttribute;
+                ColumnAttribute colAttr = objAttrs[0] as ColumnAttribute;
                  
                 return colAttr;
             }
 
-            return new OdbAttribute();
+            return new ColumnAttribute();
         }
 
         public static OdbTable CreateTable(Type type)
@@ -52,7 +52,7 @@ namespace System.Data.ODB
             for (int i = 0; i < propes.Length; i++)
             {
                 PropertyInfo prop = propes[i];
-                OdbAttribute colAttr = GetColAttribute(prop);
+                ColumnAttribute colAttr = GetColAttribute(prop);
 
                 if (!colAttr.IsOmitted)
                 {

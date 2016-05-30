@@ -37,7 +37,7 @@ namespace System.Data.ODB
             //begin foreach
             foreach (OdbColumn col in OdbMapping.GetColumns(type))
             {
-                OdbAttribute attr = col.Attribute;
+                ColumnAttribute attr = col.Attribute;
 
                 if (!attr.IsAuto)
                 {

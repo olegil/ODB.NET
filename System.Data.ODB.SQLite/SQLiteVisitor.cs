@@ -164,11 +164,7 @@ namespace System.Data.ODB.SQLite
                 this.SqlBuilder.Append("LENGTH(");
                 this.Visit(m.Expression);
                 this.SqlBuilder.Append(")");
-            }           
-            else if (m.Expression.NodeType == ExpressionType.Constant)
-            {
-                this.Visit(m.Expression);
-            }
+            }                      
             else if (OdbType.OdbEntity.IsAssignableFrom(m.Type))
             {                 
                 this.SqlBuilder.Append(string.Join(",", this.GetColumns(m.Type)));

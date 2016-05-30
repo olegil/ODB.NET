@@ -10,7 +10,7 @@ namespace System.Data.ODB
     {
         public int Id { get; set; }
 
-        [Odb(IsOmitted = true)]
+        [Column(IsOmitted = true)]
         public bool ModelState { get; set; }
 
         public OdbEntity()

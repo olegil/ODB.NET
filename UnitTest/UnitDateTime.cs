@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Linq;
-using System.Data.ODB;
-using System.Data.ODB.Linq;
-using System.Data.ODB.SQLite;
-using System.Data.SQLite;
+using System.Linq; 
 
 namespace UnitTest
 {

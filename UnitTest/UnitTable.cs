@@ -1,14 +1,7 @@
-﻿using System;
-using System.Text;
+﻿using System; 
 using System.Collections.Generic;
-using System.Data;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Data.ODB;
-using System.Data.ODB.SQLite;
-using System.Data.ODB.MSSQL;
-using System.Data.SQLite;
-using System.Diagnostics;
-
+ 
 namespace UnitTest
 {
     [TestClass]

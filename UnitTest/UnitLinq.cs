@@ -21,7 +21,7 @@ namespace UnitTest
 
             var query = from o in db.Users
                         where o.Name.Contains(name)
-                        select o.Shipping;
+                        select o;
 
             var list = query.ToList();
 
@@ -37,7 +37,7 @@ namespace UnitTest
 
             var query = from u in db.Users
                         where u.Name.Contains("hen") || u.Name.Length > 2 || u.Name.Trim() == "avsd" || u.Name != null && u.Name.ToLower() == "haweg" || u.Name.Equals("gasdhasdh")
-                        select u.Shipping; 
+                        select u; 
 
             string sql = query.ToString();
 
@@ -78,12 +78,10 @@ namespace UnitTest
             db.SetDepth(3);
 
             User user = new User() { Name = "hen" };
-
-            string name = "hen";
-
+      
             var query = from o in db.Orders
                         where o.User.Name.Contains(user.Name)
-                        select new ViewModel { Name = o.User.Name };
+                        select new ViewModel { Name = o.User.Name, Age = o.User.Age };
 
             var list = query.ToList();
 
@@ -101,7 +99,7 @@ namespace UnitTest
 
             string name = "hen";
 
-            var query = db.Users.Where(u => u.Name == name).Select(o => o);
+            var query = db.Users;
 
             var list = query.ToList();
 

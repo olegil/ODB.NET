@@ -12,10 +12,8 @@ namespace System.Data.ODB.SQLite
 
         public override IDbDataParameter Bind(string name, object b, DbType dtype)
         {
-            SQLiteParameter p = new SQLiteParameter(name, b);
-
-            p.DbType = dtype;
-
+            IDbDataParameter p = SQLiteOdbFactory.Instance.CreateParameter(name, b, dtype);
+          
             return p;
         } 
          

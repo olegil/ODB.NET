@@ -3,9 +3,9 @@ using System.Data.SQLite;
 
 namespace System.Data.ODB.SQLite
 {
-    public class SQLiteDataContext : OdbContext
+    public class SQLiteOdbContext : OdbContext
     {
-        public SQLiteDataContext(IDbConnection conn) : base(conn)
+        public SQLiteOdbContext(IDbConnection conn) : base(conn)
         {
         }
 

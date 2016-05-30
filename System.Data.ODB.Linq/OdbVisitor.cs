@@ -126,7 +126,8 @@ namespace System.Data.ODB.Linq
                 cols.Add(c + " AS " + nex.Members[n++].Name);
             }
 
-            this.SqlBuilder.Append(string.Join(",", cols.ToArray()));
+            if (cols.Count > 0)
+                this.SqlBuilder.Append(string.Join(",", cols.ToArray()));
 
             return nex;
         }
@@ -135,7 +136,7 @@ namespace System.Data.ODB.Linq
         {
             NewExpression n = this.VisitNew(init.NewExpression);
 
-            IEnumerable<MemberBinding> bindings = this.VisitBindingList(init.Bindings);            
+            this.VisitBindingList(init.Bindings);            
 
             return init;
         }
@@ -151,9 +152,7 @@ namespace System.Data.ODB.Linq
         }
 
         protected override IEnumerable<MemberBinding> VisitBindingList(ReadOnlyCollection<MemberBinding> original)
-        {
-            List<MemberBinding> list = new List<MemberBinding>();
-
+        { 
             int i = 0;
 
             while (i < original.Count)
@@ -163,12 +162,10 @@ namespace System.Data.ODB.Linq
                 this.SqlBuilder.Append(" AS " + b.Member.Name);
 
                 if (i < original.Count)
-                    this.SqlBuilder.Append(",");
-                 
-                list.Add(b);
+                    this.SqlBuilder.Append(",");              
             }
 
-            return list;
+            return original;
         }
 
         public virtual string GetMemberName(MemberExpression m)

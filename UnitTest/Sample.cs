@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Data;
 using System.Data.ODB;
 using System.Data.ODB.Linq;
 using System.Data.ODB.SQLite;
-using System.Data.SQLite;
-
+ 
 namespace UnitTest
 {   
     public class User : OdbEntity
@@ -77,9 +77,11 @@ namespace UnitTest
  
         public MyRepository()  
         {         
-            this.Context = new SQLiteDataContext(new SQLiteConnection(string.Format(Command.SqliteconnStr, "test1.db3")));
+            IDbConnection connection = SQLiteOdbFactory.Instance.CreateConnection(string.Format(Command.SqliteconnStr, "test1.db3"));
 
-            SQLiteProvider provider = new SQLiteProvider(this.Context);
+            this.Context = new SQLiteOdbContext(connection);
+
+            SQLiteOdbProvider provider = new SQLiteOdbProvider(this.Context);
 
             this.Users = provider.Create<User>();
             this.OrderItems = provider.Create<OrderItem>();

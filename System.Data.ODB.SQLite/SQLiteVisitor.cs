@@ -19,16 +19,16 @@ namespace System.Data.ODB.SQLite
         {
             if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Select")
             {
-                this.Visit(m.Arguments[0]);
+                this.Visit(m.Arguments[0]);              
               
-                this.SqlBuilder.Append(" ^ ");
                 LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
 
-                if (OdbType.OdbEntity.IsAssignableFrom(lambda.Body.Type))
+                if (lambda.Body.NodeType != ExpressionType.Parameter)
                 {
-                    this.SqlBuilder.Append(string.Join(",", this.GetColumns(lambda.Body.Type)));
-                }
+                    this.SqlBuilder.Append(" ^ ");
 
+                    this.Visit(lambda.Body);
+                } 
             }
             else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
             {
@@ -164,16 +164,16 @@ namespace System.Data.ODB.SQLite
                 this.SqlBuilder.Append("LENGTH(");
                 this.Visit(m.Expression);
                 this.SqlBuilder.Append(")");
-            }          
-            else if (OdbType.OdbEntity.IsAssignableFrom(m.Type))
-            {
-                this.SqlBuilder.Append(string.Join(",", this.GetColumns(m.Type)));
-            }
+            }           
             else if (m.Expression.NodeType == ExpressionType.Constant)
             {
                 this.Visit(m.Expression);
             }
-            else
+            else if (OdbType.OdbEntity.IsAssignableFrom(m.Type))
+            {                 
+                this.SqlBuilder.Append(string.Join(",", this.GetColumns(m.Type)));
+            }
+            else 
             {
                 this.VisitMemberValue(m);
             }        
@@ -184,13 +184,9 @@ namespace System.Data.ODB.SQLite
         public override string Bind(int index, object b)
         {
             string name = "@p" + index;
+            DbType t = OdbSqlType.Convert(b.GetType());
 
-            SQLiteParameter p = new SQLiteParameter();
-
-            p.ParameterName = name;
-            p.Value = b;
-            //p.Size = attr.Size;
-            p.DbType = OdbSqlType.Convert(b.GetType());
+            IDbDataParameter p = SQLiteOdbFactory.Instance.CreateParameter(name, b, t);
 
             this.Parameters.Add(p);
 
@@ -227,7 +223,7 @@ namespace System.Data.ODB.SQLite
 
             if (statm.Length > 1)
             {
-                sql = "SELECT " + statm[1] + statm[0];
+                sql = "SELECT" + statm[1] + statm[0];
             }
             else
             {

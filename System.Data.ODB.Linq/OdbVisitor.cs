@@ -183,7 +183,7 @@ namespace System.Data.ODB.Linq
             return m.Member.Name;         
         }
 
-        public void VisitMemberValue(MemberExpression m)
+        public Expression VisitMemberValue(MemberExpression m)
         {
             if (m.Member is FieldInfo)
             {
@@ -227,6 +227,8 @@ namespace System.Data.ODB.Linq
                     this.Visit(Expression.Constant(value));
                 }
             }
+
+            return m;
         }
 
         public static object GetValue(object obj, string propertyName)

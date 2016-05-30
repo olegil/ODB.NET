@@ -17,11 +17,11 @@ namespace UnitTest
 
             db.SetDepth(2);
              
-            string name = "hen";
+            string name = "lam";
 
             var query = from o in db.Users
-                        where o.Shipping.Street == name
-                        select o;
+                        where o.Shipping.Street.Contains(name)
+                        select o.Shipping;
 
             var list = query.ToList();
 

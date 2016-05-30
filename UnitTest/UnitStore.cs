@@ -19,11 +19,11 @@ namespace UnitTest
             db.SetDepth(2);
 
             Address ship = new Address() { City = "TKO", Street = "Po Lam", Flat = "Metro City" };
-            User user = new User() { Balance = 200.00d, Age = 26, Birthday = DateTime.Now, Name = "Peter Chan", IsPermit = true, Shipping = ship };
+            User user = new User() { Balance = 200.00d, Age = 26, Birthday = DateTime.Now, Name = "Joann Chan", IsPermit = true, Shipping = ship };
 
             Product p = new Product() { BID = "4523462347", Name = "Pencil", Price = 5.00d };
 
-          //  db.Store(user);
+            db.Store(user);
             db.Store(p);
 
             Assert.IsNotNull(user);

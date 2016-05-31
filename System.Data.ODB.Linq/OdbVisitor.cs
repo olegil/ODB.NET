@@ -101,7 +101,9 @@ namespace System.Data.ODB.Linq
                 OdbTable table = this.Diagram.GetTable(q.ElementType);
 
                 this.SqlBuilder.Append(" FROM ");
-                this.SqlBuilder.Append(Enclosed(table.Name) + " AS " + table.Alias);
+                this.SqlBuilder.Append(Enclosed(table.Name));
+                this.SqlBuilder.Append(" AS ");
+                this.SqlBuilder.Append(table.Alias);
                                
                 string joinText = this.Diagram.GetChildNodes(table);
 

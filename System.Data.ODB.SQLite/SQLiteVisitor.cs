@@ -10,7 +10,7 @@ namespace System.Data.ODB.SQLite
     public class SQLiteVisitor : OdbVisitor, IOdbVisitor
     {          
         private string _limit = "";   
-
+ 
         public SQLiteVisitor(Expression expression) : base(expression)
         {  
         }
@@ -25,7 +25,7 @@ namespace System.Data.ODB.SQLite
 
                 if (lambda.Body.NodeType != ExpressionType.Parameter)
                 {
-                    this.SqlBuilder.Append("; ^"); 
+                    this.SqlBuilder.Append(";SELECT "); 
 
                     this.Visit(lambda.Body);
                 }
@@ -213,22 +213,16 @@ namespace System.Data.ODB.SQLite
 
         public override string ToString()
         {
-            string[] statm = this.GetQueryText().Split('^');
-
-            string sql = "SELECT ";
+            string[] statm = this.GetQueryText().Split(';');
 
             if (statm.Length > 1)
             {
-                sql += statm[1] + statm[0];
+                return statm[1] + statm[0];
             }
-            else
-            {
-                Type type = TypeSystem.GetElementType(this._expression.Type);
-
-                sql += this.GetColumns(type) + statm[0];                
-            }
-
-            return sql;        
+           
+            Type type = TypeSystem.GetElementType(this._expression.Type);              
+           
+            return "SELECT " + this.GetColumns(type) + statm[0];
         }
     } 
 }

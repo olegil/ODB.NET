@@ -16,6 +16,7 @@ namespace System.Data.ODB
         void StartTrans();
         void CommitTrans();
         void RollBack();
+        void CloseTrans();
 
         IQuery Query();
         IQuery Select<T>() where T : IEntity;

@@ -70,26 +70,19 @@ namespace System.Data.ODB
 
         public virtual void CommitTrans()
         {
-            try
-            {
-                this.Transaction.Commit();       
-            }
-            catch
-            {
-                throw new OdbException("Transaction commit fail.");
-            }
+            this.Transaction.Commit();       
+            
         }
 
         public virtual void RollBack()
         {
-            try
-            {
-                this.Transaction.Rollback();
-            }
-            catch
-            {
-                throw new OdbException("Transaction commit fail."); 
-            }
+            this.Transaction.Rollback();                       
+        }
+
+        public virtual void CloseTrans()
+        {
+            this.Transaction.Dispose();
+            this.Transaction = null;
         }
 
         #endregion

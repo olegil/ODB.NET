@@ -25,7 +25,7 @@ namespace System.Data.ODB
         void ExecutePersist<T>(T t) where T : IEntity;      
         int ExecuteDelete<T>(T t) where T : IEntity;
         IList<T> ExecuteList<T>(IQuery q) where T : IEntity;
-   
+           
         int ExecuteNonQuery(string sql, params IDbDataParameter[] cmdParms);
         IDataReader ExecuteReader(string sql, params IDbDataParameter[] cmdParms);
         T ExecuteScalar<T>(string sql, params IDbDataParameter[] cmdParms);

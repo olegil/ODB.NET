@@ -330,6 +330,30 @@ namespace System.Data.ODB
         {
             return this.Db.ExecuteList<T>(this) as List<T>;
         }       
+
+        public List<T2> ToListSet<T2>()
+        {
+            using (IDataReader rdr = this.Db.ExecuteReader(this.ToString(), this.Parameters.ToArray()))
+            {
+                IList<T2> list = new List<T2>();
+
+                OdbReader<T2> reader = new OdbReader<T2>(rdr);
+
+                try
+                {
+                    foreach (T2 t in reader)
+                    {
+                        list.Add(t);
+                    }
+                }
+                catch
+                {
+                    throw;
+                }
+
+                return list as List<T2>;
+            }
+        }        
         
         protected string Enclosed(string str)
         {

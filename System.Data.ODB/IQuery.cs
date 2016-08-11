@@ -47,6 +47,7 @@ namespace System.Data.ODB
 
         T First<T>() where T : IEntity;
         List<T> ToList<T>() where T : IEntity;
+        List<T2> ToListSet<T2>();
 
         int Execute();
         int ExecuteReturnId();
